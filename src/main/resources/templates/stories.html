@@ -1,0 +1,164 @@
+﻿<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>侨乡故事 - 薪火侨乡</title>
+    <link rel="stylesheet" href="/css/qiaoyun.css">
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <div class="header-left">
+                <a href="/" class="header-logo">薪火侨乡</a>
+            </div>
+            <nav class="header-nav">
+                <a href="/">云游</a>
+                <a href="/#buildings">建筑图鉴</a>
+                <a href="/knowledge">知识库</a>
+                <a href="/stories">侨乡故事</a>
+                <a href="/archive">田野档案</a>
+                <a href="/about">关于我们</a>
+            </nav>
+            <div class="header-right">
+                <button class="header-btn" onclick="window.location.href='/map'">开始云游</button>
+            </div>
+        </div>
+    </header>
+
+    <main class="main">
+        <!-- 页面 Hero -->
+        <section class="page-hero">
+            <div class="page-hero-content">
+                <span class="page-hero-label">侨乡故事</span>
+                <h1 class="page-hero-title">侨乡故事</h1>
+                <p class="page-hero-subtitle">聆听老华侨的口述历史，感受百年侨乡的文化记忆与家国情怀</p>
+            </div>
+        </section>
+
+        <div class="page-content">
+            <!-- 分类筛选 -->
+            <div class="filter-tabs" id="filter-tabs">
+                <button class="filter-tab active" data-category="全部" onclick="filterStories('全部', this)">全部</button>
+                <button class="filter-tab" data-category="口述历史" onclick="filterStories('口述历史', this)">口述历史</button>
+                <button class="filter-tab" data-category="侨批文化" onclick="filterStories('侨批文化', this)">侨批文化</button>
+                <button class="filter-tab" data-category="教育故事" onclick="filterStories('教育故事', this)">教育故事</button>
+                <button class="filter-tab" data-category="民间传说" onclick="filterStories('民间传说', this)">民间传说</button>
+            </div>
+
+            <!-- 故事列表 -->
+            <div class="story-list" id="story-list">
+                <div class="story-item" th:each="story : ${stories}" th:data-category="${story.category}">
+                    <a th:href="@{/story/{id}(id=${story.id})}" class="story-item-link" style="text-decoration: none; color: inherit; display: block;">
+                        <div class="story-item-image">
+                            <img th:src="${coverUrls != null and coverUrls[story.id] != null} ? ${coverUrls[story.id]} : |https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=${story.title}%20traditional%20lingnan%20village%20story&image_size=square|" th:alt="${story.title}" loading="lazy">
+                            <span class="story-item-category" th:text="${story.category}"></span>
+                        </div>
+                        <div class="story-item-content">
+                            <h3 class="story-item-title" th:text="${story.title}"></h3>
+                            <p class="story-item-summary" th:text="${story.summary}"></p>
+                            <div class="story-item-footer">
+                                <div class="story-item-meta">
+                                    <span th:text="${story.author}"></span>
+                                    <span th:text="${story.date}"></span>
+                                </div>
+                                <div class="story-item-views">
+                                    <span>👁️</span>
+                                    <span th:text="${story.views}"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+
+            <!-- 空状态 -->
+            <div id="empty-state" style="display: none; text-align: center; padding: 4rem 2rem; color: var(--text-secondary);">
+                <div style="font-size: 3rem; margin-bottom: 1rem;">📜</div>
+                <p>该分类下暂无故事内容</p>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-logo">薪火侨乡</div>
+            <p><span class="project-name">侨韵薪火</span> - 江门侨乡建筑数字化云游平台</p>
+            <p>广东工业大学三下乡社会实践项目 · 2024</p>
+        </div>
+        <div class="footer-links">
+            <a href="/">首页</a>
+            <a href="/#buildings">建筑图鉴</a>
+            <a href="/stories">侨乡故事</a>
+            <a href="/archive">田野档案</a>
+            <a href="/map">景区导航</a>
+            <a href="/about">关于我们</a>
+        </div>
+        <div class="footer-bottom">
+            <p>技术支持：3D高斯泼溅技术(3DGS) · 腾讯云COS · AI语音合成</p>
+            <p style="margin-top: 0.5rem;">© 2024 侨韵薪火实践团 版权所有</p>
+        </div>
+    </footer>
+
+    <button class="ai-guide-btn" id="ai-guide-btn" onclick="toggleAiGuide()">🎧</button>
+    <div class="ai-guide-panel" id="ai-guide-panel">
+        <h3 class="ai-guide-title">AI智能讲解</h3>
+        <div class="ai-guide-text" id="ai-guide-text">欢迎来到侨乡故事页面，这里记录了宝源坊老村民的口述历史和侨乡文化故事。</div>
+        <div class="ai-guide-controls">
+            <button class="ai-control-btn primary" onclick="playPageIntro()">播放介绍</button>
+            <button class="ai-control-btn" onclick="window.location.href='/map'">开始云游</button>
+        </div>
+    </div>
+
+    <script>
+        function toggleAiGuide() {
+            const panel = document.getElementById('ai-guide-panel');
+            panel.classList.toggle('active');
+        }
+        function speak(text) {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'zh-CN';
+                utterance.rate = 0.9;
+                window.speechSynthesis.speak(utterance);
+                const btn = document.getElementById('ai-guide-btn');
+                btn.classList.add('playing');
+                utterance.onend = () => { btn.classList.remove('playing'); };
+            }
+        }
+        function playPageIntro() {
+            const text = "欢迎来到侨乡故事页面。这里收录了宝源坊老村民的口述历史、侨批文化、教育故事和民间传说。每一段故事都是华侨漂洋过海、艰苦奋斗的真实记忆，是侨乡文化的珍贵见证。请点击您感兴趣的故事，聆听那段跨越百年的乡愁。";
+            speak(text);
+        }
+        function filterStories(category, clickedBtn) {
+            const tabs = document.querySelectorAll('.filter-tab');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            if (clickedBtn) {
+                clickedBtn.classList.add('active');
+            } else {
+                tabs.forEach(tab => {
+                    if (tab.getAttribute('data-category') === category) {
+                        tab.classList.add('active');
+                    }
+                });
+            }
+            const items = document.querySelectorAll('.story-item');
+            let visibleCount = 0;
+            items.forEach(item => {
+                const itemCategory = item.getAttribute('data-category');
+                if (category === '全部' || itemCategory === category) {
+                    item.style.display = '';
+                    visibleCount++;
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+            const emptyState = document.getElementById('empty-state');
+            if (emptyState) {
+                emptyState.style.display = visibleCount === 0 ? 'block' : 'none';
+            }
+        }
+    </script>
+</body>
+</html>

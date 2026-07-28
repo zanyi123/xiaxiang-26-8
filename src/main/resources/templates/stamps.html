@@ -1,0 +1,173 @@
+﻿<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>虚拟盖章 - 侨乡建筑数字化云游平台</title>
+    <link rel="stylesheet" href="/css/qiaoyun.css">
+    <style>
+        .stamp-summary { display: flex; justify-content: space-between; align-items: center; padding: 1.5rem 2rem; background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 16px; margin-bottom: 2rem; backdrop-filter: blur(15px); }
+        .stamp-progress-text { color: var(--text-primary); font-size: 1.1rem; }
+        .stamp-progress-text strong { color: var(--warm-gold); font-size: 1.4rem; }
+        .stamp-progress-bar { flex: 1; max-width: 300px; height: 12px; background: rgba(0,0,0,0.3); border-radius: 6px; overflow: hidden; margin: 0 1.5rem; }
+        .stamp-progress-fill { height: 100%; background: linear-gradient(90deg, var(--warm-gold), #c46210); border-radius: 6px; transition: width 0.5s; width: 0%; }
+        .stamp-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1.5rem; }
+        .stamp-card { background: var(--glass-bg); border: 2px solid var(--glass-border); border-radius: 16px; padding: 1.5rem; text-align: center; transition: all 0.3s; backdrop-filter: blur(15px); position: relative; }
+        .stamp-card.unlocked { border-color: var(--warm-gold); background: rgba(212, 175, 55, 0.08); }
+        .stamp-card.locked { opacity: 0.5; filter: grayscale(1); }
+        .stamp-img { width: 120px; height: 120px; margin: 0 auto 1rem; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 3rem; background: rgba(212, 175, 55, 0.1); border: 3px solid var(--warm-gold); position: relative; }
+        .stamp-card.unlocked .stamp-img { box-shadow: 0 0 20px rgba(212, 175, 55, 0.4); }
+        .stamp-card.locked .stamp-img::after { content: '🔒'; position: absolute; font-size: 2rem; }
+        .stamp-card.locked .stamp-img > span { display: none; }
+        .stamp-name { color: var(--warm-gold); font-size: 1.05rem; font-weight: 600; margin-bottom: 0.25rem; }
+        .stamp-location { color: var(--text-muted); font-size: 0.8rem; margin-bottom: 0.5rem; }
+        .stamp-desc { color: var(--text-secondary); font-size: 0.85rem; line-height: 1.5; margin-bottom: 0.75rem; }
+        .stamp-rarity { display: inline-block; padding: 0.2rem 0.6rem; border-radius: 20px; font-size: 0.72rem; font-weight: 600; }
+        .rarity-普通 { background: rgba(160, 174, 192, 0.2); color: #a0aec0; }
+        .rarity-稀有 { background: rgba(96, 165, 250, 0.2); color: #60a5fa; }
+        .rarity-史诗 { background: rgba(168, 85, 247, 0.2); color: #a855f7; }
+        .rarity-传说 { background: rgba(250, 204, 21, 0.2); color: #facc15; }
+        .stamp-unlock-tip { color: var(--text-muted); font-size: 0.75rem; margin-top: 0.5rem; }
+        .stamp-actions { display: flex; gap: 1rem; justify-content: center; margin-top: 2rem; }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <div class="header-left"><a href="/" class="header-logo">薪火侨乡</a></div>
+            <nav class="header-nav">
+                <a href="/">云游</a><a href="/#buildings">建筑图鉴</a><a href="/knowledge">知识库</a>
+                <a href="/stories">侨乡故事</a><a href="/archive">田野档案</a><a href="/about">关于我们</a>
+            </nav>
+            <div class="header-right"><button class="header-btn" onclick="window.location.href='/map'">开始云游</button></div>
+        </div>
+    </header>
+
+    <main class="main">
+        <section class="page-hero">
+            <div class="page-hero-content">
+                <span class="page-hero-label">STAMP COLLECTION</span>
+                <h1 class="page-hero-title">虚拟盖章</h1>
+                <p class="page-hero-subtitle">云游薪火侨乡，收集专属印章</p>
+            </div>
+        </section>
+
+        <div class="page-content">
+            <section class="section">
+                <div class="section-header">
+                    <span class="section-label">打卡收集</span>
+                    <h2 class="section-title">印章图鉴</h2>
+                    <p class="section-subtitle">浏览景点、学习方言、答题闯关，解锁全部印章</p>
+                </div>
+
+                <div class="stamp-summary">
+                    <div class="stamp-progress-text">
+                        已收集 <strong id="unlocked-count">0</strong> / <strong th:text="${stamps != null ? stamps.size() : 0}">0</strong> 枚印章
+                    </div>
+                    <div class="stamp-progress-bar">
+                        <div class="stamp-progress-fill" id="progress-fill"></div>
+                    </div>
+                    <button class="hero-btn-secondary" onclick="resetStamps()">重置进度</button>
+                </div>
+
+                <div class="stamp-grid" th:if="${stamps != null and !stamps.isEmpty()}">
+                    <div class="stamp-card" th:each="s : ${stamps}"
+                         th:data-id="${s.id}"
+                         th:classappend="'rarity-' + ${s.rarity}">
+                        <div class="stamp-img">
+                            <span th:text="${#strings.substring(s.name, 0, 1)}">印</span>
+                        </div>
+                        <div class="stamp-name" th:text="${s.name}">印章名称</div>
+                        <div class="stamp-location" th:text="'📍 ' + ${s.location}">地点</div>
+                        <div class="stamp-desc" th:text="${s.description}">描述</div>
+                        <span class="stamp-rarity" th:classappend="'rarity-' + ${s.rarity}" th:text="${s.rarity}">稀有度</span>
+                        <div class="stamp-unlock-tip" th:text="'解锁条件：' + ${s.unlockCondition}">条件</div>
+                    </div>
+                </div>
+                <div th:if="${stamps == null or stamps.isEmpty()}" style="text-align: center; padding: 3rem; color: var(--text-muted);">
+                    印章数据整理中，敬请期待。
+                </div>
+
+                <div class="stamp-actions">
+                    <button class="hero-btn-primary" onclick="window.location.href='/map'">去云游打卡</button>
+                    <button class="hero-btn-secondary" onclick="window.location.href='/quiz'">去答题闯关</button>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-logo">薪火侨乡</div>
+            <p><span class="project-name">侨韵薪火</span> - 江门侨乡建筑数字化云游平台</p>
+        </div>
+        <div class="footer-links">
+            <a href="/">首页</a><a href="/#buildings">建筑图鉴</a><a href="/stories">侨乡故事</a>
+            <a href="/archive">田野档案</a><a href="/map">景区导航</a><a href="/about">关于我们</a>
+        </div>
+        <div class="footer-bottom">
+            <p>技术支持：3D高斯泼溅技术(3DGS) · 腾讯云COS · AI语音合成</p>
+            <p style="margin-top: 0.5rem;">© 2024 侨韵薪火实践团 版权所有</p>
+        </div>
+    </footer>
+
+    <button class="ai-guide-btn" onclick="toggleAiGuide()">🎧</button>
+    <div class="ai-guide-panel" id="ai-guide-panel">
+        <h3 class="ai-guide-title">AI智能讲解</h3>
+        <div class="ai-guide-text">浏览景点、学习方言、答题闯关，即可解锁对应印章。</div>
+        <div class="ai-guide-controls">
+            <button class="ai-control-btn primary" onclick="playPageIntro()">播放介绍</button>
+        </div>
+    </div>
+
+    <script>
+        function getUnlocked() {
+            try { return JSON.parse(localStorage.getItem('qiaoyun_stamps') || '[]'); }
+            catch(e) { return []; }
+        }
+        function renderStamps() {
+            const unlocked = getUnlocked();
+            const cards = document.querySelectorAll('.stamp-card');
+            let count = 0;
+            cards.forEach(card => {
+                const id = parseInt(card.dataset.id);
+                if (unlocked.includes(id)) {
+                    card.classList.add('unlocked');
+                    card.classList.remove('locked');
+                    count++;
+                } else {
+                    card.classList.add('locked');
+                    card.classList.remove('unlocked');
+                }
+            });
+            document.getElementById('unlocked-count').textContent = count;
+            const total = cards.length;
+            document.getElementById('progress-fill').style.width = (total === 0 ? 0 : count * 100 / total) + '%';
+        }
+        function resetStamps() {
+            if (confirm('确定要重置印章进度吗？此操作不可恢复。')) {
+                localStorage.removeItem('qiaoyun_stamps');
+                renderStamps();
+            }
+        }
+        function toggleAiGuide() { document.getElementById('ai-guide-panel').classList.toggle('active'); }
+        function playPageIntro() {
+            if (window.speechSynthesis) {
+                window.speechSynthesis.cancel();
+                const u = new SpeechSynthesisUtterance('欢迎来到虚拟盖章系统。云游宝源坊的各个景点、学习侨乡方言、参与知识答题，都可以解锁专属印章。印章分为普通、稀有、史诗、传说四个等级。集齐全部印章，即可成为宝源坊云游达人。快去探索吧！');
+                u.lang = 'zh-CN'; u.rate = 0.95;
+                window.speechSynthesis.speak(u);
+            }
+        }
+        // 首次访问解锁"宝源坊初访"印章
+        (function() {
+            const unlocked = getUnlocked();
+            if (!unlocked.includes(1)) {
+                unlocked.push(1);
+                localStorage.setItem('qiaoyun_stamps', JSON.stringify(unlocked));
+            }
+            renderStamps();
+        })();
+    </script>
+</body>
+</html>

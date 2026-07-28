@@ -1,0 +1,189 @@
+﻿<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>建筑知识库 - 侨乡建筑数字化云游平台</title>
+    <link rel="stylesheet" href="/css/qiaoyun.css">
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <div class="header-left">
+                <a href="/" class="header-logo">薪火侨乡</a>
+            </div>
+            <nav class="header-nav">
+                <a href="/">云游</a>
+                <a href="/#buildings">建筑图鉴</a>
+                <a href="/knowledge">知识库</a>
+                <a href="/stories">侨乡故事</a>
+                <a href="/archive">田野档案</a>
+                <a href="/about">关于我们</a>
+            </nav>
+            <div class="header-right">
+                <button class="header-btn" onclick="window.location.href='/map'">开始云游</button>
+            </div>
+        </div>
+    </header>
+
+    <main class="main">
+        <section class="page-hero">
+            <div class="page-hero-content">
+                <span class="page-hero-label">KNOWLEDGE BASE</span>
+                <h1 class="page-hero-title">建筑知识库</h1>
+                <p class="page-hero-subtitle">探索碉楼建筑的历史与工艺</p>
+            </div>
+        </section>
+
+        <div class="page-content">
+            <section class="section">
+                <div class="section-header">
+                    <span class="section-label">知识分类</span>
+                    <h2 class="section-title">建筑知识图谱</h2>
+                    <p class="section-subtitle">点击分类筛选，深入了解侨乡建筑文化</p>
+                </div>
+
+                <div class="filter-tabs" id="filter-tabs">
+                    <button class="filter-tab active" data-category="全部" onclick="filterKnowledge('全部')">全部</button>
+                    <button class="filter-tab" data-category="建筑风格" onclick="filterKnowledge('建筑风格')">建筑风格</button>
+                    <button class="filter-tab" data-category="建造技术" onclick="filterKnowledge('建造技术')">建造技术</button>
+                    <button class="filter-tab" data-category="地域建筑" onclick="filterKnowledge('地域建筑')">地域建筑</button>
+                    <button class="filter-tab" data-category="文化研究" onclick="filterKnowledge('文化研究')">文化研究</button>
+                    <button class="filter-tab" data-category="礼制建筑" onclick="filterKnowledge('礼制建筑')">礼制建筑</button>
+                    <button class="filter-tab" data-category="建筑类型" onclick="filterKnowledge('建筑类型')">建筑类型</button>
+                </div>
+
+                <div class="knowledge-detail-grid" id="knowledge-grid" th:if="${knowledgeList != null and !knowledgeList.isEmpty()}">
+                    <a th:each="item : ${knowledgeList}"
+                       th:href="|/knowledge/${item.id}|"
+                       class="knowledge-detail-card"
+                       th:data-category="${item.category}">
+                        <div class="knowledge-detail-image">
+                            <img th:src="${coverUrls != null and coverUrls[item.id] != null} ? ${coverUrls[item.id]} : |https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=${item.title}%20kaiping%20architecture%20knowledge%20cinematic&image_size=square|" th:alt="${item.title}">
+                        </div>
+                        <div class="knowledge-detail-content">
+                            <div class="knowledge-detail-header">
+                                <span style="font-size: 0.8rem; color: var(--text-muted);" th:text="${item.category}"></span>
+                                <span class="knowledge-difficulty"
+                                      th:classappend="${item.difficulty == '入门'} ? 'beginner' : 'intermediate'"
+                                      th:text="${item.difficulty}"></span>
+                            </div>
+                            <h4 class="knowledge-detail-title" th:text="${item.title}"></h4>
+                            <p class="knowledge-detail-summary" th:text="${item.summary}"></p>
+                        </div>
+                    </a>
+                </div>
+                <div th:if="${knowledgeList == null or knowledgeList.isEmpty()}" style="text-align: center; padding: 3rem; color: var(--text-muted);">
+                    知识内容整理中，敬请期待。
+                </div>
+            </section>
+
+            <section class="section">
+                <div class="section-header">
+                    <span class="section-label">侨乡民俗</span>
+                    <h2 class="section-title">传统文化记忆</h2>
+                    <p class="section-subtitle">感受侨乡独特的民俗文化魅力</p>
+                </div>
+                <div class="culture-grid" th:if="${cultures != null and !cultures.isEmpty()}">
+                    <div class="culture-card" th:each="culture : ${cultures}">
+                        <div class="culture-image">
+                            <img th:src="${cultureCoverUrls != null and cultureCoverUrls[culture.id] != null} ? ${cultureCoverUrls[culture.id]} : |https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=${culture.name}%20traditional%20culture%20kaiping%20lingnan&image_size=square|" th:alt="${culture.name}">
+                            <div class="culture-overlay">
+                                <span class="culture-category" th:text="${culture.category}"></span>
+                            </div>
+                        </div>
+                        <div class="culture-info">
+                            <h4 class="culture-name" th:text="${culture.name}"></h4>
+                            <p class="culture-desc" th:text="${culture.description}"></p>
+                        </div>
+                    </div>
+                </div>
+                <div th:if="${cultures == null or cultures.isEmpty()}" style="text-align: center; padding: 3rem; color: var(--text-muted);">
+                    民俗文化整理中，敬请期待。
+                </div>
+            </section>
+
+            <section class="section" style="text-align: center; background: linear-gradient(135deg, rgba(212, 175, 55, 0.08), rgba(196, 98, 16, 0.08)); border-radius: 16px;">
+                <div style="max-width: 700px; margin: 0 auto; padding: 3rem 2rem;">
+                    <h2 style="font-size: 1.6rem; color: var(--warm-gold); margin-bottom: 1rem; letter-spacing: 3px;">学以致用，知行合一</h2>
+                    <p style="color: var(--text-secondary); margin-bottom: 2rem; line-height: 1.8;">
+                        了解建筑知识后，走进实景云游，感受侨乡建筑的真实魅力。
+                    </p>
+                    <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+                        <button class="hero-btn-primary" onclick="window.location.href='/map'">开始云游 →</button>
+                        <button class="hero-btn-secondary" onclick="window.location.href='/archive'">田野档案</button>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-logo">薪火侨乡</div>
+            <p><span class="project-name">侨韵薪火</span> - 江门侨乡建筑数字化云游平台</p>
+            <p>广东工业大学三下乡社会实践项目 · 2024</p>
+        </div>
+        <div class="footer-links">
+            <a href="/">首页</a>
+            <a href="/#buildings">建筑图鉴</a>
+            <a href="/stories">侨乡故事</a>
+            <a href="/archive">田野档案</a>
+            <a href="/map">景区导航</a>
+            <a href="/about">关于我们</a>
+        </div>
+        <div class="footer-bottom">
+            <p>技术支持：3D高斯泼溅技术(3DGS) · 腾讯云COS · AI语音合成</p>
+            <p style="margin-top: 0.5rem;">© 2024 侨韵薪火实践团 版权所有</p>
+        </div>
+    </footer>
+
+    <button class="ai-guide-btn" id="ai-guide-btn" onclick="toggleAiGuide()">🎧</button>
+    <div class="ai-guide-panel" id="ai-guide-panel">
+        <h3 class="ai-guide-title">AI智能讲解</h3>
+        <div class="ai-guide-text" id="ai-guide-text">欢迎来到建筑知识库，这里有关于碉楼建筑、侨乡文化的详细介绍。</div>
+        <div class="ai-guide-controls">
+            <button class="ai-control-btn primary" onclick="playPageIntro()">播放介绍</button>
+            <button class="ai-control-btn" onclick="window.location.href='/map'">开始云游</button>
+        </div>
+    </div>
+
+    <script>
+        function toggleAiGuide() {
+            const panel = document.getElementById('ai-guide-panel');
+            panel.classList.toggle('active');
+        }
+        function speak(text) {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'zh-CN';
+                utterance.rate = 0.9;
+                window.speechSynthesis.speak(utterance);
+                const btn = document.getElementById('ai-guide-btn');
+                btn.classList.add('playing');
+                utterance.onend = () => { btn.classList.remove('playing'); };
+            }
+        }
+        function playPageIntro() {
+            const text = "欢迎来到建筑知识库。这里系统整理了碉楼建筑的风格、建造技术、地域特色与侨乡文化研究。点击上方分类标签筛选感兴趣的内容，点击卡片即可查看详情。";
+            speak(text);
+        }
+        function filterKnowledge(category) {
+            const tabs = document.querySelectorAll('.filter-tab');
+            tabs.forEach(tab => {
+                tab.classList.toggle('active', tab.dataset.category === category);
+            });
+            const cards = document.querySelectorAll('#knowledge-grid .knowledge-detail-card');
+            cards.forEach(card => {
+                const cardCategory = card.dataset.category;
+                if (category === '全部' || cardCategory === category) {
+                    card.style.display = '';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+    </script>
+</body>
+</html>

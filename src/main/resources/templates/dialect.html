@@ -1,0 +1,125 @@
+﻿<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>方言学习 - 侨乡建筑数字化云游平台</title>
+    <link rel="stylesheet" href="/css/qiaoyun.css">
+    <style>
+        .dialect-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.25rem; margin-top: 2rem; }
+        .dialect-card { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 12px; padding: 1.5rem; transition: all 0.3s; backdrop-filter: blur(15px); position: relative; }
+        .dialect-card:hover { border-color: var(--warm-gold); transform: translateY(-4px); }
+        .dialect-play { position: absolute; top: 1rem; right: 1rem; width: 36px; height: 36px; border-radius: 50%; background: rgba(212, 175, 55, 0.15); border: 1px solid var(--warm-gold); color: var(--warm-gold); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1rem; transition: all 0.3s; }
+        .dialect-play:hover { background: var(--warm-gold); color: var(--ink-black); }
+        .dialect-chinese { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 0.25rem; }
+        .dialect-word { color: var(--warm-gold); font-size: 1.8rem; font-weight: 700; margin-bottom: 0.25rem; font-family: 'KaiTi', 'STKaiti', serif; }
+        .dialect-pinyin { color: var(--text-muted); font-size: 0.85rem; font-style: italic; margin-bottom: 0.75rem; }
+        .dialect-meaning { color: var(--text-primary); font-size: 1rem; margin-bottom: 0.75rem; }
+        .dialect-example { color: var(--text-secondary); font-size: 0.88rem; line-height: 1.6; padding: 0.6rem; background: rgba(0,0,0,0.25); border-radius: 6px; border-left: 3px solid var(--warm-gold); }
+        .dialect-category-tag { display: inline-block; padding: 0.15rem 0.6rem; background: rgba(212, 175, 55, 0.15); color: var(--warm-gold); border-radius: 20px; font-size: 0.72rem; margin-top: 0.75rem; }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <div class="header-left"><a href="/" class="header-logo">薪火侨乡</a></div>
+            <nav class="header-nav">
+                <a href="/">云游</a><a href="/#buildings">建筑图鉴</a><a href="/knowledge">知识库</a>
+                <a href="/stories">侨乡故事</a><a href="/archive">田野档案</a><a href="/about">关于我们</a>
+            </nav>
+            <div class="header-right"><button class="header-btn" onclick="window.location.href='/map'">开始云游</button></div>
+        </div>
+    </header>
+
+    <main class="main">
+        <section class="page-hero">
+            <div class="page-hero-content">
+                <span class="page-hero-label">DIALECT LEARNING</span>
+                <h1 class="page-hero-title">方言学习角</h1>
+                <p class="page-hero-subtitle">学一句侨乡话，听懂百年乡愁</p>
+            </div>
+        </section>
+
+        <div class="page-content">
+            <section class="section">
+                <div class="section-header">
+                    <span class="section-label">侨乡方言</span>
+                    <h2 class="section-title">粤语·开平话</h2>
+                    <p class="section-subtitle">点击播放按钮，跟读侨乡方言</p>
+                </div>
+
+                <div class="filter-tabs">
+                    <a class="filter-tab" th:classappend="${currentCategory == 'all'} ? 'active' : ''" th:href="@{/dialect}">全部</a>
+                    <a th:each="cat : ${categories}"
+                       class="filter-tab"
+                       th:classappend="${currentCategory == cat} ? 'active' : ''"
+                       th:href="|/dialect?category=${cat}|"
+                       th:text="${cat}">分类</a>
+                </div>
+
+                <div class="dialect-grid" th:if="${dialects != null and !dialects.isEmpty()}">
+                    <div class="dialect-card" th:each="d : ${dialects}">
+                        <button class="dialect-play" th:data-example="${d.example}" th:data-dialect="${d.dialect}" onclick="playDialect(this)">🔊</button>
+                        <div class="dialect-chinese" th:text="${d.chinese}">中文</div>
+                        <div class="dialect-word" th:text="${d.dialect}">方言</div>
+                        <div class="dialect-pinyin" th:text="${d.pinyin}">拼音</div>
+                        <div class="dialect-meaning" th:text="'释义：' + ${d.meaning}">释义</div>
+                        <div class="dialect-example" th:text="|例：${d.example}|">例句</div>
+                        <span class="dialect-category-tag" th:text="${d.category}">分类</span>
+                    </div>
+                </div>
+                <div th:if="${dialects == null or dialects.isEmpty()}" style="text-align: center; padding: 3rem; color: var(--text-muted);">
+                    方言数据整理中，敬请期待。
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-logo">薪火侨乡</div>
+            <p><span class="project-name">侨韵薪火</span> - 江门侨乡建筑数字化云游平台</p>
+        </div>
+        <div class="footer-links">
+            <a href="/">首页</a><a href="/#buildings">建筑图鉴</a><a href="/stories">侨乡故事</a>
+            <a href="/archive">田野档案</a><a href="/map">景区导航</a><a href="/about">关于我们</a>
+        </div>
+        <div class="footer-bottom">
+            <p>技术支持：3D高斯泼溅技术(3DGS) · 腾讯云COS · AI语音合成</p>
+            <p style="margin-top: 0.5rem;">© 2024 侨韵薪火实践团 版权所有</p>
+        </div>
+    </footer>
+
+    <button class="ai-guide-btn" onclick="toggleAiGuide()">🎧</button>
+    <div class="ai-guide-panel" id="ai-guide-panel">
+        <h3 class="ai-guide-title">AI智能讲解</h3>
+        <div class="ai-guide-text">点击每个词条右上角的播放按钮，AI将用粤语语音朗读例句。</div>
+        <div class="ai-guide-controls">
+            <button class="ai-control-btn primary" onclick="playPageIntro()">播放介绍</button>
+        </div>
+    </div>
+
+    <script>
+        function playDialect(btn) {
+            if (!window.speechSynthesis) return;
+            window.speechSynthesis.cancel();
+            const text = btn.dataset.example;
+            const u = new SpeechSynthesisUtterance(text);
+            u.lang = 'yue-CN'; u.rate = 0.85;
+            const voices = window.speechSynthesis.getVoices();
+            const yue = voices.find(v => v.lang && v.lang.toLowerCase().includes('yue'));
+            if (yue) u.voice = yue;
+            window.speechSynthesis.speak(u);
+        }
+        function toggleAiGuide() { document.getElementById('ai-guide-panel').classList.toggle('active'); }
+        function playPageIntro() {
+            if (window.speechSynthesis) {
+                window.speechSynthesis.cancel();
+                const u = new SpeechSynthesisUtterance('欢迎来到方言学习角。侨乡方言承载着浓厚的地域文化，开平话属粤语四邑片，独具特色。在这里，你可以学习返屋企、食饭、金山客、寄银等侨乡特有词汇。点击播放按钮，跟读学习。');
+                u.lang = 'zh-CN'; u.rate = 0.95;
+                window.speechSynthesis.speak(u);
+            }
+        }
+    </script>
+</body>
+</html>

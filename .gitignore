@@ -1,0 +1,40 @@
+target/
+*.class
+*.jar
+*.war
+*.log
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+.project
+.classpath
+.settings/
+
+# Maven
+.mvn/
+mvnw
+mvnw.cmd
+
+# Logs
+logs/
+*.log
+
+# Environment variables
+.env
+application-local.yml
+application-prod.yml
+application.yml
+
+# Sensitive files
+secret.properties
+credentials.json
+密钥管理.txt
+*.key
+*.pem
+
+# Temp files
+tmp/
+*.tmp

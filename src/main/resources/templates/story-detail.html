@@ -1,0 +1,203 @@
+﻿<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${story.title} + ' - 侨乡故事'">侨乡故事 - 薪火侨乡</title>
+    <link rel="stylesheet" href="/css/qiaoyun.css">
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <div class="header-left">
+                <a href="/" class="header-logo">薪火侨乡</a>
+            </div>
+            <nav class="header-nav">
+                <a href="/">云游</a>
+                <a href="/#buildings">建筑图鉴</a>
+                <a href="/knowledge">知识库</a>
+                <a href="/stories">侨乡故事</a>
+                <a href="/archive">田野档案</a>
+                <a href="/about">关于我们</a>
+            </nav>
+            <div class="header-right">
+                <button class="header-btn" onclick="window.location.href='/map'">开始云游</button>
+            </div>
+        </div>
+    </header>
+
+    <main class="main">
+        <div class="detail-page">
+            <!-- 返回链接 -->
+            <a href="/stories" class="detail-back back-link">← 返回侨乡故事</a>
+
+            <!-- 封面大图 -->
+            <div class="detail-hero-image">
+                <img th:src="${coverUrl != null} ? ${coverUrl} : |https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=${story.title}%20traditional%20lingnan%20village%20story%20cinematic&image_size=square|" th:alt="${story.title}">
+                <span class="detail-category-tag" th:text="${story.category}"></span>
+            </div>
+
+            <!-- 标题与元信息 -->
+            <h1 class="detail-title" th:text="${story.title}"></h1>
+            <div class="detail-meta">
+                <span>✍️ <span th:text="${story.author}"></span></span>
+                <span>📅 <span th:text="${story.date}"></span></span>
+                <span>👁️ <span th:text="${story.views}"></span> 次阅读</span>
+            </div>
+
+            <!-- 音频播放按钮 -->
+            <div style="margin: 1.5rem 0;">
+                <button class="hero-btn-primary" id="play-audio-btn" onclick="playStoryAudio()">
+                    <span class="play-icon">▶</span>
+                    <span id="audio-btn-text">播放音频</span>
+                </button>
+            </div>
+
+            <!-- 故事正文 -->
+            <div class="detail-content" id="story-content" th:utext="${story.content}"></div>
+
+            <!-- 上一篇 / 下一篇导航 -->
+            <div th:if="${otherStories != null and #lists.size(otherStories) > 0}" style="display: flex; justify-content: space-between; gap: 1rem; margin: 3rem 0; padding: 1.5rem; background: var(--glass-bg); border: 1px solid var(--glass-border-light); border-radius: 12px;">
+                <a th:if="${#lists.size(otherStories) > 0}" th:href="@{/story/{id}(id=${otherStories[0].id})}" class="back-link" style="flex: 1;">
+                    ← 上一篇：<span th:text="${otherStories[0].title}"></span>
+                </a>
+                <a th:if="${#lists.size(otherStories) > 1}" th:href="@{/story/{id}(id=${otherStories[#lists.size(otherStories)-1].id})}" class="back-link" style="flex: 1; text-align: right;">
+                    下一篇：<span th:text="${otherStories[#lists.size(otherStories)-1].title}"></span> →
+                </a>
+            </div>
+
+            <!-- 相关故事 -->
+            <section class="section" th:if="${otherStories != null and #lists.size(otherStories) > 0}">
+                <div class="section-header">
+                    <span class="section-label">延伸阅读</span>
+                    <h2 class="section-title">相关故事</h2>
+                    <p class="section-subtitle">继续探索侨乡的文化记忆</p>
+                </div>
+                <div class="story-list">
+                    <div class="story-item" th:each="other : ${otherStories}">
+                        <a th:href="@{/story/{id}(id=${other.id})}" class="story-item-link" style="text-decoration: none; color: inherit; display: block;">
+                            <div class="story-item-image">
+                                <img th:src="${coverUrls != null and coverUrls[other.id] != null} ? ${coverUrls[other.id]} : |https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=${other.title}%20traditional%20lingnan%20village%20story&image_size=square|" th:alt="${other.title}" loading="lazy">
+                                <span class="story-item-category" th:text="${other.category}"></span>
+                            </div>
+                            <div class="story-item-content">
+                                <h3 class="story-item-title" th:text="${other.title}"></h3>
+                                <p class="story-item-summary" th:text="${other.summary}"></p>
+                                <div class="story-item-footer">
+                                    <div class="story-item-meta">
+                                        <span th:text="${other.author}"></span>
+                                        <span th:text="${other.date}"></span>
+                                    </div>
+                                    <div class="story-item-views">
+                                        <span>👁️</span>
+                                        <span th:text="${other.views}"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-logo">薪火侨乡</div>
+            <p><span class="project-name">侨韵薪火</span> - 江门侨乡建筑数字化云游平台</p>
+            <p>广东工业大学三下乡社会实践项目 · 2024</p>
+        </div>
+        <div class="footer-links">
+            <a href="/">首页</a>
+            <a href="/#buildings">建筑图鉴</a>
+            <a href="/stories">侨乡故事</a>
+            <a href="/archive">田野档案</a>
+            <a href="/map">景区导航</a>
+            <a href="/about">关于我们</a>
+        </div>
+        <div class="footer-bottom">
+            <p>技术支持：3D高斯泼溅技术(3DGS) · 腾讯云COS · AI语音合成</p>
+            <p style="margin-top: 0.5rem;">© 2024 侨韵薪火实践团 版权所有</p>
+        </div>
+    </footer>
+
+    <button class="ai-guide-btn" id="ai-guide-btn" onclick="toggleAiGuide()">🎧</button>
+    <div class="ai-guide-panel" id="ai-guide-panel">
+        <h3 class="ai-guide-title">AI智能讲解</h3>
+        <div class="ai-guide-text" id="ai-guide-text">欢迎来到侨乡故事页面，这里记录了宝源坊老村民的口述历史和侨乡文化故事。</div>
+        <div class="ai-guide-controls">
+            <button class="ai-control-btn primary" onclick="playPageIntro()">播放介绍</button>
+            <button class="ai-control-btn" onclick="window.location.href='/map'">开始云游</button>
+        </div>
+    </div>
+
+    <script>
+        function toggleAiGuide() {
+            const panel = document.getElementById('ai-guide-panel');
+            panel.classList.toggle('active');
+        }
+        function speak(text) {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'zh-CN';
+                utterance.rate = 0.9;
+                window.speechSynthesis.speak(utterance);
+                const btn = document.getElementById('ai-guide-btn');
+                btn.classList.add('playing');
+                utterance.onend = () => { btn.classList.remove('playing'); };
+            }
+        }
+        function playPageIntro() {
+            const text = "欢迎来到侨乡故事页面。这里收录了宝源坊老村民的口述历史、侨批文化、教育故事和民间传说。每一段故事都是华侨漂洋过海、艰苦奋斗的真实记忆，是侨乡文化的珍贵见证。请点击您感兴趣的故事，聆听那段跨越百年的乡愁。";
+            speak(text);
+        }
+        let isPlaying = false;
+        function playStoryAudio() {
+            const btn = document.getElementById('play-audio-btn');
+            const btnText = document.getElementById('audio-btn-text');
+            const playIcon = btn.querySelector('.play-icon');
+            if (isPlaying) {
+                window.speechSynthesis.cancel();
+                isPlaying = false;
+                if (btnText) btnText.textContent = '播放音频';
+                if (playIcon) playIcon.textContent = '▶';
+                return;
+            }
+            const contentEl = document.getElementById('story-content');
+            if (!contentEl) return;
+            const titleEl = document.querySelector('.detail-title');
+            const title = titleEl ? titleEl.textContent.trim() : '';
+            const body = contentEl.innerText || contentEl.textContent || '';
+            const text = (title ? title + '。' : '') + body;
+            if (!text.trim()) return;
+            if (!('speechSynthesis' in window)) {
+                alert('您的浏览器不支持语音合成功能');
+                return;
+            }
+            window.speechSynthesis.cancel();
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'zh-CN';
+            utterance.rate = 0.9;
+            isPlaying = true;
+            if (btnText) btnText.textContent = '停止播放';
+            if (playIcon) playIcon.textContent = '■';
+            const guideBtn = document.getElementById('ai-guide-btn');
+            guideBtn.classList.add('playing');
+            utterance.onend = () => {
+                isPlaying = false;
+                if (btnText) btnText.textContent = '播放音频';
+                if (playIcon) playIcon.textContent = '▶';
+                guideBtn.classList.remove('playing');
+            };
+            utterance.onerror = () => {
+                isPlaying = false;
+                if (btnText) btnText.textContent = '播放音频';
+                if (playIcon) playIcon.textContent = '▶';
+                guideBtn.classList.remove('playing');
+            };
+            window.speechSynthesis.speak(utterance);
+        }
+    </script>
+</body>
+</html>

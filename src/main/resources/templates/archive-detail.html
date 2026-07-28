@@ -1,0 +1,396 @@
+﻿<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${archive.title} + ' - 田野档案 - 薪火侨乡'">档案详情 - 薪火侨乡</title>
+    <link rel="stylesheet" href="/css/qiaoyun.css">
+    <style>
+        .archive-detail-layout {
+            display: grid;
+            grid-template-columns: 1.5fr 1fr;
+            gap: 2.5rem;
+            align-items: start;
+            margin-top: 1.5rem;
+        }
+        @media (max-width: 900px) {
+            .archive-detail-layout { grid-template-columns: 1fr; }
+        }
+        .archive-hero-card {
+            background: linear-gradient(135deg, rgba(212, 175, 55, 0.08), rgba(196, 98, 16, 0.05));
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 2.5rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .archive-hero-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(212, 175, 55, 0.06) 0%, transparent 60%);
+            animation: rotate 20s linear infinite;
+        }
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        .archive-hero-icon {
+            font-size: 5rem;
+            margin-bottom: 1rem;
+            position: relative;
+            z-index: 1;
+        }
+        .archive-hero-category {
+            display: inline-block;
+            padding: 0.3rem 1rem;
+            background: rgba(212, 175, 55, 0.15);
+            color: var(--warm-gold);
+            border-radius: 20px;
+            font-size: 0.85rem;
+            margin-bottom: 0.75rem;
+            position: relative;
+            z-index: 1;
+        }
+        .archive-hero-title {
+            color: var(--text-primary);
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            position: relative;
+            z-index: 1;
+        }
+        .archive-hero-count {
+            font-size: 3rem;
+            color: var(--warm-gold);
+            font-weight: 700;
+            line-height: 1;
+            position: relative;
+            z-index: 1;
+        }
+        .archive-hero-unit {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            margin-top: 0.5rem;
+            position: relative;
+            z-index: 1;
+        }
+        .archive-hero-desc {
+            color: var(--text-secondary);
+            font-size: 1rem;
+            line-height: 1.8;
+            margin-top: 1.5rem;
+            padding: 1rem 1.5rem;
+            background: rgba(0, 0, 0, 0.25);
+            border-left: 4px solid var(--warm-gold);
+            border-radius: 0 8px 8px 0;
+            text-align: left;
+            position: relative;
+            z-index: 1;
+        }
+        .archive-section-title {
+            color: var(--warm-gold);
+            font-size: 1.2rem;
+            margin: 2rem 0 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--glass-border-light);
+        }
+        .archive-content-block {
+            color: var(--text-secondary);
+            line-height: 1.9;
+            margin-bottom: 1rem;
+        }
+        .archive-related-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        .archive-related-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 1.25rem 1rem;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border-light);
+            border-radius: 12px;
+            text-decoration: none;
+            color: inherit;
+            transition: all 0.3s;
+        }
+        .archive-related-card:hover {
+            border-color: var(--warm-gold);
+            transform: translateY(-2px);
+        }
+        .archive-related-icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+        .archive-related-title {
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            font-weight: 600;
+            text-align: center;
+        }
+        .archive-related-count {
+            color: var(--warm-gold);
+            font-size: 0.85rem;
+            margin-top: 0.25rem;
+        }
+        .timeline-aside {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border-light);
+            border-radius: 16px;
+            padding: 1.5rem;
+            position: sticky;
+            top: 100px;
+        }
+        .timeline-aside-title {
+            color: var(--warm-gold);
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+        .timeline-aside-item {
+            padding: 0.75rem 0;
+            border-bottom: 1px solid var(--glass-border-light);
+        }
+        .timeline-aside-item:last-child { border-bottom: none; }
+        .timeline-aside-year {
+            color: var(--warm-gold);
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+        .timeline-aside-title-text {
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            margin-top: 0.2rem;
+        }
+        .timeline-aside-desc {
+            color: var(--text-muted);
+            font-size: 0.78rem;
+            line-height: 1.5;
+            margin-top: 0.3rem;
+        }
+        .category-tag-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 0.75rem;
+            justify-content: center;
+        }
+        .category-tag-item {
+            padding: 0.2rem 0.7rem;
+            background: rgba(212, 175, 55, 0.1);
+            color: var(--warm-gold);
+            border-radius: 12px;
+            font-size: 0.75rem;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <div class="header-left">
+                <a href="/" class="header-logo">薪火侨乡</a>
+            </div>
+            <nav class="header-nav">
+                <a href="/">云游</a>
+                <a href="/#buildings">建筑图鉴</a>
+                <a href="/knowledge">知识库</a>
+                <a href="/stories">侨乡故事</a>
+                <a href="/archive">田野档案</a>
+                <a href="/about">关于我们</a>
+            </nav>
+            <div class="header-right">
+                <button class="header-btn" onclick="window.location.href='/map'">开始云游</button>
+            </div>
+        </div>
+    </header>
+
+    <main class="main" th:if="${archive != null}">
+        <div class="page-content">
+            <!-- 返回链接 -->
+            <a href="/archive" class="detail-back back-link">← 返回田野档案</a>
+
+            <!-- 双栏布局：左主区+右时间线侧栏 -->
+            <div class="archive-detail-layout">
+                <!-- 左主区 -->
+                <div>
+                    <!-- 档案 Hero 卡 -->
+                    <div class="archive-hero-card">
+                        <div class="archive-hero-icon" th:text="${archive.icon}">📜</div>
+                        <span class="archive-hero-category" th:text="${archive.category}">分类</span>
+                        <h1 class="archive-hero-title" th:text="${archive.title}">档案标题</h1>
+                        <div class="archive-hero-count" th:text="${archive.count}">0</div>
+                        <div class="archive-hero-unit" th:text="${archive.unit}">单位</div>
+                        <div class="archive-hero-desc" th:text="${archive.description}">档案描述</div>
+                    </div>
+
+                    <!-- 档案详细说明（基于分类生成场景化文案） -->
+                    <section>
+                        <h2 class="archive-section-title">档案详情</h2>
+                        <div class="archive-content-block">
+                            <p>
+                                本档案归属于<span th:text="${archive.category}"></span>类别，由广东工业大学"侨韵薪火"三下乡实践团在江门开平宝源坊实地调研期间采集整理而成。
+                                截至目前，已累计收录 <strong style="color: var(--warm-gold);" th:text="${archive.count}"></strong>
+                                <span th:text="${archive.unit}"></span>，是宝源坊侨乡文化记忆的重要组成部分。
+                            </p>
+                            <p th:switch="${archive.category}">
+                                <span th:case="'建筑档案'">
+                                    宝源坊现存碉楼、祠堂、骑楼、民居等多种类型的历史建筑，每一栋建筑都见证了侨乡百年来的兴衰变迁。实践团对每栋建筑进行了实地测绘、拍照记录、口述访谈，建立了完整的建筑档案库，为后续的3D数字化采集与文化保护提供了第一手资料。
+                                </span>
+                                <span th:case="'文献档案'">
+                                    侨批、族谱、地契、账本等历史文献是研究侨乡社会经济的珍贵资料。这些泛黄的纸张记录着华侨与家乡之间的情感纽带，也展现了侨乡社会的礼俗、宗族与商业网络。所有文献档案均经村民自愿提供并数字化扫描存档。
+                                </span>
+                                <span th:case="'口述历史'">
+                                    实践团走访了宝源坊及周边村落的多位老人，记录他们关于"下南洋""金山客"的真实记忆。这些口述史料以音频、视频形式保存，配以文字转录，是侨乡活态文化的珍贵见证。
+                                </span>
+                                <span th:case="'影像档案'">
+                                    实践团以无人机航拍、地面摄影、360°全景等多种方式记录宝源坊的建筑风貌、村落实景、民俗活动等影像资料，建立了完整的影像档案库，为侨乡文化传播提供高质量素材。
+                                </span>
+                                <span th:case="'文化档案'">
+                                    宝源坊保留了开平泮村灯会、龙舟竞渡、舞狮表演、灰塑工艺等多项非物质文化遗产。实践团对每项民俗活动进行了详细记录，并采访传承人，整理技艺谱系与传承现状。
+                                </span>
+                                <span th:case="'家族档案'">
+                                    宝源坊以陈氏、李氏、黄氏等大家族为主，每家族均有族谱记录。实践团与族中长辈合作，整理各家族的迁徙史、华侨史、重要人物事迹，构建了完整的家族档案体系。
+                                </span>
+                                <span th:case="'技术档案'">
+                                    实践团对宝源坊主要历史建筑进行了三维激光扫描与摄影测量，生成了高精度的测绘图纸与3D点云数据，为建筑保护、修缮设计、数字化展示提供了精准的技术支撑。
+                                </span>
+                                <span th:case="'学术档案'">
+                                    围绕宝源坊与开平碉楼，学界已有丰富的研究成果。实践团整理了相关学术论文、研究报告、专著等文献资料，建立了学术档案库，方便后续研究者检索与参考。
+                                </span>
+                                <span th:case="*">
+                                    本档案库由侨韵薪火实践团采集整理，致力于为侨乡文化保护与传承提供扎实的数据支撑。
+                                </span>
+                            </p>
+                            <p>
+                                如需查阅原始档案资料或合作研究，欢迎通过"关于我们"页面的反馈表单与实践团联系。我们将秉持开放共享的原则，与所有关心侨乡文化的人士共同守护这份珍贵的记忆。
+                            </p>
+                        </div>
+                    </section>
+
+                    <!-- 相关档案推荐 -->
+                    <section th:if="${relatedArchives != null and !relatedArchives.isEmpty()}">
+                        <h2 class="archive-section-title">相关档案</h2>
+                        <div class="archive-related-grid">
+                            <a th:each="rel : ${relatedArchives}"
+                               th:href="@{/archive/{id}(id=${rel.id})}"
+                               class="archive-related-card">
+                                <div class="archive-related-icon" th:text="${rel.icon}">📄</div>
+                                <div class="archive-related-title" th:text="${rel.title}">档案标题</div>
+                                <div class="archive-related-count" th:text="${rel.count} + ' ' + ${rel.unit}">0 单位</div>
+                            </a>
+                        </div>
+                    </section>
+
+                    <!-- 同分类档案 -->
+                    <section th:if="${sameCategoryArchives != null and sameCategoryArchives.size() > 1}">
+                        <h2 class="archive-section-title">
+                            同分类档案（<span th:text="${archive.category}"></span>）
+                        </h2>
+                        <div class="archive-related-grid">
+                            <a th:each="same : ${sameCategoryArchives}"
+                               th:if="${!same.id.equals(archive.id)}"
+                               th:href="@{/archive/{id}(id=${same.id})}"
+                               class="archive-related-card">
+                                <div class="archive-related-icon" th:text="${same.icon}">📄</div>
+                                <div class="archive-related-title" th:text="${same.title}">档案标题</div>
+                                <div class="archive-related-count" th:text="${same.count} + ' ' + ${same.unit}">0 单位</div>
+                            </a>
+                        </div>
+                    </section>
+
+                    <!-- 返回按钮 -->
+                    <div style="text-align: center; margin-top: 2.5rem;">
+                        <button class="hero-btn-primary" onclick="window.location.href='/archive'">← 返回田野档案</button>
+                        <button class="hero-btn-secondary" onclick="window.location.href='/map'" style="margin-left: 1rem;">开始云游</button>
+                    </div>
+                </div>
+
+                <!-- 右侧栏：历史时间线 -->
+                <aside class="timeline-aside" th:if="${timeline != null and !timeline.isEmpty()}">
+                    <div class="timeline-aside-title">📜 历史时间线</div>
+                    <div class="timeline-aside-item" th:each="item : ${timeline}">
+                        <div class="timeline-aside-year" th:text="${item.year}">年份</div>
+                        <div class="timeline-aside-title-text" th:text="${item.title}">标题</div>
+                        <div class="timeline-aside-desc" th:text="${item.description}">描述</div>
+                    </div>
+                </aside>
+            </div>
+        </div>
+    </main>
+
+    <!-- 数据缺失兜底 -->
+    <main class="main" th:if="${archive == null}">
+        <div class="page-content" style="text-align: center; padding: 4rem 1rem;">
+            <h2 class="detail-title">档案不存在</h2>
+            <p style="color: var(--text-secondary); margin: 1rem 0 2rem;">您访问的档案可能已被删除或链接有误。</p>
+            <a href="/archive" class="hero-btn-primary" style="display: inline-block; text-decoration: none; padding: 0.9rem 2.2rem;">← 返回田野档案</a>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-logo">薪火侨乡</div>
+            <p><span class="project-name">侨韵薪火</span> - 江门侨乡建筑数字化云游平台</p>
+            <p>广东工业大学三下乡社会实践项目 · 2024</p>
+        </div>
+        <div class="footer-links">
+            <a href="/">首页</a>
+            <a href="/#buildings">建筑图鉴</a>
+            <a href="/stories">侨乡故事</a>
+            <a href="/archive">田野档案</a>
+            <a href="/map">景区导航</a>
+            <a href="/about">关于我们</a>
+        </div>
+        <div class="footer-bottom">
+            <p>技术支持：3D高斯泼溅技术(3DGS) · 腾讯云COS · AI语音合成</p>
+            <p style="margin-top: 0.5rem;">© 2024 侨韵薪火实践团 版权所有</p>
+        </div>
+    </footer>
+
+    <button class="ai-guide-btn" id="ai-guide-btn" onclick="toggleAiGuide()">🎧</button>
+    <div class="ai-guide-panel" id="ai-guide-panel">
+        <h3 class="ai-guide-title">AI智能讲解</h3>
+        <div class="ai-guide-text" id="ai-guide-text">欢迎查看田野档案详情，点击下方按钮聆听档案介绍。</div>
+        <div class="ai-guide-controls">
+            <button class="ai-control-btn primary" onclick="playPageIntro()">播放介绍</button>
+            <button class="ai-control-btn" onclick="window.location.href='/archive'">返回列表</button>
+        </div>
+    </div>
+
+    <script th:inline="javascript">
+        const archiveTitle = /*[[${archive?.title}]]*/ '';
+        const archiveDesc = /*[[${archive?.description}]]*/ '';
+        const archiveCount = /*[[${archive?.count}]]*/ '';
+        const archiveUnit = /*[[${archive?.unit}]]*/ '';
+
+        function toggleAiGuide() {
+            const panel = document.getElementById('ai-guide-panel');
+            panel.classList.toggle('active');
+        }
+        function speak(text) {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'zh-CN';
+                utterance.rate = 0.9;
+                window.speechSynthesis.speak(utterance);
+                const btn = document.getElementById('ai-guide-btn');
+                btn.classList.add('playing');
+                utterance.onend = () => { btn.classList.remove('playing'); };
+            }
+        }
+        function playPageIntro() {
+            const text = '正在为您介绍田野档案：' + archiveTitle + '。' + archiveDesc + '目前已累计收录 ' + archiveCount + ' ' + archiveUnit + '，是宝源坊侨乡文化记忆的重要组成部分。';
+            speak(text);
+        }
+    </script>
+</body>
+</html>

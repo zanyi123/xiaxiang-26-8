@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${building.name} + ' - 3D云游'"></title>
+    <link rel="stylesheet" href="/css/qiaoyun.css">
+</head>
+<body>
+    <!-- 顶部导航 -->
+    <header class="header">
+        <div class="header-content">
+            <a href="/" class="back-link">← 返回首页</a>
+            <h1 class="title" th:text="${building.name}"></h1>
+            <p class="subtitle" th:text="${building.description}"></p>
+        </div>
+    </header>
+
+    <!-- 主内容区 -->
+    <main class="main">
+        <!-- 内容选项卡 -->
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('model')">3D 云游</button>
+            <button class="tab" onclick="switchTab('video')">4K 视频</button>
+            <button class="tab" onclick="switchTab('info')">建筑介绍</button>
+        </div>
+
+        <!-- 3D 模型渲染区 -->
+        <section id="tab-model" class="tab-content active">
+            <div class="canvas-wrapper">
+                <!-- Loading 动画 -->
+                <div id="loading" class="loading">
+                    <div class="spinner"></div>
+                    <p>3D 模型加载中，请稍候...</p>
+                    <p class="hint">模型文件较大，首次加载可能需要 30-60 秒</p>
+                </div>
+                <!-- Three.js 渲染画布 -->
+                <canvas id="canvas"></canvas>
+            </div>
+        </section>
+
+        <!-- 4K 视频播放区 -->
+        <section id="tab-video" class="tab-content">
+            <div class="video-wrapper">
+                <video id="video" controls>
+                    <source th:src="${videoUrl}" type="video/mp4">
+                    您的浏览器不支持视频播放。
+                </video>
+            </div>
+        </section>
+
+        <!-- 建筑介绍区 -->
+        <section id="tab-info" class="tab-content">
+            <div class="info-card">
+                <h3>建筑简介</h3>
+                <p th:text="${building.description}"></p>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <span class="label">建筑 ID</span>
+                        <span class="value" th:text="${building.id}"></span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">模型文件</span>
+                        <span class="value" th:text="${building.modelKey}"></span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">视频文件</span>
+                        <span class="value" th:text="${building.videoKey}"></span>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- 页脚 -->
+    <footer class="footer">
+        <p>&copy; 2026 广东工业大学侨韵薪火团队</p>
+    </footer>
+
+    <!-- 引入 Three.js 和 gsplat 渲染库（CDN） -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.150.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsplat@0.1.0/build/gsplat.esm.js"></script>
+    <script src="/js/building-3d.js"></script>
+
+    <!-- 数据注入：Thymeleaf 将后端 modelUrl 安全传递给 JS -->
+    <script th:inline="javascript">
+        const modelUrl = /*[[${modelUrl}]]*/ '';
+        const coverImageUrl = /*[[${coverImageUrl}]]*/ '';
+    </script>
+</body>
+</html>

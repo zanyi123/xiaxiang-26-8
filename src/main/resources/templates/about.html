@@ -1,0 +1,314 @@
+﻿<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>关于我们 - 侨韵薪火实践团 - 薪火侨乡</title>
+    <link rel="stylesheet" href="/css/qiaoyun.css">
+</head>
+<body>
+    <!-- 顶部导航 -->
+    <header class="header">
+        <div class="header-content">
+            <div class="header-left">
+                <a href="/" class="header-logo">薪火侨乡</a>
+            </div>
+            <nav class="header-nav">
+                <a href="/">云游</a>
+                <a href="/#buildings">建筑图鉴</a>
+                <a href="/knowledge">知识库</a>
+                <a href="/stories">侨乡故事</a>
+                <a href="/archive">田野档案</a>
+                <a href="/about">关于我们</a>
+            </nav>
+            <div class="header-right">
+                <button class="header-btn" onclick="window.location.href='/map'">开始云游</button>
+            </div>
+        </div>
+    </header>
+
+    <main class="main">
+        <!-- 页面 Hero -->
+        <section class="page-hero">
+            <div class="page-hero-content">
+                <span class="page-hero-label">About Us</span>
+                <h1 class="page-hero-title">关于我们</h1>
+                <p class="page-hero-subtitle">侨韵薪火实践团</p>
+            </div>
+        </section>
+
+        <div class="page-content">
+            <!-- 团队简介 -->
+            <section class="section about-section">
+                <div class="section-header">
+                    <span class="section-label">团队简介</span>
+                    <h2 class="section-title about-section-title">以数字之火，燃侨乡之韵</h2>
+                    <p class="section-subtitle">广东工业大学三下乡社会实践团队</p>
+                </div>
+                <div class="about-intro">
+                    <p>
+                        <strong>侨韵薪火实践团</strong>是来自广东工业大学的一支三下乡社会实践团队，由多位来自建筑学、计算机科学、数字媒体艺术、文化产业等专业的青年学子组成。我们怀揣对侨乡文化的深厚情感，走进江门开平宝源坊，以"数字技术+文化传承"为核心路径，记录、研究与传播百年侨乡建筑背后的故事。
+                    </p>
+                    <p>
+                        宝源坊始建于1909年，是开平碉楼与村落世界文化遗产的重要组成部分。我们以3D高斯泼溅技术（3DGS）为核心，结合腾讯云COS云端存储与AI语音合成，搭建了"江门侨乡建筑数字化云游平台"，让世界各地的侨胞与文化爱好者，足不出户便能云游百年古村，聆听青砖灰瓦背后的华侨记忆。
+                    </p>
+                    <p>
+                        我们相信，青年既是文化的传承者，也是创新的实践者。愿这束"侨韵薪火"，在数字时代继续薪火相传，照亮每一个思乡的灵魂。
+                    </p>
+                </div>
+            </section>
+
+            <!-- 团队目标 -->
+            <section class="section">
+                <div class="section-header">
+                    <span class="section-label">实践使命</span>
+                    <h2 class="section-title">我们的目标</h2>
+                    <p class="section-subtitle">以青年之力，守护侨乡文化根脉</p>
+                </div>
+                <div class="about-goals">
+                    <div class="goal-card">
+                        <div class="goal-icon">🏛️</div>
+                        <h3 class="goal-title">文化保护</h3>
+                        <p class="goal-desc">
+                            对宝源坊碉楼、古井、祠堂等历史建筑进行实地测绘与口述史采集，建立完整的侨乡建筑档案，为文化遗产保护提供第一手资料。
+                        </p>
+                    </div>
+                    <div class="goal-card">
+                        <div class="goal-icon">💻</div>
+                        <h3 class="goal-title">数字化传承</h3>
+                        <p class="goal-desc">
+                            运用3D高斯泼溅、WebGL、AI语音合成等前沿技术，将侨乡建筑转化为可云端漫游的数字资产，让文化遗产在数字世界永生。
+                        </p>
+                    </div>
+                    <div class="goal-card">
+                        <div class="goal-icon">🔥</div>
+                        <h3 class="goal-title">青年担当</h3>
+                        <p class="goal-desc">
+                            以大学生三下乡为契机，引导青年学子深入乡土、理解侨乡、服务社会，让Z世代成为中华优秀传统文化传承的新生力量。
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 团队成员 -->
+            <section class="section">
+                <div class="section-header">
+                    <span class="section-label">团队成员</span>
+                    <h2 class="section-title">侨韵薪火实践团</h2>
+                    <p class="section-subtitle">多元专业背景的青年协作团队</p>
+                </div>
+                <div class="team-grid">
+                    <div class="team-card" th:each="member : ${team}" th:if="${team != null and #lists.size(team) > 0}">
+                        <div class="team-avatar">
+                            <div class="avatar-placeholder" th:text="${member.name != null ? member.name.charAt(0) : '?'}"></div>
+                        </div>
+                        <div class="team-name" th:text="${member.name}"></div>
+                        <div class="team-role" th:text="${member.role}"></div>
+                        <div class="team-major" th:text="${member.major}"></div>
+                    </div>
+                </div>
+                <div th:if="${team == null or #lists.size(team) == 0}" style="text-align: center; color: var(--text-secondary); padding: 2rem;">
+                    团队成员信息加载中...
+                </div>
+            </section>
+
+            <!-- 实践日志 -->
+            <section class="section" style="background: linear-gradient(180deg, transparent, rgba(26, 42, 74, 0.15), transparent);">
+                <div class="section-header">
+                    <span class="section-label">实践日志</span>
+                    <h2 class="section-title">三下乡日记</h2>
+                    <p class="section-subtitle">记录实践团的下乡点滴与思考</p>
+                </div>
+                <div class="blog-grid">
+                    <div class="blog-card" th:each="post : ${blogPosts}" th:if="${blogPosts != null and #lists.size(blogPosts) > 0}"
+                         th:data-post-id="${post.id}"
+                         onclick="window.location.href='/blog/' + this.dataset.postId"
+                         style="cursor: pointer;">
+                        <div class="blog-image">
+                            <img th:src="${blogCoverUrls != null and blogCoverUrls[post.id] != null} ? ${blogCoverUrls[post.id]} : |https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=${post.title}%20qiaoxiang%20village%20summer%20practice%20team%20documentary%20warm%20golden%20hour&image_size=square|" alt="实践日志">
+                            <div class="blog-category" th:text="${post.category}"></div>
+                        </div>
+                        <div class="blog-content">
+                            <div class="blog-meta">
+                                <span class="blog-author" th:text="${post.author}"></span>
+                                <span th:text="${post.date}"></span>
+                            </div>
+                            <h4 class="blog-title" th:text="${post.title}"></h4>
+                            <p class="blog-summary" th:text="${post.summary}"></p>
+                            <a th:href="@{/blog/{id}(id=${post.id})}" class="blog-link">阅读全文 →</a>
+                        </div>
+                    </div>
+                </div>
+                <div th:if="${blogPosts == null or #lists.size(blogPosts) == 0}" style="text-align: center; color: var(--text-secondary); padding: 2rem;">
+                    暂无实践日志
+                </div>
+            </section>
+
+            <!-- 视频展播 -->
+            <section class="section">
+                <div class="section-header">
+                    <span class="section-label">视频展播</span>
+                    <h2 class="section-title">影像中的侨乡</h2>
+                    <p class="section-subtitle">通过镜头感受百年侨乡的魅力</p>
+                </div>
+                <div class="video-grid">
+                    <div class="video-card" th:each="video : ${videos}" th:if="${videos != null and #lists.size(videos) > 0}" th:data-video-id="${video.id}" onclick="window.location.href='/video/' + this.dataset.videoId" style="cursor: pointer;">
+                        <div class="video-thumbnail">
+                            <img th:src="${videoCoverUrls != null and videoCoverUrls[video.id] != null} ? ${videoCoverUrls[video.id]} : |https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=${video.title}%20kaiping%20qiaoxiang%20village%20cinematic%20documentary%20golden%20hour&image_size=square|" alt="视频封面">
+                            <div class="video-play-btn">▶</div>
+                            <div class="video-duration" th:text="${video.duration}"></div>
+                        </div>
+                        <div class="video-info">
+                            <h4 class="video-title" th:text="${video.title}"></h4>
+                            <p class="video-desc" th:text="${video.description}"></p>
+                            <div class="video-meta">
+                                <span>👁️ <span th:text="${video.views}"></span> 次观看</span>
+                                <span>⏱️ <span th:text="${video.duration}"></span></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div th:if="${videos == null or #lists.size(videos) == 0}" style="text-align: center; color: var(--text-secondary); padding: 2rem;">
+                    暂无视频内容
+                </div>
+            </section>
+
+            <!-- 反馈与联系 -->
+            <section class="section" style="background: linear-gradient(135deg, rgba(212, 175, 55, 0.08), rgba(196, 98, 16, 0.08));">
+                <div class="section-header">
+                    <span class="section-label">联系我们</span>
+                    <h2 class="section-title">意见反馈</h2>
+                    <p class="section-subtitle">您的每一条建议，都是我们前行的动力</p>
+                </div>
+                <div style="max-width: 720px; margin: 0 auto; padding: 2.5rem; background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 16px; backdrop-filter: blur(15px);">
+                    <form id="feedback-form" onsubmit="submitFeedback(event)">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                            <div>
+                                <label for="feedback-name" style="display: block; color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 0.5rem;">您的姓名</label>
+                                <input type="text" id="feedback-name" name="name" placeholder="请输入您的姓名" required style="width: 100%; padding: 0.75rem 1rem; background: rgba(0,0,0,0.3); border: 1px solid var(--glass-border-light); border-radius: 8px; color: var(--text-primary); font-size: 0.95rem;">
+                            </div>
+                            <div>
+                                <label for="feedback-contact" style="display: block; color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 0.5rem;">联系方式</label>
+                                <input type="text" id="feedback-contact" name="contact" placeholder="邮箱或手机号" style="width: 100%; padding: 0.75rem 1rem; background: rgba(0,0,0,0.3); border: 1px solid var(--glass-border-light); border-radius: 8px; color: var(--text-primary); font-size: 0.95rem;">
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 1rem;">
+                            <label for="feedback-type" style="display: block; color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 0.5rem;">反馈类型</label>
+                            <select id="feedback-type" name="type" style="width: 100%; padding: 0.75rem 1rem; background: rgba(0,0,0,0.3); border: 1px solid var(--glass-border-light); border-radius: 8px; color: var(--text-primary); font-size: 0.95rem;">
+                                <option value="general">一般建议</option>
+                                <option value="bug">问题反馈</option>
+                                <option value="content">内容纠错</option>
+                                <option value="cooperation">合作洽谈</option>
+                            </select>
+                        </div>
+                        <div style="margin-bottom: 1.5rem;">
+                            <label for="feedback-content" style="display: block; color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 0.5rem;">反馈内容</label>
+                            <textarea id="feedback-content" name="content" rows="5" placeholder="请输入您的建议或问题..." required style="width: 100%; padding: 0.75rem 1rem; background: rgba(0,0,0,0.3); border: 1px solid var(--glass-border-light); border-radius: 8px; color: var(--text-primary); font-size: 0.95rem; resize: vertical;"></textarea>
+                        </div>
+                        <div style="text-align: center;">
+                            <button type="submit" class="hero-btn-primary">提交反馈</button>
+                        </div>
+                        <div id="feedback-message" style="text-align: center; margin-top: 1rem; color: var(--warm-gold); font-size: 0.95rem;"></div>
+                    </form>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- 页脚 -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-logo">薪火侨乡</div>
+            <p><span class="project-name">侨韵薪火</span> - 江门侨乡建筑数字化云游平台</p>
+            <p>广东工业大学三下乡社会实践项目 · 2024</p>
+        </div>
+        <div class="footer-links">
+            <a href="/">首页</a>
+            <a href="/#buildings">建筑图鉴</a>
+            <a href="/stories">侨乡故事</a>
+            <a href="/archive">田野档案</a>
+            <a href="/map">景区导航</a>
+            <a href="/about">关于我们</a>
+        </div>
+        <div class="footer-bottom">
+            <p>技术支持：3D高斯泼溅技术(3DGS) · 腾讯云COS · AI语音合成</p>
+            <p style="margin-top: 0.5rem;">© 2024 侨韵薪火实践团 版权所有</p>
+        </div>
+    </footer>
+
+    <!-- AI 导览按钮与面板 -->
+    <button class="ai-guide-btn" id="ai-guide-btn" onclick="toggleAiGuide()">🎧</button>
+    <div class="ai-guide-panel" id="ai-guide-panel">
+        <h3 class="ai-guide-title">AI智能讲解</h3>
+        <div class="ai-guide-text" id="ai-guide-text">欢迎了解侨韵薪火实践团，我们致力于用数字技术传承侨乡文化。</div>
+        <div class="ai-guide-controls">
+            <button class="ai-control-btn primary" onclick="playPageIntro()">播放介绍</button>
+            <button class="ai-control-btn" onclick="window.location.href='/map'">开始云游</button>
+        </div>
+    </div>
+
+    <script>
+        function toggleAiGuide() {
+            const panel = document.getElementById('ai-guide-panel');
+            panel.classList.toggle('active');
+        }
+        function speak(text) {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'zh-CN';
+                utterance.rate = 0.9;
+                window.speechSynthesis.speak(utterance);
+                const btn = document.getElementById('ai-guide-btn');
+                btn.classList.add('playing');
+                utterance.onend = () => { btn.classList.remove('playing'); };
+            }
+        }
+        function playPageIntro() {
+            speak('欢迎了解侨韵薪火实践团。我们来自广东工业大学，是一支由多专业学子组成的三下乡社会实践团队。我们走进江门开平宝源坊，用3D高斯泼溅技术数字化记录百年侨乡建筑，搭建云游平台，让世界各地的侨胞都能云端回望故土。愿侨韵薪火，代代相传。');
+        }
+        function playVideo(videoKey) {
+            if (videoKey && videoKey.trim()) {
+                alert('视频播放功能开发中，视频Key：' + videoKey);
+            } else {
+                alert('视频资源准备中，敬请期待！');
+            }
+        }
+        function submitFeedback(event) {
+            event.preventDefault();
+            const name = document.getElementById('feedback-name').value.trim();
+            const contact = document.getElementById('feedback-contact').value.trim();
+            const type = document.getElementById('feedback-type').value;
+            const content = document.getElementById('feedback-content').value.trim();
+            const messageEl = document.getElementById('feedback-message');
+
+            if (!content) {
+                messageEl.style.color = '#ff6b6b';
+                messageEl.textContent = '请填写反馈内容';
+                return;
+            }
+
+            fetch('/api/feedback', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ type: type, name: name, contact: contact, content: content })
+            })
+            .then(res => res.json())
+            .then(result => {
+                if (result.success !== false && (result.data || result.code === 200 || result.code === 0)) {
+                    messageEl.style.color = 'var(--warm-gold)';
+                    messageEl.textContent = '感谢您的反馈，我们会认真处理！';
+                    document.getElementById('feedback-form').reset();
+                } else {
+                    messageEl.style.color = '#ff6b6b';
+                    messageEl.textContent = result.message || result.msg || '提交失败，请稍后重试';
+                }
+            })
+            .catch(err => {
+                messageEl.style.color = '#ff6b6b';
+                messageEl.textContent = '网络错误，请稍后重试';
+            });
+        }
+    </script>
+</body>
+</html>

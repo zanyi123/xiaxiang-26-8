@@ -1,0 +1,328 @@
+﻿<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>搜索结果 - 薪火侨乡</title>
+    <link rel="stylesheet" href="/css/qiaoyun.css">
+</head>
+<body>
+    <!-- 顶部导航 -->
+    <header class="header">
+        <div class="header-content">
+            <div class="header-left">
+                <a href="/" class="header-logo">薪火侨乡</a>
+            </div>
+            <nav class="header-nav">
+                <a href="/">云游</a>
+                <a href="/#buildings">建筑图鉴</a>
+                <a href="/knowledge">知识库</a>
+                <a href="/stories">侨乡故事</a>
+                <a href="/archive">田野档案</a>
+                <a href="/about">关于我们</a>
+            </nav>
+            <div class="header-right">
+                <div class="header-search">
+                    <input type="text" id="header-search-input" placeholder="搜索地点、故事、知识..." th:value="${keyword}" onkeypress="handleSearchKey(event)">
+                </div>
+                <button class="header-btn" onclick="performSearch()">搜索</button>
+            </div>
+        </div>
+    </header>
+
+    <main class="main">
+        <!-- 页面 Hero -->
+        <section class="page-hero">
+            <div class="page-hero-content">
+                <span class="page-hero-label">Search Results</span>
+                <h1 class="page-hero-title">搜索结果</h1>
+                <p class="page-hero-subtitle">
+                    关键词：<span th:text="${keyword}" style="color: var(--warm-gold);"></span>
+                </p>
+            </div>
+        </section>
+
+        <div class="page-content"
+             th:with="
+                resultItems=${results != null and results.items != null ? results.items : {}},
+                locationItems=${resultItems.?[#this['type'] == 'location']},
+                storyItems=${resultItems.?[#this['type'] == 'story']},
+                knowledgeItems=${resultItems.?[#this['type'] == 'knowledge']},
+                otherItems=${resultItems.?[#this['type'] != 'location' and #this['type'] != 'story' and #this['type'] != 'knowledge']},
+                totalCount=${results != null and results.total != null ? results.total : 0}">
+
+            <!-- 搜索摘要 -->
+            <section class="section">
+                <div class="section-header">
+                    <span class="section-label">搜索摘要</span>
+                    <h2 class="section-title" th:if="${totalCount > 0}">
+                        共找到 <span th:text="${totalCount}" style="color: var(--warm-gold);"></span> 条相关结果
+                    </h2>
+                    <h2 class="section-title" th:if="${totalCount == 0}">
+                        未找到相关结果
+                    </h2>
+                    <p class="section-subtitle">
+                        为您在宝源坊云游平台中检索：
+                        <span th:text="${keyword}" style="color: var(--warm-gold);"></span>
+                    </p>
+                </div>
+
+                <!-- 重新搜索 -->
+                <div style="max-width: 720px; margin: 0 auto 2rem; display: flex; gap: 0.75rem;">
+                    <input type="text" id="result-search-input" placeholder="请输入新的搜索关键词..." th:value="${keyword}" onkeypress="handleResultSearchKey(event)" style="flex: 1; padding: 0.85rem 1.2rem; background: rgba(0,0,0,0.4); border: 1px solid var(--glass-border-light); border-radius: 8px; color: var(--text-primary); font-size: 1rem;">
+                    <button class="hero-btn-primary" onclick="performResultSearch()">搜索</button>
+                </div>
+            </section>
+
+            <!-- 有结果时显示分组列表 -->
+            <div th:if="${totalCount > 0}">
+
+                <!-- 地点结果 -->
+                <section class="section" th:if="${#lists.size(locationItems) > 0}">
+                    <div class="section-header">
+                        <span class="section-label">📍 地点</span>
+                        <h2 class="section-title">相关地点</h2>
+                        <p class="section-subtitle">
+                            共 <span th:text="${#lists.size(locationItems)}" style="color: var(--warm-gold);"></span> 个地点
+                        </p>
+                    </div>
+                    <div class="search-results-list">
+                        <a th:each="item : ${locationItems}" th:href="${item['url']}" class="search-result-item">
+                            <div class="result-type-badge location">地点</div>
+                            <div class="result-content">
+                                <h4 class="result-title" th:text="${item['title']}"></h4>
+                                <p class="result-desc" th:text="${item['description']}"></p>
+                                <span class="result-url" th:text="${item['url']}"></span>
+                            </div>
+                            <div class="result-arrow">→</div>
+                        </a>
+                    </div>
+                </section>
+
+                <!-- 故事结果 -->
+                <section class="section" th:if="${#lists.size(storyItems) > 0}" style="background: linear-gradient(180deg, transparent, rgba(26, 42, 74, 0.15), transparent);">
+                    <div class="section-header">
+                        <span class="section-label">📖 故事</span>
+                        <h2 class="section-title">相关故事</h2>
+                        <p class="section-subtitle">
+                            共 <span th:text="${#lists.size(storyItems)}" style="color: var(--warm-gold);"></span> 个故事
+                        </p>
+                    </div>
+                    <div class="search-results-list">
+                        <a th:each="item : ${storyItems}" th:href="${item['url']}" class="search-result-item">
+                            <div class="result-type-badge story">故事</div>
+                            <div class="result-content">
+                                <h4 class="result-title" th:text="${item['title']}"></h4>
+                                <p class="result-desc" th:text="${item['description']}"></p>
+                                <div class="result-meta">
+                                    <span th:if="${item['category'] != null}" class="result-category" th:text="${item['category']}"></span>
+                                    <span class="result-url" th:text="${item['url']}"></span>
+                                </div>
+                            </div>
+                            <div class="result-arrow">→</div>
+                        </a>
+                    </div>
+                </section>
+
+                <!-- 知识结果 -->
+                <section class="section" th:if="${#lists.size(knowledgeItems) > 0}">
+                    <div class="section-header">
+                        <span class="section-label">📚 知识</span>
+                        <h2 class="section-title">相关知识</h2>
+                        <p class="section-subtitle">
+                            共 <span th:text="${#lists.size(knowledgeItems)}" style="color: var(--warm-gold);"></span> 条知识
+                        </p>
+                    </div>
+                    <div class="search-results-list">
+                        <a th:each="item : ${knowledgeItems}" th:href="${item['url']}" class="search-result-item">
+                            <div class="result-type-badge knowledge">知识</div>
+                            <div class="result-content">
+                                <h4 class="result-title" th:text="${item['title']}"></h4>
+                                <p class="result-desc" th:text="${item['description']}"></p>
+                                <div class="result-meta">
+                                    <span th:if="${item['category'] != null}" class="result-category" th:text="${item['category']}"></span>
+                                    <span class="result-url" th:text="${item['url']}"></span>
+                                </div>
+                            </div>
+                            <div class="result-arrow">→</div>
+                        </a>
+                    </div>
+                </section>
+
+                <!-- 其他类型结果（兜底） -->
+                <section class="section" th:if="${#lists.size(otherItems) > 0}">
+                    <div class="section-header">
+                        <span class="section-label">🔍 其他</span>
+                        <h2 class="section-title">其他结果</h2>
+                        <p class="section-subtitle">未分类的相关内容</p>
+                    </div>
+                    <div class="search-results-list">
+                        <a th:each="item : ${otherItems}" th:href="${item['url']}" class="search-result-item">
+                            <div class="result-type-badge other" th:text="${item['type']}"></div>
+                            <div class="result-content">
+                                <h4 class="result-title" th:text="${item['title']}"></h4>
+                                <p class="result-desc" th:text="${item['description']}"></p>
+                                <span class="result-url" th:text="${item['url']}"></span>
+                            </div>
+                            <div class="result-arrow">→</div>
+                        </a>
+                    </div>
+                </section>
+            </div>
+
+            <!-- 无结果时显示友好提示 -->
+            <section class="section" th:if="${totalCount == 0}">
+                <div style="max-width: 720px; margin: 0 auto; padding: 4rem 2rem; background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 16px; backdrop-filter: blur(15px); text-align: center;">
+                    <div style="font-size: 4rem; margin-bottom: 1rem;">🔍</div>
+                    <h3 style="font-size: 1.8rem; color: var(--warm-gold); margin-bottom: 1rem; letter-spacing: 2px;">未找到结果</h3>
+                    <p style="color: var(--text-secondary); margin-bottom: 2rem; line-height: 1.8; font-size: 1rem;">
+                        抱歉，没有找到与 "<span th:text="${keyword}" style="color: var(--warm-gold);"></span>" 相关的内容。<br>
+                        请尝试其他关键词，或浏览以下推荐内容：
+                    </p>
+                    <div style="display: flex; flex-wrap: wrap; gap: 0.75rem; justify-content: center; margin-bottom: 2rem;">
+                        <button class="hero-btn-secondary" onclick="searchSuggest('宝源坊')">宝源坊</button>
+                        <button class="hero-btn-secondary" onclick="searchSuggest('碉楼')">碉楼</button>
+                        <button class="hero-btn-secondary" onclick="searchSuggest('华侨')">华侨</button>
+                        <button class="hero-btn-secondary" onclick="searchSuggest('建筑')">建筑</button>
+                        <button class="hero-btn-secondary" onclick="searchSuggest('口述历史')">口述历史</button>
+                    </div>
+                    <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+                        <button class="hero-btn-primary" onclick="window.location.href='/'">返回首页</button>
+                        <button class="hero-btn-secondary" onclick="window.location.href='/map'">开始云游</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 推荐快捷入口 -->
+            <section class="section">
+                <div class="section-header">
+                    <span class="section-label">快捷入口</span>
+                    <h2 class="section-title">继续探索</h2>
+                    <p class="section-subtitle">浏览平台其他精彩内容</p>
+                </div>
+                <div class="knowledge-grid">
+                    <div class="knowledge-card" onclick="window.location.href='/'">
+                        <div class="knowledge-image">
+                            <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=kaiping%20diaolou%20village%20aerial%20panoramic%20view%20golden%20hour%20cinematic&image_size=square" alt="云游首页">
+                        </div>
+                        <div class="knowledge-content">
+                            <span class="knowledge-tag">云游</span>
+                            <h4 class="knowledge-title">返回云游首页</h4>
+                            <p class="knowledge-desc">开启沉浸式3D云游之旅</p>
+                        </div>
+                    </div>
+                    <div class="knowledge-card" onclick="window.location.href='/stories'">
+                        <div class="knowledge-image">
+                            <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=elderly%20overseas%20chinese%20villager%20telling%20story%20warm%20golden%20hour%20portrait&image_size=square" alt="侨乡故事">
+                        </div>
+                        <div class="knowledge-content">
+                            <span class="knowledge-tag">故事</span>
+                            <h4 class="knowledge-title">侨乡故事</h4>
+                            <p class="knowledge-desc">聆听老华侨的下南洋记忆</p>
+                        </div>
+                    </div>
+                    <div class="knowledge-card" onclick="window.location.href='/knowledge'">
+                        <div class="knowledge-image">
+                            <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=kaiping%20diaolou%20architecture%20style%20fusion%20chinese%20western%20golden%20hour%20cinematic&image_size=square" alt="知识库">
+                        </div>
+                        <div class="knowledge-content">
+                            <span class="knowledge-tag">知识</span>
+                            <h4 class="knowledge-title">建筑知识库</h4>
+                            <p class="knowledge-desc">深入了解碉楼建筑文化</p>
+                        </div>
+                    </div>
+                    <div class="knowledge-card" onclick="window.location.href='/archive'">
+                        <div class="knowledge-image">
+                            <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=historical%20archive%20documents%20old%20photographs%20warm%20ambient%20light&image_size=square" alt="田野档案">
+                        </div>
+                        <div class="knowledge-content">
+                            <span class="knowledge-tag">档案</span>
+                            <h4 class="knowledge-title">田野档案</h4>
+                            <p class="knowledge-desc">百年宝源坊的历史印记</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- 页脚 -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-logo">薪火侨乡</div>
+            <p><span class="project-name">侨韵薪火</span> - 江门侨乡建筑数字化云游平台</p>
+            <p>广东工业大学三下乡社会实践项目 · 2024</p>
+        </div>
+        <div class="footer-links">
+            <a href="/">首页</a>
+            <a href="/#buildings">建筑图鉴</a>
+            <a href="/stories">侨乡故事</a>
+            <a href="/archive">田野档案</a>
+            <a href="/map">景区导航</a>
+            <a href="/about">关于我们</a>
+        </div>
+        <div class="footer-bottom">
+            <p>技术支持：3D高斯泼溅技术(3DGS) · 腾讯云COS · AI语音合成</p>
+            <p style="margin-top: 0.5rem;">© 2024 侨韵薪火实践团 版权所有</p>
+        </div>
+    </footer>
+
+    <!-- AI 导览按钮与面板 -->
+    <button class="ai-guide-btn" id="ai-guide-btn" onclick="toggleAiGuide()">🎧</button>
+    <div class="ai-guide-panel" id="ai-guide-panel">
+        <h3 class="ai-guide-title">AI智能讲解</h3>
+        <div class="ai-guide-text" id="ai-guide-text">欢迎了解侨韵薪火实践团，我们致力于用数字技术传承侨乡文化。</div>
+        <div class="ai-guide-controls">
+            <button class="ai-control-btn primary" onclick="playPageIntro()">播放介绍</button>
+            <button class="ai-control-btn" onclick="window.location.href='/map'">开始云游</button>
+        </div>
+    </div>
+
+    <script>
+        function toggleAiGuide() {
+            const panel = document.getElementById('ai-guide-panel');
+            panel.classList.toggle('active');
+        }
+        function speak(text) {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'zh-CN';
+                utterance.rate = 0.9;
+                window.speechSynthesis.speak(utterance);
+                const btn = document.getElementById('ai-guide-btn');
+                btn.classList.add('playing');
+                utterance.onend = () => { btn.classList.remove('playing'); };
+            }
+        }
+        function playPageIntro() {
+            speak('这是搜索结果页面。您可以在这里检索宝源坊云游平台上的地点、故事和建筑知识。试试输入"碉楼"、"华侨"或"宝源坊"等关键词，发现更多侨乡文化内容。');
+        }
+        function performSearch() {
+            const keyword = document.getElementById('header-search-input').value.trim();
+            if (keyword) {
+                window.location.href = '/search?keyword=' + encodeURIComponent(keyword);
+            }
+        }
+        function handleSearchKey(event) {
+            if (event.key === 'Enter') {
+                performSearch();
+            }
+        }
+        function performResultSearch() {
+            const keyword = document.getElementById('result-search-input').value.trim();
+            if (keyword) {
+                window.location.href = '/search?keyword=' + encodeURIComponent(keyword);
+            }
+        }
+        function handleResultSearchKey(event) {
+            if (event.key === 'Enter') {
+                performResultSearch();
+            }
+        }
+        function searchSuggest(keyword) {
+            window.location.href = '/search?keyword=' + encodeURIComponent(keyword);
+        }
+    </script>
+</body>
+</html>

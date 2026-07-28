@@ -1,0 +1,43 @@
+server:
+  port: 8080
+
+spring:
+  thymeleaf:
+    cache: false
+    prefix: classpath:/templates/
+    suffix: .html
+    mode: HTML
+    encoding: UTF-8
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+
+# ============================================================
+# 腾讯云 COS 配置
+# 注意：secret-id 和 secret-key 极其敏感，严禁提交到 Git！
+# 请复制本文件为 application.yml 并填入真实配置
+# 生产部署时建议通过环境变量或 secrets manager 注入
+# ============================================================
+cos:
+  secret-id: "your-secret-id"
+  secret-key: "your-secret-key"
+  region: "ap-guangzhou"
+  bucket-name: "your-bucket-name"
+
+# ============================================================
+# 应用级配置
+# ============================================================
+app:
+  # Mock 模式开关：true 时返回本地静态资源 URL，不调用真实 COS
+  mock-mode: true
+
+  # 建筑静态数据（纯 YAML 配置，无数据库）
+  buildings:
+    - id: 1
+      name: "开平碉楼"
+      description: "世界文化遗产，融合中西建筑风格的经典之作"
+      cover-image: "cover-kaiping.jpg"
+      model-key: "models/kaiping.splat"
+      video-key: "videos/kaiping-4k.mp4"
+    # ... 其他建筑数据按相同结构添加

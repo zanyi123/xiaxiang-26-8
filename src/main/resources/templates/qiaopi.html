@@ -1,0 +1,123 @@
+﻿<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>侨批文化 - 侨乡建筑数字化云游平台</title>
+    <link rel="stylesheet" href="/css/qiaoyun.css">
+    <style>
+        .qiaopi-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.5rem; margin-top: 2rem; }
+        .qiaopi-card { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 12px; overflow: hidden; transition: all 0.3s; backdrop-filter: blur(15px); cursor: pointer; }
+        .qiaopi-card:hover { border-color: var(--warm-gold); transform: translateY(-4px); }
+        .qiaopi-img { width: 100%; aspect-ratio: 4/3; object-fit: cover; filter: sepia(0.3); }
+        .qiaopi-body { padding: 1.25rem; }
+        .qiaopi-title { color: var(--warm-gold); font-size: 1.1rem; margin-bottom: 0.5rem; }
+        .qiaopi-meta { display: flex; flex-wrap: wrap; gap: 0.5rem; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.75rem; }
+        .qiaopi-meta span { padding: 0.15rem 0.5rem; background: rgba(0,0,0,0.25); border-radius: 4px; }
+        .qiaopi-content { color: var(--text-secondary); font-size: 0.88rem; line-height: 1.6; font-style: italic; max-height: 4.8em; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; }
+        .qiaopi-amount { display: inline-block; margin-top: 0.5rem; padding: 0.25rem 0.75rem; background: rgba(212, 175, 55, 0.15); color: var(--warm-gold); border-radius: 20px; font-size: 0.85rem; font-weight: 600; }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <div class="header-left"><a href="/" class="header-logo">薪火侨乡</a></div>
+            <nav class="header-nav">
+                <a href="/">云游</a><a href="/#buildings">建筑图鉴</a><a href="/knowledge">知识库</a>
+                <a href="/stories">侨乡故事</a><a href="/archive">田野档案</a><a href="/about">关于我们</a>
+            </nav>
+            <div class="header-right"><button class="header-btn" onclick="window.location.href='/map'">开始云游</button></div>
+        </div>
+    </header>
+
+    <main class="main">
+        <section class="page-hero">
+            <div class="page-hero-content">
+                <span class="page-hero-label">QIAOPI CULTURE</span>
+                <h1 class="page-hero-title">侨批文化</h1>
+                <p class="page-hero-subtitle">跨海家书，承载华侨的乡愁与牵挂</p>
+            </div>
+        </section>
+
+        <div class="page-content">
+            <section class="section">
+                <div class="section-header">
+                    <span class="section-label">世界记忆遗产</span>
+                    <h2 class="section-title">侨批文物展示</h2>
+                    <p class="section-subtitle">每一封侨批，都是一段跨越重洋的思念</p>
+                </div>
+
+                <div class="filter-tabs">
+                    <a class="filter-tab" th:classappend="${currentCategory == 'all'} ? 'active' : ''" th:href="@{/qiaopi}">全部</a>
+                    <a th:each="cat : ${categories}"
+                       class="filter-tab"
+                       th:classappend="${currentCategory == cat} ? 'active' : ''"
+                       th:href="|/qiaopi?category=${cat}|"
+                       th:text="${cat}">分类</a>
+                </div>
+
+                <div class="qiaopi-grid" th:if="${qiaopiList != null and !qiaopiList.isEmpty()}">
+                    <div class="qiaopi-card" th:each="item : ${qiaopiList}"
+                         th:data-id="${item.id}" onclick="openQiaopi(this.dataset.id)">
+                        <img class="qiaopi-img"
+                             th:src="|https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=${item.title}%20qiaopi%20letter%20vintage%20chinese%20calligraphy%20sepia&image_size=landscape_4_3|"
+                             th:alt="${item.title}">
+                        <div class="qiaopi-body">
+                            <h3 class="qiaopi-title" th:text="${item.title}">标题</h3>
+                            <div class="qiaopi-meta">
+                                <span th:text="'✉ ' + ${item.sender}">寄信人</span>
+                                <span th:text="'👤 ' + ${item.recipient}">收信人</span>
+                                <span th:text="'📍 ' + ${item.sendFrom}">寄出地</span>
+                                <span th:text="'📅 ' + ${item.year}">年份</span>
+                                <span th:text="'🏷️ ' + ${item.category}">分类</span>
+                            </div>
+                            <p class="qiaopi-content" th:text="${item.content}">内容</p>
+                            <span class="qiaopi-amount" th:text="'💰 ' + ${item.amount}">金额</span>
+                        </div>
+                    </div>
+                </div>
+                <div th:if="${qiaopiList == null or qiaopiList.isEmpty()}" style="text-align: center; padding: 3rem; color: var(--text-muted);">
+                    侨批数据整理中，敬请期待。
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-logo">薪火侨乡</div>
+            <p><span class="project-name">侨韵薪火</span> - 江门侨乡建筑数字化云游平台</p>
+        </div>
+        <div class="footer-links">
+            <a href="/">首页</a><a href="/#buildings">建筑图鉴</a><a href="/stories">侨乡故事</a>
+            <a href="/archive">田野档案</a><a href="/map">景区导航</a><a href="/about">关于我们</a>
+        </div>
+        <div class="footer-bottom">
+            <p>技术支持：3D高斯泼溅技术(3DGS) · 腾讯云COS · AI语音合成</p>
+            <p style="margin-top: 0.5rem;">© 2024 侨韵薪火实践团 版权所有</p>
+        </div>
+    </footer>
+
+    <button class="ai-guide-btn" onclick="toggleAiGuide()">🎧</button>
+    <div class="ai-guide-panel" id="ai-guide-panel">
+        <h3 class="ai-guide-title">AI智能讲解</h3>
+        <div class="ai-guide-text">侨批是海外华侨寄回国内的汇款与书信结合物，2013年入选《世界记忆名录》。</div>
+        <div class="ai-guide-controls">
+            <button class="ai-control-btn primary" onclick="playPageIntro()">播放介绍</button>
+        </div>
+    </div>
+
+    <script>
+        function openQiaopi(id) { window.location.href = '/qiaopi/' + id; }
+        function toggleAiGuide() { document.getElementById('ai-guide-panel').classList.toggle('active'); }
+        function playPageIntro() {
+            if (window.speechSynthesis) {
+                window.speechSynthesis.cancel();
+                const u = new SpeechSynthesisUtterance('欢迎来到侨批文化展示区。侨批，是海外华侨通过民间渠道寄回国内的汇款与书信的结合物，被誉为跨海家书。每一封侨批背后，都有一段华侨艰苦奋斗、心系家乡的感人故事。2013年，侨批档案入选世界记忆名录。点击任意侨批卡片，可查看完整书信内容与解读。');
+                u.lang = 'zh-CN'; u.rate = 0.95;
+                window.speechSynthesis.speak(u);
+            }
+        }
+    </script>
+</body>
+</html>

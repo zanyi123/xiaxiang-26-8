@@ -1,0 +1,142 @@
+﻿<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${knowledge.title} + ' - 建筑知识库'">知识详情</title>
+    <link rel="stylesheet" href="/css/qiaoyun.css">
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <div class="header-left">
+                <a href="/" class="header-logo">薪火侨乡</a>
+            </div>
+            <nav class="header-nav">
+                <a href="/">云游</a>
+                <a href="/#buildings">建筑图鉴</a>
+                <a href="/knowledge">知识库</a>
+                <a href="/stories">侨乡故事</a>
+                <a href="/archive">田野档案</a>
+                <a href="/about">关于我们</a>
+            </nav>
+            <div class="header-right">
+                <button class="header-btn" onclick="window.location.href='/map'">开始云游</button>
+            </div>
+        </div>
+    </header>
+
+    <main class="main">
+        <div class="detail-page">
+            <a href="/knowledge" class="detail-back">← 返回知识库</a>
+
+            <div class="detail-hero-image">
+                <img th:src="${coverUrl != null} ? ${coverUrl} : |https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=${knowledge.title}%20kaiping%20architecture%20cinematic%20warm%20golden%20hour&image_size=square|" th:alt="${knowledge.title}">
+                <span class="detail-category-tag" th:text="${knowledge.category}"></span>
+                <span class="knowledge-difficulty"
+                      style="position: absolute; top: 1.5rem; right: 1.5rem; z-index: 2; padding: 0.4rem 1rem; font-size: 0.8rem;"
+                      th:classappend="${knowledge.difficulty == '入门'} ? 'beginner' : 'intermediate'"
+                      th:text="${knowledge.difficulty}"></span>
+            </div>
+
+            <h1 class="detail-title" th:text="${knowledge.title}"></h1>
+            <div class="detail-meta">
+                <span>📂 分类：<span th:text="${knowledge.category}"></span></span>
+                <span>🎯 难度：<span th:text="${knowledge.difficulty}"></span></span>
+                <span>📖 建筑知识库</span>
+            </div>
+
+            <p style="font-size: 1.05rem; color: var(--text-secondary); line-height: 1.9; margin-bottom: 2rem; padding: 1.2rem 1.5rem; background: var(--glass-bg); border-left: 4px solid var(--warm-gold); border-radius: 0 8px 8px 0;" th:text="${knowledge.summary}"></p>
+
+            <div class="detail-content" th:utext="${knowledge.content}"></div>
+
+            <section class="section" th:if="${relatedKnowledge != null and !relatedKnowledge.isEmpty()}" style="margin-top: 3rem;">
+                <div class="section-header">
+                    <span class="section-label">相关推荐</span>
+                    <h2 class="section-title">延伸阅读</h2>
+                    <p class="section-subtitle">继续探索侨乡建筑文化</p>
+                </div>
+                <div class="knowledge-detail-grid">
+                    <a th:each="item : ${relatedKnowledge}"
+                       th:href="|/knowledge/${item.id}|"
+                       class="knowledge-detail-card">
+                        <div class="knowledge-detail-image">
+                            <img th:src="${coverUrls != null and coverUrls[item.id] != null} ? ${coverUrls[item.id]} : |https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=${item.title}%20kaiping%20architecture%20knowledge%20cinematic&image_size=square|" th:alt="${item.title}">
+                        </div>
+                        <div class="knowledge-detail-content">
+                            <div class="knowledge-detail-header">
+                                <span style="font-size: 0.8rem; color: var(--text-muted);" th:text="${item.category}"></span>
+                                <span class="knowledge-difficulty"
+                                      th:classappend="${item.difficulty == '入门'} ? 'beginner' : 'intermediate'"
+                                      th:text="${item.difficulty}"></span>
+                            </div>
+                            <h4 class="knowledge-detail-title" th:text="${item.title}"></h4>
+                            <p class="knowledge-detail-summary" th:text="${item.summary}"></p>
+                        </div>
+                    </a>
+                </div>
+            </section>
+
+            <div style="text-align: center; margin-top: 3rem;">
+                <button class="hero-btn-secondary" onclick="window.location.href='/knowledge'">← 返回知识库</button>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-logo">薪火侨乡</div>
+            <p><span class="project-name">侨韵薪火</span> - 江门侨乡建筑数字化云游平台</p>
+            <p>广东工业大学三下乡社会实践项目 · 2024</p>
+        </div>
+        <div class="footer-links">
+            <a href="/">首页</a>
+            <a href="/#buildings">建筑图鉴</a>
+            <a href="/stories">侨乡故事</a>
+            <a href="/archive">田野档案</a>
+            <a href="/map">景区导航</a>
+            <a href="/about">关于我们</a>
+        </div>
+        <div class="footer-bottom">
+            <p>技术支持：3D高斯泼溅技术(3DGS) · 腾讯云COS · AI语音合成</p>
+            <p style="margin-top: 0.5rem;">© 2024 侨韵薪火实践团 版权所有</p>
+        </div>
+    </footer>
+
+    <button class="ai-guide-btn" id="ai-guide-btn" onclick="toggleAiGuide()">🎧</button>
+    <div class="ai-guide-panel" id="ai-guide-panel">
+        <h3 class="ai-guide-title">AI智能讲解</h3>
+        <div class="ai-guide-text" id="ai-guide-text" th:text="'正在为您讲解：' + ${knowledge.title} + '。' + ${knowledge.summary}"></div>
+        <div class="ai-guide-controls">
+            <button class="ai-control-btn primary" onclick="playPageIntro()">播放介绍</button>
+            <button class="ai-control-btn" onclick="window.location.href='/map'">开始云游</button>
+        </div>
+    </div>
+
+    <script th:inline="javascript">
+        const knowledgeTitle = /*[[${knowledge.title}]]*/ '';
+        const knowledgeSummary = /*[[${knowledge.summary}]]*/ '';
+
+        function toggleAiGuide() {
+            const panel = document.getElementById('ai-guide-panel');
+            panel.classList.toggle('active');
+        }
+        function speak(text) {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'zh-CN';
+                utterance.rate = 0.9;
+                window.speechSynthesis.speak(utterance);
+                const btn = document.getElementById('ai-guide-btn');
+                btn.classList.add('playing');
+                utterance.onend = () => { btn.classList.remove('playing'); };
+            }
+        }
+        function playPageIntro() {
+            const text = '正在为您讲解：' + knowledgeTitle + '。' + knowledgeSummary;
+            speak(text);
+        }
+    </script>
+</body>
+</html>

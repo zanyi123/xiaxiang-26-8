@@ -1,0 +1,52 @@
+﻿<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>页面未找到 - 薪火侨乡</title>
+    <link rel="stylesheet" href="/css/qiaoyun.css">
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <div class="header-left">
+                <a href="/" class="header-logo">薪火侨乡</a>
+            </div>
+            <nav class="header-nav">
+                <a href="/">云游</a>
+                <a href="/#buildings">建筑图鉴</a>
+                <a href="/knowledge">知识库</a>
+                <a href="/stories">侨乡故事</a>
+                <a href="/archive">田野档案</a>
+                <a href="/about">关于我们</a>
+            </nav>
+            <div class="header-right">
+                <button class="header-btn" onclick="window.location.href='/map'">开始云游</button>
+            </div>
+        </div>
+    </header>
+
+    <main class="main" style="display: flex; align-items: center; justify-content: center; min-height: 70vh;">
+        <div style="text-align: center; max-width: 500px;">
+            <div style="font-size: 6rem; color: var(--warm-gold); margin-bottom: 1rem; opacity: 0.6;">404</div>
+            <h1 style="font-size: 2rem; color: var(--warm-gold); margin-bottom: 1rem; letter-spacing: 3px;" th:text="${error != null ? error : '页面未找到'}">页面未找到</h1>
+            <p style="color: var(--text-secondary); font-size: 1rem; margin-bottom: 2rem; line-height: 1.8;">
+                抱歉，您访问的页面不存在或已被移除。<br>
+                请返回首页继续探索宝源坊的魅力。
+            </p>
+            <div style="display: flex; gap: 1rem; justify-content: center;">
+                <button class="hero-btn-primary" onclick="window.location.href='/'">返回首页</button>
+                <button class="hero-btn-secondary" onclick="window.location.href='/map'">开始云游</button>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-logo">薪火侨乡</div>
+            <p><span class="project-name">侨韵薪火</span> - 江门侨乡建筑数字化云游平台</p>
+            <p>广东工业大学三下乡社会实践项目 · 2024</p>
+        </div>
+    </footer>
+</body>
+</html>

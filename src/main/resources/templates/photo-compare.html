@@ -1,0 +1,147 @@
+﻿<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>老照片对比 - 侨乡建筑数字化云游平台</title>
+    <link rel="stylesheet" href="/css/qiaoyun.css">
+    <style>
+        .compare-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(420px, 1fr)); gap: 2rem; margin-top: 2rem; }
+        .compare-card { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 16px; overflow: hidden; backdrop-filter: blur(15px); }
+        .compare-slider { position: relative; width: 100%; aspect-ratio: 16/10; overflow: hidden; cursor: ew-resize; user-select: none; }
+        .compare-img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
+        .compare-img-old { z-index: 1; filter: sepia(0.4); }
+        .compare-img-new-wrap { position: absolute; top: 0; left: 0; width: 50%; height: 100%; overflow: hidden; z-index: 2; }
+        .compare-img-new-wrap img { width: 100vw; max-width: 100%; height: 100%; object-fit: cover; }
+        .compare-handle { position: absolute; top: 0; left: 50%; width: 3px; height: 100%; background: var(--warm-gold); z-index: 3; transform: translateX(-50%); pointer-events: none; }
+        .compare-handle::after { content: '⇆'; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: var(--warm-gold); color: var(--ink-black); width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; }
+        .compare-label { position: absolute; top: 12px; padding: 0.25rem 0.75rem; background: rgba(0,0,0,0.7); color: var(--warm-gold); border-radius: 4px; font-size: 0.8rem; z-index: 4; }
+        .compare-label-old { left: 12px; }
+        .compare-label-new { right: 12px; }
+        .compare-info { padding: 1.5rem; }
+        .compare-title { color: var(--warm-gold); font-size: 1.2rem; margin-bottom: 0.5rem; }
+        .compare-location { color: var(--text-muted); font-size: 0.85rem; margin-bottom: 0.75rem; }
+        .compare-desc { color: var(--text-secondary); font-size: 0.9rem; line-height: 1.6; margin-bottom: 0.75rem; }
+        .compare-story { color: var(--text-primary); font-size: 0.9rem; line-height: 1.7; padding: 0.75rem; background: rgba(0,0,0,0.2); border-left: 3px solid var(--warm-gold); border-radius: 4px; }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <div class="header-left"><a href="/" class="header-logo">薪火侨乡</a></div>
+            <nav class="header-nav">
+                <a href="/">云游</a><a href="/#buildings">建筑图鉴</a><a href="/knowledge">知识库</a>
+                <a href="/stories">侨乡故事</a><a href="/archive">田野档案</a><a href="/about">关于我们</a>
+            </nav>
+            <div class="header-right"><button class="header-btn" onclick="window.location.href='/map'">开始云游</button></div>
+        </div>
+    </header>
+
+    <main class="main">
+        <section class="page-hero">
+            <div class="page-hero-content">
+                <span class="page-hero-label">TIME TRAVEL</span>
+                <h1 class="page-hero-title">老照片对比</h1>
+                <p class="page-hero-subtitle">拖动滑块，穿越百年时光</p>
+            </div>
+        </section>
+
+        <div class="page-content">
+            <section class="section">
+                <div class="section-header">
+                    <span class="section-label">百年变迁</span>
+                    <h2 class="section-title">同一地点，不同年代</h2>
+                    <p class="section-subtitle">左右拖动滑块，对比宝源坊百年间的沧桑变化</p>
+                </div>
+
+                <div class="compare-grid" th:if="${photos != null and !photos.isEmpty()}">
+                    <div class="compare-card" th:each="photo : ${photos}">
+                        <div class="compare-slider" th:data-id="${photo.id}"
+                             onmousedown="startDrag(event, this)" ontouchstart="startDrag(event, this)">
+                            <img class="compare-img compare-img-old"
+                                 th:src="|https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=${photo.title}%20old%20vintage%20photo%20sepia%20kaiping%201920s&image_size=landscape_4_3|"
+                                 th:alt="${photo.title}">
+                            <div class="compare-img-new-wrap">
+                                <img th:src="|https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=${photo.title}%20modern%20photo%20kaiping%202024%20cinematic&image_size=landscape_4_3|"
+                                     th:alt="${photo.title}">
+                            </div>
+                            <div class="compare-handle"></div>
+                            <span class="compare-label compare-label-old" th:text="${photo.yearOld}">1925</span>
+                            <span class="compare-label compare-label-new" th:text="${photo.yearNew}">2024</span>
+                        </div>
+                        <div class="compare-info">
+                            <h3 class="compare-title" th:text="${photo.title}">标题</h3>
+                            <div class="compare-location">
+                                <span th:text="'📍 ' + ${photo.location}">地点</span>
+                                <span style="margin-left: 1rem;" th:text="${photo.description}">描述</span>
+                            </div>
+                            <div class="compare-story" th:text="${photo.story}">故事</div>
+                        </div>
+                    </div>
+                </div>
+                <div th:if="${photos == null or photos.isEmpty()}" style="text-align: center; padding: 3rem; color: var(--text-muted);">
+                    老照片对比数据整理中，敬请期待。
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-logo">薪火侨乡</div>
+            <p><span class="project-name">侨韵薪火</span> - 江门侨乡建筑数字化云游平台</p>
+        </div>
+        <div class="footer-links">
+            <a href="/">首页</a><a href="/#buildings">建筑图鉴</a><a href="/stories">侨乡故事</a>
+            <a href="/archive">田野档案</a><a href="/map">景区导航</a><a href="/about">关于我们</a>
+        </div>
+        <div class="footer-bottom">
+            <p>技术支持：3D高斯泼溅技术(3DGS) · 腾讯云COS · AI语音合成</p>
+            <p style="margin-top: 0.5rem;">© 2024 侨韵薪火实践团 版权所有</p>
+        </div>
+    </footer>
+
+    <button class="ai-guide-btn" onclick="toggleAiGuide()">🎧</button>
+    <div class="ai-guide-panel" id="ai-guide-panel">
+        <h3 class="ai-guide-title">AI智能讲解</h3>
+        <div class="ai-guide-text">拖动照片中间的滑块，即可对比百年前的宝源坊与今日风貌。</div>
+        <div class="ai-guide-controls">
+            <button class="ai-control-btn primary" onclick="playPageIntro()">播放介绍</button>
+        </div>
+    </div>
+
+    <script>
+        function startDrag(e, slider) {
+            e.preventDefault();
+            const move = (clientX) => {
+                const rect = slider.getBoundingClientRect();
+                let pct = ((clientX - rect.left) / rect.width) * 100;
+                pct = Math.max(0, Math.min(100, pct));
+                slider.querySelector('.compare-img-new-wrap').style.width = pct + '%';
+                slider.querySelector('.compare-handle').style.left = pct + '%';
+            };
+            const moveMouse = (ev) => move(ev.clientX);
+            const moveTouch = (ev) => move(ev.touches[0].clientX);
+            const stop = () => {
+                document.removeEventListener('mousemove', moveMouse);
+                document.removeEventListener('mouseup', stop);
+                document.removeEventListener('touchmove', moveTouch);
+                document.removeEventListener('touchend', stop);
+            };
+            document.addEventListener('mousemove', moveMouse);
+            document.addEventListener('mouseup', stop);
+            document.addEventListener('touchmove', moveTouch);
+            document.addEventListener('touchend', stop);
+        }
+        function toggleAiGuide() { document.getElementById('ai-guide-panel').classList.toggle('active'); }
+        function playPageIntro() {
+            if (window.speechSynthesis) {
+                window.speechSynthesis.cancel();
+                const u = new SpeechSynthesisUtterance('欢迎来到老照片对比模块。这里展示了宝源坊碉楼群、陈氏宗祠、青石板路、方形古井四个地点的百年前后对比。拖动照片中间的滑块，即可穿越时光，感受百年侨乡的沧桑变迁。');
+                u.lang = 'zh-CN'; u.rate = 0.95;
+                window.speechSynthesis.speak(u);
+            }
+        }
+    </script>
+</body>
+</html>

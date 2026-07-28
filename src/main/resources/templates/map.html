@@ -1,0 +1,204 @@
+﻿<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>景区导航 - 薪火侨乡</title>
+    <link rel="stylesheet" href="/css/qiaoyun.css">
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <div class="header-left">
+                <a href="/" class="header-logo">侨韵薪火</a>
+            </div>
+            <nav class="header-nav">
+                <a href="/">首页</a>
+                <a href="/map">景区导航</a>
+                <a href="/#locations">地点导览</a>
+                <a href="/#about">关于我们</a>
+            </nav>
+            <div class="header-right">
+                <a href="/" class="back-link">← 返回首页</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="main">
+        <div class="map-section">
+            <div class="map-container">
+                <h3 class="map-title">宝源坊景区地图</h3>
+                <div class="map-canvas" id="map-canvas">
+                    <div th:each="location : ${locations}" 
+                         class="map-marker" 
+                         th:data-id="${location.id}" 
+                         th:data-number="${location.number}"
+                         th:style="|left: ${location.xCoordinate}%; top: ${location.yCoordinate}%;|"
+                         th:onclick="selectLocation(${location.id})">
+                    </div>
+                    
+                    <div style="position: absolute; bottom: 1rem; left: 1rem; color: var(--stone-gray); font-size: 0.8rem; opacity: 0.6;">
+                        宝源坊 / 开平
+                    </div>
+                </div>
+            </div>
+
+            <div class="location-detail-panel" id="detail-panel">
+                <div class="detail-header">
+                    <div class="detail-number" id="detail-number">01</div>
+                    <h2 class="detail-title" id="detail-title">选择地点</h2>
+                </div>
+                
+                <div class="detail-image" id="detail-image">
+                    <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=jiangmen%20kaiping%20ancient%20village%20map%20illustration&image_size=square" alt="地点图片">
+                </div>
+                
+                <p class="detail-desc" id="detail-desc">
+                    点击左侧地图上的金色标记，选择您想游览的地点。
+                </p>
+                
+                <div class="detail-history" id="detail-history" style="display: none;">
+                    <h4 class="detail-history-title">历史背景</h4>
+                    <p class="detail-history-content" id="detail-history-content"></p>
+                </div>
+                
+                <div class="detail-actions" id="detail-actions" style="display: none;">
+                    <button class="detail-btn detail-btn-primary" onclick="view3D()">
+                        📐 查看3D模型
+                    </button>
+                    <button class="detail-btn" onclick="playGuide()">
+                        🎧 AI讲解
+                    </button>
+                    <button class="detail-btn" onclick="navigateTo()">
+                        🗺️ 导航前往
+                    </button>
+                </div>
+
+                <div class="progress-bar">
+                    <div class="progress-title">游览进度</div>
+                    <div class="progress-track">
+                        <div class="progress-fill" id="progress-fill" style="width: 0%;"></div>
+                    </div>
+                    <div class="progress-text" id="progress-text">已游览 0/6 个地点</div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <button class="ai-guide-btn" id="ai-guide-btn" onclick="toggleAiGuide()">
+        🎧
+    </button>
+
+    <div class="ai-guide-panel" id="ai-guide-panel">
+        <h3 class="ai-guide-title">AI智能讲解</h3>
+        <div class="ai-guide-text" id="ai-guide-text">
+            点击地图上的地点标记，我可以为您讲解该地点的历史故事。
+        </div>
+        <div class="ai-guide-controls">
+            <button class="ai-control-btn" onclick="pauseGuide()">暂停</button>
+            <button class="ai-control-btn" onclick="resumeGuide()">继续</button>
+        </div>
+    </div>
+
+    <script th:inline="javascript">
+        const locations = /*[[${locations}]]*/ [];
+        let currentLocationId = null;
+        let visitedLocations = [];
+
+        function selectLocation(id) {
+            currentLocationId = id;
+            const location = locations.find(l => l.id === id);
+            if (!location) return;
+
+            document.querySelectorAll('.map-marker').forEach(marker => {
+                marker.classList.remove('active');
+            });
+            document.querySelector(`.map-marker[data-id="${id}"]`).classList.add('active');
+
+            document.getElementById('detail-number').textContent = location.number;
+            document.getElementById('detail-title').textContent = location.name;
+            document.getElementById('detail-desc').textContent = location.description;
+            
+            const imgUrl = `https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=jiangmen%20kaiping%20${encodeURIComponent(location.name)}%20ancient%20architecture%20cultural%20heritage%20cinematic%20photography&image_size=square`;
+            document.querySelector('#detail-image img').src = imgUrl;
+
+            document.getElementById('detail-history-content').textContent = location.history;
+            document.getElementById('detail-history').style.display = 'block';
+            document.getElementById('detail-actions').style.display = 'flex';
+
+            if (!visitedLocations.includes(id)) {
+                visitedLocations.push(id);
+                updateProgress();
+            }
+        }
+
+        function updateProgress() {
+            const total = locations.length;
+            const visited = visitedLocations.length;
+            const percentage = (visited / total) * 100;
+            
+            document.getElementById('progress-fill').style.width = `${percentage}%`;
+            document.getElementById('progress-text').textContent = `已游览 ${visited}/${total} 个地点`;
+        }
+
+        function view3D() {
+            if (currentLocationId) {
+                window.location.href = `/location/${currentLocationId}`;
+            }
+        }
+
+        function playGuide() {
+            if (currentLocationId) {
+                const location = locations.find(l => l.id === currentLocationId);
+                if (location && location.audioText) {
+                    speak(location.audioText);
+                }
+            }
+        }
+
+        function navigateTo() {
+            if (currentLocationId) {
+                const location = locations.find(l => l.id === currentLocationId);
+                alert(`正在为您导航前往：${location.name}\n\n温馨提示：这是虚拟导航，实际导航请使用手机地图应用。`);
+            }
+        }
+
+        function toggleAiGuide() {
+            const panel = document.getElementById('ai-guide-panel');
+            panel.classList.toggle('active');
+        }
+
+        function pauseGuide() {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                document.getElementById('ai-guide-btn').classList.remove('playing');
+            }
+        }
+
+        function resumeGuide() {
+            playGuide();
+        }
+
+        function speak(text) {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'zh-CN';
+                utterance.rate = 0.9;
+                utterance.pitch = 1;
+                window.speechSynthesis.speak(utterance);
+                
+                const btn = document.getElementById('ai-guide-btn');
+                btn.classList.add('playing');
+                utterance.onend = () => {
+                    btn.classList.remove('playing');
+                };
+            } else {
+                alert('您的浏览器不支持语音合成功能');
+            }
+        }
+
+        updateProgress();
+    </script>
+</body>
+</html>

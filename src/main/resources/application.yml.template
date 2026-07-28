@@ -1,0 +1,60 @@
+server:
+  port: 8080
+
+spring:
+  thymeleaf:
+    cache: false
+    prefix: classpath:/templates/
+    suffix: .html
+    mode: HTML
+    encoding: UTF-8
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+
+# ============================================================
+# 腾讯云 COS 配置（生产环境）
+# 注意：secret-id 和 secret-key 极其敏感，严禁提交到 Git！
+# 使用方法：复制此文件为 application.yml，填写真实密钥
+# ============================================================
+cos:
+  secret-id: "YOUR_SECRET_ID"
+  secret-key: "YOUR_SECRET_KEY"
+  region: "ap-guangzhou"
+  bucket-name: "qiaoyun-2026-gdut-100050675333-1453696876"
+
+# ============================================================
+# 应用级配置
+# ============================================================
+app:
+  # Mock 模式开关：true 时返回本地静态资源 URL，不调用真实 COS
+  mock-mode: false
+
+  # 建筑静态数据（纯 YAML 配置，无数据库）
+  buildings:
+    - id: 1
+      name: "开平碉楼"
+      description: "世界文化遗产，融合中西建筑风格的经典之作"
+      cover-image: "cover-kaiping.jpg"
+      model-key: "models/kaiping.splat"
+      video-key: "videos/kaiping-4k.mp4"
+    - id: 2
+      name: "自力村碉楼群"
+      description: "村落与碉楼和谐共生，展现侨乡独特风貌"
+      cover-image: "cover-zili.jpg"
+      model-key: "models/zili.splat"
+      video-key: "videos/zili-4k.mp4"
+    - id: 3
+      name: "赤坎古镇骑楼"
+      description: "保存完好的骑楼建筑群，承载百年商埠记忆"
+      cover-image: "cover-chikan.jpg"
+      model-key: "models/chikan.splat"
+      video-key: "videos/chikan-4k.mp4"
+
+logging:
+  level:
+    org.example.xiaxiang: INFO
+    org.springframework.web: WARN
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"

@@ -1,0 +1,934 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>薪火侨乡 - 侨乡建筑数字化云游平台</title>
+    <link rel="stylesheet" href="/css/qiaoyun.css">
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <div class="header-left">
+                <a href="/" class="header-logo">薪火侨乡</a>
+            </div>
+            <nav class="header-nav">
+                <a href="#hero">首页</a>
+                <a href="#projects">两大方案</a>
+                <a href="#baoyuanfang">宝源坊专题</a>
+                <a href="#knowledge-section">知识库</a>
+                <a href="#story">侨乡故事</a>
+                <a href="#archive">田野档案</a>
+                <a href="#about">关于我们</a>
+            </nav>
+            <div class="header-right">
+                <div class="header-search">
+                    <input type="text" id="header-search-input" placeholder="搜索地点、故事、知识..." oninput="handleSearchInput(event)" onkeypress="handleSearchKey(event)">
+                    <div class="search-suggestions" id="search-suggestions"></div>
+                </div>
+                <button class="header-icon-btn" title="搜索" onclick="toggleSearch()">🔍</button>
+                <button class="header-icon-btn" title="地图" onclick="startTour()">🗺️</button>
+                <button class="header-icon-btn" title="音频" onclick="toggleAiGuide()">🎧</button>
+                <div class="header-divider"></div>
+                <button class="header-btn" onclick="startTour()">开始云游</button>
+            </div>
+        </div>
+    </header>
+
+    <div class="chapter-nav">
+        <div class="chapter-label">序章</div>
+        <div class="chapter-line"></div>
+        <div class="chapter-dot active" onclick="scrollToSection('hero')"></div>
+        <div class="chapter-dot" onclick="scrollToSection('projects')"></div>
+        <div class="chapter-dot" onclick="scrollToSection('baoyuanfang')"></div>
+        <div class="chapter-dot" onclick="scrollToSection('knowledge-section')"></div>
+        <div class="chapter-dot" onclick="scrollToSection('story')"></div>
+        <div class="chapter-dot" onclick="scrollToSection('archive')"></div>
+        <div class="chapter-line"></div>
+        <div class="chapter-label">尾章</div>
+        <button class="chapter-dot" onclick="window.scrollTo({top: document.body.scrollHeight, behavior: 'smooth'})" style="margin-top: 0.5rem;">↓</button>
+    </div>
+
+    <main class="main">
+        <section id="hero" class="hero-section">
+            <div class="hero-bg"></div>
+            <div class="hero-particles" id="hero-particles"></div>
+            
+            <div class="hero-content">
+                <span class="hero-chapter">序章 · 数字记忆</span>
+                <h1 class="hero-title">薪火侨乡</h1>
+                <p class="hero-subtitle">侨乡建筑数字化云游平台</p>
+                <p class="hero-tagline">长沙街道"百千万工程"结对合作项目 · 让世界看见侨乡之美</p>
+                
+                <div class="hero-buttons">
+                    <button class="hero-btn-primary" onclick="startTour()">▶ 开始云游</button>
+                    <button class="hero-btn-secondary" onclick="toggleAiGuide()">🎧 AI讲解</button>
+                </div>
+
+                <div class="hero-stats">
+                    <div class="stat-item">
+                        <div class="stat-number">12</div>
+                        <div class="stat-label">历史建筑</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">100+</div>
+                        <div class="stat-label">年历史</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">3DGS</div>
+                        <div class="stat-label">高斯泼溅</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">AI</div>
+                        <div class="stat-label">智能讲解</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="hero-3d-control">
+                <div class="control-dial">
+                    <div class="control-center"></div>
+                    <button class="control-btn up" title="向上">↑</button>
+                    <button class="control-btn down" title="向下">↓</button>
+                    <button class="control-btn left" title="向左">←</button>
+                    <button class="control-btn right" title="向右">→</button>
+                    <button class="control-btn zoom-in" title="放大">+</button>
+                    <button class="control-btn zoom-out" title="缩小">−</button>
+                    <button class="control-btn rotate" title="旋转" onclick="startTour()">↻</button>
+                    <button class="control-btn fullscreen" title="全屏" onclick="startTour()">⛶</button>
+                </div>
+            </div>
+        </section>
+
+        <section id="projects" class="section" style="background: linear-gradient(180deg, transparent, rgba(26, 42, 74, 0.2), transparent);">
+            <div class="section-header">
+                <span class="section-label">项目介绍</span>
+                <h2 class="section-title">让世界看见侨乡之美</h2>
+                <p class="section-subtitle">长沙街道"百千万工程"结对合作 · 广东工业大学"侨韵薪火"实践团</p>
+            </div>
+            <div class="project-card single">
+                <div class="project-card-icon">🏛️</div>
+                <h3 class="project-card-title">建筑数字化与云游平台</h3>
+                <p class="project-card-desc">
+                    我们运用3D高斯泼溅技术对历史建筑进行高精度三维重建，打造线上云游平台，
+                    让公众足不出户也能沉浸式体验侨乡建筑之美，让百年建筑在数字世界中永久留存。
+                </p>
+                <div class="project-card-features">
+                    <div class="project-feature-item">
+                        <span class="project-feature-icon">📸</span>
+                        <span>3D高斯泼溅高精度建模</span>
+                    </div>
+                    <div class="project-feature-item">
+                        <span class="project-feature-icon">🌐</span>
+                        <span>线上云游打破时空限制</span>
+                    </div>
+                    <div class="project-feature-item">
+                        <span class="project-feature-icon">🎧</span>
+                        <span>AI智能讲解深度解读</span>
+                    </div>
+                    <div class="project-feature-item">
+                        <span class="project-feature-icon">💾</span>
+                        <span>历史文脉数字化永久保存</span>
+                    </div>
+                </div>
+                <button class="hero-btn-primary" onclick="document.getElementById('baoyuanfang').scrollIntoView({behavior: 'smooth'})">
+                    探索试点案例 →
+                </button>
+            </div>
+        </section>
+
+        <section id="baoyuanfang" class="section">
+            <div class="section-header">
+                <span class="section-label">试点专题</span>
+                <h2 class="section-title">宝源坊 · 云游专题</h2>
+                <p class="section-subtitle">广东开平宝源坊 — 首个数字化试点村落</p>
+            </div>
+            <div style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 2.5rem; align-items: center;">
+                <div>
+                    <div class="baoyuan-hero-image">
+                        <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=baoyuanfang%20kaiping%20diaolou%20village%20panoramic%20view%20three%20towers%20lingnan%20architecture%20golden%20hour%20cinematic%20wide%20angle&image_size=landscape_4_3" alt="宝源坊全景">
+                        <div class="baoyuan-image-overlay">
+                            <span class="baoyuan-badge">🏆 广东省古村落</span>
+                            <span class="baoyuan-year">百年侨乡 · 1909</span>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <h3 style="font-size: 1.6rem; color: var(--warm-gold); margin-bottom: 1rem; letter-spacing: 2px;">宝源坊简介</h3>
+                    <p style="color: var(--text-secondary); line-height: 1.9; margin-bottom: 1.2rem;">
+                        宝源坊始建于1909年，是一座拥有百年历史的侨乡古村落，2023年入选第八批"广东省古村落"。
+                        村内现存三座中西合璧的精美碉楼，见证了华侨回乡建设的辉煌历史。
+                    </p>
+                    <p style="color: var(--text-secondary); line-height: 1.9; margin-bottom: 1.5rem;">
+                        作为"薪火侨乡"项目的首个数字化试点，实践团对宝源坊进行了全面的三维激光扫描、
+                        摄影测量与口述历史采集，构建了完整的数字档案库。
+                    </p>
+                    <div class="baoyuan-stats-row">
+                        <div class="baoyuan-stat">
+                            <div class="baoyuan-stat-num">3</div>
+                            <div class="baoyuan-stat-label">座百年碉楼</div>
+                        </div>
+                        <div class="baoyuan-stat">
+                            <div class="baoyuan-stat-num">6</div>
+                            <div class="baoyuan-stat-label">大核心景点</div>
+                        </div>
+                        <div class="baoyuan-stat">
+                            <div class="baoyuan-stat-num">12</div>
+                            <div class="baoyuan-stat-label">栋登记建筑</div>
+                        </div>
+                    </div>
+                    <div style="margin-top: 1.5rem; display: flex; gap: 1rem; flex-wrap: wrap;">
+                        <button class="hero-btn-primary" onclick="startTour()">▶ 进入云游</button>
+                        <button class="hero-btn-secondary" onclick="document.getElementById('buildings').scrollIntoView({behavior: 'smooth'})">查看景点</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="buildings" class="section" style="background: linear-gradient(180deg, transparent, rgba(26, 42, 74, 0.15), transparent);">
+            <div class="section-header">
+                <span class="section-label">建筑图鉴</span>
+                <h2 class="section-title">宝源坊核心景点导览</h2>
+                <p class="section-subtitle">六大历史文化地标，每一处都有故事</p>
+            </div>
+            <div class="locations-grid">
+                <div th:each="location : ${locations}" class="location-card" th:onclick="|window.location.href='/location/' + ${location.id}|">
+                    <div class="location-card-image">
+                        <img th:src="${locationImageUrls != null and locationImageUrls[location.id] != null} ? ${locationImageUrls[location.id]} : |https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=kaiping%20${location.name}%20ancient%20architecture%20lingnan%20cultural%20heritage%20cinematic%20photography%20golden%20hour&image_size=square|" alt="地点图片">
+                        <div class="location-card-number" th:text="${location.number}"></div>
+                    </div>
+                    <div class="location-card-content">
+                        <h4 class="location-card-title" th:text="${location.name}"></h4>
+                        <p class="location-card-desc" th:text="${location.description}"></p>
+                        <div class="location-card-tags">
+                            <span class="location-tag">3D模型</span>
+                            <span class="location-tag">AI讲解</span>
+                            <span class="location-tag">历史建筑</span>
+                        </div>
+                        <div class="location-card-footer">
+                            <span style="font-size: 0.8rem; color: var(--text-muted);">点击查看详情 →</span>
+                            <button class="location-card-btn">云游</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="3d-section" class="section">
+            <div class="section-header">
+                <span class="section-label">3D数字孪生</span>
+                <h2 class="section-title">三维建模展示</h2>
+                <p class="section-subtitle">基于3D高斯泼溅技术的高精度建筑数字化</p>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; align-items: center;">
+                <div style="position: relative;">
+                    <div style="width: 100%; height: 350px; background: linear-gradient(135deg, rgba(26, 42, 74, 0.5), rgba(10, 10, 10, 0.8)); border-radius: 12px; border: 1px solid var(--glass-border); display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden;">
+                        <div style="text-align: center; z-index: 2;">
+                            <div style="font-size: 4rem; margin-bottom: 1rem;">🏛️</div>
+                            <div style="color: var(--warm-gold); font-size: 1.2rem; font-weight: bold;">3D 高斯泼溅模型</div>
+                            <div style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 0.5rem;">点击下方按钮体验</div>
+                        </div>
+                        <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-image: radial-gradient(circle at 30% 40%, rgba(212, 175, 55, 0.1) 0%, transparent 50%);"></div>
+                        <div style="position: absolute; bottom: 1rem; left: 50%; transform: translateX(-50%); display: flex; gap: 0.5rem;">
+                            <span style="padding: 0.3rem 0.8rem; background: rgba(0,0,0,0.6); border: 1px solid var(--glass-border); border-radius: 4px; font-size: 0.75rem; color: var(--warm-gold);">点云</span>
+                            <span style="padding: 0.3rem 0.8rem; background: rgba(0,0,0,0.6); border: 1px solid var(--glass-border); border-radius: 4px; font-size: 0.75rem; color: var(--text-secondary);">网格</span>
+                            <span style="padding: 0.3rem 0.8rem; background: rgba(0,0,0,0.6); border: 1px solid var(--glass-border); border-radius: 4px; font-size: 0.75rem; color: var(--text-secondary);">材质</span>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <h3 style="font-size: 1.5rem; color: var(--warm-gold); margin-bottom: 1.5rem; letter-spacing: 2px;">技术亮点</h3>
+                    <div style="display: flex; flex-direction: column; gap: 1rem;">
+                        <div style="display: flex; gap: 1rem; padding: 1rem; background: var(--glass-bg); border-radius: 8px; border: 1px solid var(--glass-border-light);">
+                            <div style="font-size: 1.5rem;">⚡</div>
+                            <div>
+                                <div style="color: var(--text-primary); font-weight: bold; margin-bottom: 0.3rem;">实时渲染</div>
+                                <div style="color: var(--text-secondary); font-size: 0.9rem;">基于WebGL的高性能3D渲染，流畅体验</div>
+                            </div>
+                        </div>
+                        <div style="display: flex; gap: 1rem; padding: 1rem; background: var(--glass-bg); border-radius: 8px; border: 1px solid var(--glass-border-light);">
+                            <div style="font-size: 1.5rem;">📐</div>
+                            <div>
+                                <div style="color: var(--text-primary); font-weight: bold; margin-bottom: 0.3rem;">高精度建模</div>
+                                <div style="color: var(--text-secondary); font-size: 0.9rem;">毫米级精度还原建筑细节与纹理</div>
+                            </div>
+                        </div>
+                        <div style="display: flex; gap: 1rem; padding: 1rem; background: var(--glass-bg); border-radius: 8px; border: 1px solid var(--glass-border-light);">
+                            <div style="font-size: 1.5rem;">🔄</div>
+                            <div>
+                                <div style="color: var(--text-primary); font-weight: bold; margin-bottom: 0.3rem;">360°交互</div>
+                                <div style="color: var(--text-secondary); font-size: 0.9rem;">自由旋转、缩放、平移，沉浸式探索</div>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="hero-btn-primary" style="margin-top: 1.5rem;" onclick="startTour()">进入3D展厅 →</button>
+                </div>
+            </div>
+        </section>
+
+        <section id="story" class="section" style="background: linear-gradient(180deg, transparent, rgba(26, 42, 74, 0.2), transparent);">
+            <div class="section-header">
+                <span class="section-label">侨乡故事</span>
+                <h2 class="section-title">口述历史</h2>
+                <p class="section-subtitle">聆听老华侨的故事，感受百年侨乡文化</p>
+            </div>
+            <div class="story-section">
+                <div class="story-image">
+                    <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=elderly%20chinese%20overseas%20returned%20villager%20sitting%20in%20traditional%20lingnan%20courtyard%20telling%20stories%20warm%20golden%20hour%20portrait%20cinematic&image_size=square" alt="口述历史">
+                </div>
+                <div class="story-content">
+                    <span class="story-label">口述 · 第一辑</span>
+                    <h3 class="story-title">下南洋的记忆</h3>
+                    <p class="story-text">
+                        宝源坊的每一块青砖，都承载着华侨们漂洋过海的故事。清朝末年，国难当头，无数开平乡亲远渡重洋，在异国他乡艰苦奋斗，又将血汗钱寄回家乡，建起了这一座座中西合璧的碉楼。
+                    </p>
+                    <div class="story-quote">
+                        "当年我阿公带着五块大洋下南洋，在金山做了十年苦力，终于攒钱建起了这座楼。他说，楼建起来了，根就留住了。"
+                        <div class="story-author">—— 陈伯 · 宝源坊村民</div>
+                    </div>
+                    <button class="story-play-btn" onclick="playStory()">
+                        <span class="play-icon">▶</span>
+                        播放口述音频
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <section id="archive" class="section">
+            <div class="section-header">
+                <span class="section-label">田野档案</span>
+                <h2 class="section-title">历史时间线</h2>
+                <p class="section-subtitle">百年侨乡，岁月流转中的文化印记</p>
+            </div>
+            <div class="timeline" th:if="${timeline != null and !timeline.isEmpty()}">
+                <div class="timeline-item" th:each="item : ${timeline}">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-content">
+                        <div class="timeline-year" th:text="${item.year}">年份</div>
+                        <div class="timeline-title" th:text="${item.title}">标题</div>
+                        <div class="timeline-desc" th:text="${item.description}">描述</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="archive-data" class="section" style="background: linear-gradient(180deg, transparent, rgba(26, 42, 74, 0.15), transparent);">
+            <div class="section-header">
+                <span class="section-label">数据档案</span>
+                <h2 class="section-title">田野调查数据</h2>
+                <p class="section-subtitle">三下乡实践团实地调研成果</p>
+            </div>
+            <div class="archive-section">
+                <div th:each="item : ${archives}" class="archive-card" th:if="${itemStat.count} <= 4">
+                    <div class="archive-icon" th:text="${item.icon}"></div>
+                    <div class="archive-title" th:text="${item.title}"></div>
+                    <div class="archive-count" th:text="${item.count}"></div>
+                    <div class="archive-unit" th:text="${item.unit}"></div>
+                </div>
+            </div>
+            <div style="text-align: center; margin-top: 2rem;">
+                <button class="hero-btn-secondary" onclick="window.location.href='/archive'">查看完整档案 →</button>
+            </div>
+        </section>
+
+        <section id="knowledge-section" class="section">
+            <div class="section-header">
+                <span class="section-label">建筑知识库</span>
+                <h2 class="section-title">探索建筑文化</h2>
+                <p class="section-subtitle">了解碉楼建筑的历史与工艺</p>
+            </div>
+            <div class="knowledge-grid">
+                <div class="knowledge-card"
+                     th:each="k, kIter : ${knowledgeList}"
+                     th:if="${kIter.index < 3}"
+                     th:data-knowledge-id="${k.id}"
+                     onclick="window.location.href='/knowledge/' + this.dataset.knowledgeId"
+                     style="cursor: pointer;">
+                    <div class="knowledge-image">
+                        <img th:src="${knowledgeCoverUrls != null and knowledgeCoverUrls[k.id] != null} ? ${knowledgeCoverUrls[k.id]} : |https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=${k.title}%20kaiping%20architecture%20cinematic%20warm%20golden%20hour&image_size=square|"
+                             th:alt="${k.title}">
+                    </div>
+                    <div class="knowledge-content">
+                        <span class="knowledge-tag" th:text="${k.category}">分类</span>
+                        <h4 class="knowledge-title" th:text="${k.title}">知识标题</h4>
+                        <p class="knowledge-desc" th:text="${k.summary}">知识简介</p>
+                    </div>
+                </div>
+                <div class="knowledge-card knowledge-more" onclick="window.location.href='/knowledge'">
+                    <div class="knowledge-more-content">
+                        <div style="font-size: 3rem; margin-bottom: 1rem;">📚</div>
+                        <div style="font-size: 1.1rem; color: var(--warm-gold); font-weight: bold;">更多知识</div>
+                        <div style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.5rem;">侨批文化 · 祠堂建筑 · 骑楼溯源</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="culture-section" class="section" style="background: linear-gradient(180deg, transparent, rgba(26, 42, 74, 0.2), transparent);">
+            <div class="section-header">
+                <span class="section-label">侨乡民俗</span>
+                <h2 class="section-title">传统文化记忆</h2>
+                <p class="section-subtitle">感受侨乡独特的民俗文化魅力</p>
+            </div>
+            <div class="culture-grid" th:if="${cultures != null and !cultures.isEmpty()}">
+                <div class="culture-card" th:each="culture : ${cultures}">
+                    <div class="culture-image">
+                        <img th:src="${cultureCoverUrls != null and cultureCoverUrls[culture.id] != null} ? ${cultureCoverUrls[culture.id]} : |https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=${culture.name}%20traditional%20chinese%20culture%20warm%20golden%20hour%20cinematic&image_size=square|"
+                             th:alt="${culture.name}">
+                        <div class="culture-overlay">
+                            <span class="culture-category" th:text="${culture.category}">分类</span>
+                        </div>
+                    </div>
+                    <div class="culture-info">
+                        <h4 class="culture-name" th:text="${culture.name}">民俗名称</h4>
+                        <p class="culture-desc" th:text="${culture.description}">民俗描述</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="interactive-section" class="section">
+            <div class="section-header">
+                <span class="section-label">深度互动</span>
+                <h2 class="section-title">六大互动体验</h2>
+                <p class="section-subtitle">沉浸式探索侨乡文化的多种打开方式</p>
+            </div>
+            <div class="feature-cards" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem;">
+                <a href="/anatomy" class="feature-card" style="text-decoration: none; cursor: pointer;">
+                    <div class="feature-icon" style="font-size: 2.5rem;">🏛️</div>
+                    <h3 class="feature-title" style="color: var(--warm-gold);">建筑解剖</h3>
+                    <p class="feature-desc" style="color: var(--text-secondary);">拆解碉楼构造，逐层解读屋顶、八角窗、燕子窝等部位的功能与材料</p>
+                </a>
+                <a href="/photo-compare" class="feature-card" style="text-decoration: none; cursor: pointer;">
+                    <div class="feature-icon" style="font-size: 2.5rem;">📸</div>
+                    <h3 class="feature-title" style="color: var(--warm-gold);">老照片对比</h3>
+                    <p class="feature-desc" style="color: var(--text-secondary);">拖动滑块穿越百年时光，对比同一地点的今昔变迁</p>
+                </a>
+                <a href="/qiaopi" class="feature-card" style="text-decoration: none; cursor: pointer;">
+                    <div class="feature-icon" style="font-size: 2.5rem;">✉️</div>
+                    <h3 class="feature-title" style="color: var(--warm-gold);">侨批文化</h3>
+                    <p class="feature-desc" style="color: var(--text-secondary);">阅读跨海家书，感受华侨对家乡的思念与牵挂</p>
+                </a>
+                <a href="/dialect" class="feature-card" style="text-decoration: none; cursor: pointer;">
+                    <div class="feature-icon" style="font-size: 2.5rem;">🗣️</div>
+                    <h3 class="feature-title" style="color: var(--warm-gold);">方言学习</h3>
+                    <p class="feature-desc" style="color: var(--text-secondary);">学一句开平话，听懂"返屋企""金山客"背后的乡愁</p>
+                </a>
+                <a href="/quiz" class="feature-card" style="text-decoration: none; cursor: pointer;">
+                    <div class="feature-icon" style="font-size: 2.5rem;">🎯</div>
+                    <h3 class="feature-title" style="color: var(--warm-gold);">知识答题</h3>
+                    <p class="feature-desc" style="color: var(--text-secondary);">答题闯关，正确率达80%解锁"答题高手"专属印章</p>
+                </a>
+                <a href="/stamps" class="feature-card" style="text-decoration: none; cursor: pointer;">
+                    <div class="feature-icon" style="font-size: 2.5rem;">📮</div>
+                    <h3 class="feature-title" style="color: var(--warm-gold);">虚拟盖章</h3>
+                    <p class="feature-desc" style="color: var(--text-secondary);">云游打卡收集8枚专属印章，集齐成为侨乡达人</p>
+                </a>
+            </div>
+        </section>
+
+        <section id="video-section" class="section" style="background: linear-gradient(180deg, transparent, rgba(26, 42, 74, 0.15), transparent);">
+            <div class="section-header">
+                <span class="section-label">视频展播</span>
+                <h2 class="section-title">影像中的侨乡</h2>
+                <p class="section-subtitle">微纪录片系列 · 通过镜头感受百年侨乡的魅力</p>
+            </div>
+            <div class="video-grid" th:if="${videos != null and #lists.size(videos) > 0}">
+                <div class="video-card featured"
+                     th:if="${videos[0] != null}"
+                     th:data-video-id="${videos[0].id}"
+                     onclick="window.location.href='/video/' + this.dataset.videoId"
+                     style="cursor: pointer;">
+                    <div class="video-thumbnail">
+                        <img th:src="${videoCoverUrls != null and videoCoverUrls[videos[0].id] != null} ? ${videoCoverUrls[videos[0].id]} : |https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=${videos[0].title}%20kaiping%20qiaoxiang%20cinematic%20documentary%20golden%20hour&image_size=landscape_4_3|" th:alt="${videos[0].title}">
+                        <div class="video-play-btn">▶</div>
+                        <div class="video-duration" th:text="${videos[0].duration}">00:00</div>
+                    </div>
+                    <div class="video-info">
+                        <h4 class="video-title" th:text="${videos[0].title}">视频标题</h4>
+                        <p class="video-desc" th:text="${videos[0].description}">视频简介</p>
+                        <div class="video-meta">
+                            <span>👁️ <span th:text="${videos[0].views}">0</span> 次观看</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="video-side">
+                    <div class="video-card small"
+                         th:each="vid, vIter : ${videos}"
+                         th:if="${vIter.index > 0 and vIter.index <= 3}"
+                         th:data-video-id="${vid.id}"
+                         onclick="window.location.href='/video/' + this.dataset.videoId"
+                         style="cursor: pointer;">
+                        <div class="video-thumbnail">
+                            <img th:src="${videoCoverUrls != null and videoCoverUrls[vid.id] != null} ? ${videoCoverUrls[vid.id]} : |https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=${vid.title}%20kaiping%20qiaoxiang%20cinematic%20documentary&image_size=square|" th:alt="${vid.title}">
+                            <div class="video-play-btn small">▶</div>
+                            <div class="video-duration small" th:text="${vid.duration}">00:00</div>
+                        </div>
+                        <div class="video-info">
+                            <h5 class="video-title" th:text="${vid.title}">视频标题</h5>
+                            <p class="video-meta">👁️ <span th:text="${vid.views}">0</span> 次观看</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div th:if="${videos == null or #lists.size(videos) == 0}" style="text-align: center; padding: 3rem; color: var(--text-muted);">
+                视频内容整理中，敬请期待。
+            </div>
+        </section>
+
+        <section id="blog-section" class="section">
+            <div class="section-header">
+                <span class="section-label">实践日志</span>
+                <h2 class="section-title">三下乡日记</h2>
+                <p class="section-subtitle">记录实践团的下乡点滴</p>
+            </div>
+            <div class="blog-grid">
+                <div class="blog-card" th:each="post : ${blogPosts}" th:if="${#lists.size(blogPosts) > 0}"
+                     th:data-post-id="${post.id}"
+                     onclick="window.location.href='/blog/' + this.dataset.postId"
+                     style="cursor: pointer;">
+                    <div class="blog-image">
+                        <img th:src="${blogCoverUrls != null and blogCoverUrls[post.id] != null} ? ${blogCoverUrls[post.id]} : |https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=${post.title}%20village%20summer%20practice&image_size=square|" alt="实践日志">
+                        <div class="blog-category" th:text="${post.category}"></div>
+                    </div>
+                    <div class="blog-content">
+                        <div class="blog-meta">
+                            <span class="blog-author" th:text="${post.author}"></span>
+                            <span class="blog-date" th:text="${post.date}"></span>
+                        </div>
+                        <h4 class="blog-title" th:text="${post.title}"></h4>
+                        <p class="blog-summary" th:text="${post.summary}"></p>
+                        <a th:href="@{/blog/{id}(id=${post.id})}" class="blog-link">阅读全文 →</a>
+                    </div>
+                </div>
+            </div>
+            <div style="text-align: center; margin-top: 2rem;">
+                <button class="hero-btn-secondary" onclick="window.location.href='/about'">查看更多日志 →</button>
+            </div>
+        </section>
+
+        <section id="team-section" class="section" style="background: linear-gradient(180deg, transparent, rgba(26, 42, 74, 0.2), transparent);">
+            <div class="section-header" id="about">
+                <span class="section-label">关于我们</span>
+                <h2 class="section-title">侨韵薪火实践团</h2>
+                <p class="section-subtitle">广东工业大学三下乡社会实践团队 · 长沙街道"百千万工程"结对合作</p>
+            </div>
+            <div class="team-grid">
+                <div class="team-card" th:each="member : ${team}" th:if="${#lists.size(team) > 0 and memberStat.count <= 6}">
+                    <div class="team-avatar">
+                        <img th:if="${teamAvatarUrls != null and teamAvatarUrls[member.id] != null}"
+                             th:src="${teamAvatarUrls[member.id]}"
+                             th:alt="${member.name}"
+                             style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
+                        <div th:if="${teamAvatarUrls == null or teamAvatarUrls[member.id] == null}"
+                             class="avatar-placeholder"
+                             th:text="${member.name?.charAt(0)}"></div>
+                    </div>
+                    <div class="team-name" th:text="${member.name}"></div>
+                    <div class="team-role" th:text="${member.role}"></div>
+                    <div class="team-major" th:text="${member.major}"></div>
+                </div>
+            </div>
+            <div style="text-align: center; margin-top: 2rem;">
+                <button class="hero-btn-secondary" onclick="window.location.href='/about'">了解更多 →</button>
+            </div>
+        </section>
+
+        <section class="section" style="text-align: center;">
+            <div style="max-width: 700px; margin: 0 auto; padding: 4rem 2rem; background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 16px; backdrop-filter: blur(15px);">
+                <h2 style="font-size: 2rem; color: var(--warm-gold); margin-bottom: 1rem; letter-spacing: 3px;">准备好开始云游了吗？</h2>
+                <p style="color: var(--text-secondary); margin-bottom: 2rem; font-size: 1.05rem; line-height: 1.8;">
+                    点击开启沉浸式游览，AI导游将为您讲述每一座建筑背后的故事。
+                    让我们一起穿越时空，感受百年侨乡的魅力。
+                </p>
+                <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+                    <button class="hero-btn-primary" onclick="startTour()">▶ 立即开始云游</button>
+                    <button class="hero-btn-secondary" onclick="toggleAiGuide()">🎧 试听AI讲解</button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-logo">薪火侨乡</div>
+            <p><span class="project-name">侨韵薪火</span> - 侨乡建筑数字化云游平台</p>
+            <p>长沙街道"百千万工程"结对合作项目 · 广东工业大学三下乡</p>
+        </div>
+        <div class="footer-links">
+            <a href="#hero">首页</a>
+            <a href="#projects">两大方案</a>
+            <a href="#baoyuanfang">宝源坊专题</a>
+            <a href="#story">侨乡故事</a>
+            <a href="#archive">田野档案</a>
+            <a href="/map">景区导航</a>
+            <a href="#about">关于我们</a>
+        </div>
+        <div class="footer-bottom">
+            <p>技术支持：3D高斯泼溅技术(3DGS) · 腾讯云COS · AI语音合成</p>
+            <p style="margin-top: 0.5rem;">© 2024 侨韵薪火实践团 版权所有</p>
+        </div>
+    </footer>
+
+    <button class="ai-guide-btn" id="ai-guide-btn" onclick="toggleAiGuide()">
+        🎧
+    </button>
+
+    <div class="ai-guide-panel" id="ai-guide-panel">
+        <h3 class="ai-guide-title">AI智能讲解</h3>
+        <div class="ai-guide-text" id="ai-guide-text">
+            欢迎来到薪火侨乡云游平台！我是您的AI导游。我们团队与长沙街道开展"百千万工程"结对合作，致力于侨乡历史文化建筑的数字化传播。这里有建筑数字化记录、微纪录片、宝源坊专题等丰富内容，点击下方按钮开始讲解，或者点击页面上的地点进行详细介绍。
+        </div>
+        <div class="ai-guide-controls">
+            <button class="ai-control-btn primary" onclick="playWelcome()">播放欢迎语</button>
+            <button class="ai-control-btn" onclick="startTour()">开始云游</button>
+        </div>
+    </div>
+
+    <script>
+        function createParticles() {
+            const container = document.getElementById('hero-particles');
+            if (!container) return;
+            
+            for (let i = 0; i < 50; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 8 + 's';
+                particle.style.animationDuration = (6 + Math.random() * 4) + 's';
+                container.appendChild(particle);
+            }
+        }
+
+        function startTour() {
+            window.location.href = '/map';
+        }
+
+        function scrollToSection(id) {
+            const el = document.getElementById(id);
+            if (el) {
+                el.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        function toggleAiGuide() {
+            const panel = document.getElementById('ai-guide-panel');
+            panel.classList.toggle('active');
+        }
+
+        function toggleSearch() {
+            const input = document.getElementById('header-search-input');
+            if (input) {
+                input.classList.toggle('active');
+                if (input.classList.contains('active')) {
+                    input.focus();
+                }
+            }
+        }
+
+        let searchTimeout = null;
+        function handleSearchInput(event) {
+            const keyword = event.target.value;
+            const suggestionsBox = document.getElementById('search-suggestions');
+
+            if (searchTimeout) {
+                clearTimeout(searchTimeout);
+            }
+
+            if (!keyword || keyword.trim().length < 1) {
+                if (suggestionsBox) suggestionsBox.style.display = 'none';
+                return;
+            }
+
+            searchTimeout = setTimeout(() => {
+                fetch('/api/search/suggest?keyword=' + encodeURIComponent(keyword))
+                    .then(res => res.json())
+                    .then(result => {
+                        if (result.success && result.data && result.data.length > 0) {
+                            let html = '';
+                            result.data.forEach(item => {
+                                html += '<div class="suggestion-item" onclick="goToSearch(\'' + item.text + '\')">';
+                                html += '<span class="suggestion-type">' + item.type + '</span>';
+                                html += '<span class="suggestion-text">' + item.text + '</span>';
+                                html += '</div>';
+                            });
+                            suggestionsBox.innerHTML = html;
+                            suggestionsBox.style.display = 'block';
+                        } else {
+                            suggestionsBox.style.display = 'none';
+                        }
+                    })
+                    .catch(err => {
+                        suggestionsBox.style.display = 'none';
+                    });
+            }, 300);
+        }
+
+        function handleSearchKey(event) {
+            if (event.key === 'Enter') {
+                const keyword = event.target.value;
+                if (keyword && keyword.trim()) {
+                    goToSearch(keyword);
+                }
+            }
+        }
+
+        function goToSearch(keyword) {
+            window.location.href = '/search?keyword=' + encodeURIComponent(keyword);
+        }
+
+        function playWelcome() {
+            const text = "欢迎来到薪火侨乡云游平台！我是您的AI导游。我们团队与长沙街道开展百千万工程结对合作，致力于侨乡历史文化建筑的数字化传播。这里有建筑数字化记录、微纪录片、宝源坊专题等丰富内容。让我们一起开启这段穿越时空的文化之旅吧！";
+            speak(text);
+        }
+
+        function playStory() {
+            const text = "当年我阿公带着五块大洋下南洋，在金山做了十年苦力，终于攒钱建起了这座楼。他说，楼建起来了，根就留住了。宝源坊的每一块青砖，都承载着华侨们漂洋过海的故事。清朝末年，国难当头，无数开平乡亲远渡重洋，在异国他乡艰苦奋斗，又将血汗钱寄回家乡，建起了这一座座中西合璧的碉楼。";
+            speak(text);
+        }
+
+        function speak(text) {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'zh-CN';
+                utterance.rate = 0.9;
+                utterance.pitch = 1;
+                window.speechSynthesis.speak(utterance);
+                
+                const btn = document.getElementById('ai-guide-btn');
+                btn.classList.add('playing');
+                utterance.onend = () => {
+                    btn.classList.remove('playing');
+                };
+            } else {
+                alert('您的浏览器不支持语音合成功能');
+            }
+        }
+
+        function updateChapterDots() {
+            const sections = ['hero', 'projects', 'baoyuanfang', 'knowledge-section', 'culture-section', 'story', 'archive', 'team-section'];
+            const dots = document.querySelectorAll('.chapter-dot');
+            
+            let current = 0;
+            sections.forEach((id, index) => {
+                const el = document.getElementById(id);
+                if (el) {
+                    const rect = el.getBoundingClientRect();
+                    if (rect.top <= window.innerHeight / 2) {
+                        current = index;
+                    }
+                }
+            });
+            
+            dots.forEach((dot, index) => {
+                if (index < 6) {
+                    const mappedIndex = Math.floor(current * 6 / sections.length);
+                    dot.classList.toggle('active', index === mappedIndex);
+                }
+            });
+        }
+
+        function updateCheckinStats() {
+            const visited = JSON.parse(localStorage.getItem('visitedLocations') || '[]');
+            const count = visited.length;
+            const total = 6;
+            const progress = Math.round((count / total) * 100);
+
+            const countEl = document.getElementById('checkin-count');
+            const progressEl = document.getElementById('checkin-progress');
+            if (countEl) countEl.textContent = count;
+            if (progressEl) progressEl.textContent = progress + '%';
+
+            if (count >= 1) {
+                document.querySelector('.badge-item')?.classList.add('unlocked');
+            }
+            if (count >= 3) {
+                document.getElementById('badge-explorer')?.classList.add('unlocked');
+            }
+            if (count >= 6) {
+                document.getElementById('badge-master')?.classList.add('unlocked');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            createParticles();
+            window.addEventListener('scroll', updateChapterDots);
+            updateCheckinStats();
+
+            document.addEventListener('click', function(e) {
+                const searchBox = document.querySelector('.header-search');
+                const suggestions = document.getElementById('search-suggestions');
+                if (searchBox && !searchBox.contains(e.target)) {
+                    if (suggestions) suggestions.style.display = 'none';
+                }
+            });
+        });
+    </script>
+
+    <style>
+        .project-card {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 2.5rem;
+            backdrop-filter: blur(15px);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s ease;
+        }
+        .project-card:hover {
+            transform: translateY(-6px);
+            border-color: var(--warm-gold);
+            box-shadow: 0 20px 60px rgba(212, 175, 55, 0.15);
+        }
+        .project-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(212, 175, 55, 0.05) 0%, transparent 60%);
+            pointer-events: none;
+        }
+        .project-card-badge {
+            display: inline-block;
+            padding: 0.3rem 1rem;
+            background: linear-gradient(135deg, var(--warm-gold), #e0a840);
+            color: #1a1a2e;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            margin-bottom: 1.25rem;
+            align-self: flex-start;
+            position: relative;
+            z-index: 1;
+        }
+        .project-card-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            position: relative;
+            z-index: 1;
+        }
+        .project-card-title {
+            font-size: 1.5rem;
+            color: var(--warm-gold);
+            margin-bottom: 1rem;
+            letter-spacing: 1px;
+            position: relative;
+            z-index: 1;
+        }
+        .project-card-desc {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            line-height: 1.9;
+            margin-bottom: 1.5rem;
+            position: relative;
+            z-index: 1;
+        }
+        .project-card-features {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.75rem;
+            margin-bottom: 1.75rem;
+            position: relative;
+            z-index: 1;
+        }
+        .project-feature-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+        }
+        .project-feature-icon {
+            font-size: 1.1rem;
+        }
+        .project-card .hero-btn-primary,
+        .project-card .hero-btn-secondary {
+            align-self: flex-start;
+            position: relative;
+            z-index: 1;
+        }
+
+        .baoyuan-hero-image {
+            position: relative;
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid var(--glass-border);
+        }
+        .baoyuan-hero-image img {
+            width: 100%;
+            height: 320px;
+            object-fit: cover;
+            display: block;
+        }
+        .baoyuan-image-overlay {
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        .baoyuan-badge {
+            padding: 0.3rem 0.8rem;
+            background: rgba(212, 175, 55, 0.9);
+            color: #1a1a2e;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        .baoyuan-year {
+            padding: 0.2rem 0.8rem;
+            background: rgba(0, 0, 0, 0.6);
+            color: var(--text-primary);
+            border-radius: 6px;
+            font-size: 0.75rem;
+        }
+        .baoyuan-stats-row {
+            display: flex;
+            gap: 2rem;
+            padding: 1.25rem;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border-light);
+            border-radius: 12px;
+        }
+        .baoyuan-stat {
+            text-align: center;
+            flex: 1;
+        }
+        .baoyuan-stat-num {
+            font-size: 2rem;
+            color: var(--warm-gold);
+            font-weight: 700;
+            line-height: 1;
+            margin-bottom: 0.35rem;
+        }
+        .baoyuan-stat-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        @media (max-width: 900px) {
+            .project-card {
+                padding: 1.75rem;
+            }
+            .project-card-title {
+                font-size: 1.25rem;
+            }
+            .baoyuan-stats-row {
+                gap: 1rem;
+                padding: 1rem;
+            }
+            .baoyuan-stat-num {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</body>
+</html>

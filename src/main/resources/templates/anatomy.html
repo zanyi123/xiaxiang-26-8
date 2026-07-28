@@ -1,0 +1,174 @@
+﻿<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>建筑解剖 - 侨乡建筑数字化云游平台</title>
+    <link rel="stylesheet" href="/css/qiaoyun.css">
+    <style>
+        .anatomy-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-top: 2rem; }
+        .anatomy-preview { position: sticky; top: 100px; }
+        .anatomy-preview-box { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 16px; padding: 2rem; text-align: center; backdrop-filter: blur(15px); }
+        .anatomy-preview-img { width: 100%; max-width: 360px; border-radius: 12px; margin: 0 auto 1rem; display: block; }
+        .anatomy-parts-list { display: flex; flex-direction: column; gap: 1rem; }
+        .anatomy-part-card { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 12px; padding: 1.5rem; cursor: pointer; transition: all 0.3s; backdrop-filter: blur(15px); }
+        .anatomy-part-card:hover { border-color: var(--warm-gold); transform: translateX(4px); }
+        .anatomy-part-card.active { border-color: var(--warm-gold); background: rgba(212, 175, 55, 0.1); }
+        .anatomy-part-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; }
+        .anatomy-part-name { font-size: 1.2rem; color: var(--warm-gold); font-weight: 600; }
+        .anatomy-part-en { font-size: 0.85rem; color: var(--text-muted); font-style: italic; }
+        .anatomy-part-category { display: inline-block; padding: 0.2rem 0.75rem; background: rgba(212, 175, 55, 0.15); color: var(--warm-gold); border-radius: 20px; font-size: 0.75rem; }
+        .anatomy-part-desc { color: var(--text-secondary); font-size: 0.9rem; line-height: 1.6; margin-bottom: 0.75rem; }
+        .anatomy-part-meta { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; font-size: 0.8rem; }
+        .anatomy-meta-item { padding: 0.5rem; background: rgba(0,0,0,0.2); border-radius: 6px; }
+        .anatomy-meta-label { color: var(--text-muted); display: block; margin-bottom: 0.25rem; }
+        .anatomy-meta-value { color: var(--text-primary); }
+        @media (max-width: 768px) { .anatomy-layout { grid-template-columns: 1fr; } .anatomy-preview { position: static; } }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <div class="header-left"><a href="/" class="header-logo">薪火侨乡</a></div>
+            <nav class="header-nav">
+                <a href="/">云游</a>
+                <a href="/#buildings">建筑图鉴</a>
+                <a href="/knowledge">知识库</a>
+                <a href="/stories">侨乡故事</a>
+                <a href="/archive">田野档案</a>
+                <a href="/about">关于我们</a>
+            </nav>
+            <div class="header-right"><button class="header-btn" onclick="window.location.href='/map'">开始云游</button></div>
+        </div>
+    </header>
+
+    <main class="main">
+        <section class="page-hero">
+            <div class="page-hero-content">
+                <span class="page-hero-label">BUILDING ANATOMY</span>
+                <h1 class="page-hero-title">建筑解剖</h1>
+                <p class="page-hero-subtitle">拆解碉楼构造，读懂百年建筑的语言</p>
+            </div>
+        </section>
+
+        <div class="page-content">
+            <section class="section">
+                <div class="section-header">
+                    <span class="section-label">互动探索</span>
+                    <h2 class="section-title">碉楼部位分解</h2>
+                    <p class="section-subtitle">点击右侧部位卡片，查看功能、材料与年代详情</p>
+                </div>
+
+                <div class="filter-tabs" th:if="${buildings != null and !buildings.isEmpty()}">
+                    <a th:each="b : ${buildings}"
+                       th:href="|/anatomy?buildingId=${b.id}|"
+                       class="filter-tab"
+                       th:classappend="${b.id == buildingId} ? 'active' : ''"
+                       th:text="${b.name}">建筑名称</a>
+                </div>
+
+                <div class="anatomy-layout">
+                    <div class="anatomy-preview">
+                        <div class="anatomy-preview-box">
+                            <img class="anatomy-preview-img"
+                                 th:src="|https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=kaiping%20diaolou%20architecture%20cross%20section%20anatomy%20illustration%20golden%20hour&image_size=portrait_4_3|"
+                                 alt="建筑解剖图">
+                            <h3 style="color: var(--warm-gold); margin-bottom: 0.5rem;">碉楼构造示意图</h3>
+                            <p style="color: var(--text-muted); font-size: 0.9rem;">本图为示意图，3D模型素材就绪后将替换为可交互模型</p>
+                            <div id="anatomy-detail-box" style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--glass-border); display: none;">
+                                <h4 id="detail-name" style="color: var(--warm-gold);"></h4>
+                                <p id="detail-desc" style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 0.5rem;"></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="anatomy-parts-list" th:if="${parts != null and !parts.isEmpty()}">
+                        <div th:each="part : ${parts}"
+                             class="anatomy-part-card"
+                             th:data-id="${part.id}"
+                             th:data-name="${part.partName}"
+                             th:data-desc="${part.description}"
+                             onclick="selectPart(this)">
+                            <div class="anatomy-part-header">
+                                <div>
+                                    <div class="anatomy-part-name" th:text="${part.partName}">部位名称</div>
+                                    <div class="anatomy-part-en" th:text="${part.partNameEn}">English</div>
+                                </div>
+                                <span class="anatomy-part-category" th:text="${part.category}">分类</span>
+                            </div>
+                            <p class="anatomy-part-desc" th:text="${part.description}">描述</p>
+                            <div class="anatomy-part-meta">
+                                <div class="anatomy-meta-item">
+                                    <span class="anatomy-meta-label">功能</span>
+                                    <span class="anatomy-meta-value" th:text="${part.function}">功能</span>
+                                </div>
+                                <div class="anatomy-meta-item">
+                                    <span class="anatomy-meta-label">材料</span>
+                                    <span class="anatomy-meta-value" th:text="${part.material}">材料</span>
+                                </div>
+                                <div class="anatomy-meta-item">
+                                    <span class="anatomy-meta-label">年代</span>
+                                    <span class="anatomy-meta-value" th:text="${part.era}">年代</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div th:if="${parts == null or parts.isEmpty()}" style="text-align: center; padding: 3rem; color: var(--text-muted);">
+                        建筑解剖数据整理中，敬请期待。
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-logo">薪火侨乡</div>
+            <p><span class="project-name">侨韵薪火</span> - 江门侨乡建筑数字化云游平台</p>
+        </div>
+        <div class="footer-links">
+            <a href="/">首页</a><a href="/#buildings">建筑图鉴</a><a href="/stories">侨乡故事</a>
+            <a href="/archive">田野档案</a><a href="/map">景区导航</a><a href="/about">关于我们</a>
+        </div>
+        <div class="footer-bottom">
+            <p>技术支持：3D高斯泼溅技术(3DGS) · 腾讯云COS · AI语音合成</p>
+            <p style="margin-top: 0.5rem;">© 2024 侨韵薪火实践团 版权所有</p>
+        </div>
+    </footer>
+
+    <button class="ai-guide-btn" id="ai-guide-btn" onclick="toggleAiGuide()">🎧</button>
+    <div class="ai-guide-panel" id="ai-guide-panel">
+        <h3 class="ai-guide-title">AI智能讲解</h3>
+        <div class="ai-guide-text">点击右侧建筑部位，AI将为您详细解读其功能与历史。</div>
+        <div class="ai-guide-controls">
+            <button class="ai-control-btn primary" onclick="playPageIntro()">播放介绍</button>
+        </div>
+    </div>
+
+    <script>
+        function selectPart(card) {
+            document.querySelectorAll('.anatomy-part-card').forEach(c => c.classList.remove('active'));
+            card.classList.add('active');
+            const box = document.getElementById('anatomy-detail-box');
+            document.getElementById('detail-name').textContent = card.dataset.name;
+            document.getElementById('detail-desc').textContent = card.dataset.desc;
+            box.style.display = 'block';
+            if (window.speechSynthesis) {
+                window.speechSynthesis.cancel();
+                const u = new SpeechSynthesisUtterance(card.dataset.name + '。' + card.dataset.desc);
+                u.lang = 'zh-CN'; u.rate = 0.95;
+                window.speechSynthesis.speak(u);
+            }
+        }
+        function toggleAiGuide() { document.getElementById('ai-guide-panel').classList.toggle('active'); }
+        function playPageIntro() {
+            if (window.speechSynthesis) {
+                window.speechSynthesis.cancel();
+                const u = new SpeechSynthesisUtterance('欢迎来到建筑解剖互动模块。在这里，我们将百年碉楼拆解为屋顶、八角窗、燕子窝、青砖墙体、灰塑装饰等部位，逐一解读其功能、材料与建造年代。点击右侧任意部位卡片，即可聆听详细讲解。');
+                u.lang = 'zh-CN'; u.rate = 0.95;
+                window.speechSynthesis.speak(u);
+            }
+        }
+    </script>
+</body>
+</html>

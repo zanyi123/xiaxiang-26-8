@@ -1,0 +1,241 @@
+package org.example.xiaxiang.service;
+
+import lombok.extern.slf4j.Slf4j;
+import org.example.xiaxiang.exception.BusinessException;
+import org.example.xiaxiang.properties.AppProperties;
+import org.example.xiaxiang.properties.CosProperties;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import javax.annotation.PostConstruct;
+
+/**
+ * COS URL 生成服务
+ *
+ * 核心职责：拼接 COS 文件的公开 URL，绝不通过 InputStream 读取大文件
+ * 动静分离原则：前端浏览器直接通过 COS 公网 URL 拉取 .splat / .mp4
+ *
+ * Mock 模式：app.mock-mode=true 时返回本地静态资源路径，用于开发调试
+ */
+@Slf4j
+@Service
+public class CosService {
+
+    @Autowired
+    private CosProperties cosProperties;
+
+    @Autowired
+    private AppProperties appProperties;
+
+    private String cosBaseUrl;
+
+    /**
+     * 初始化 COS 基础 URL
+     */
+    @PostConstruct
+    public void init() {
+        String region = cosProperties.getRegion();
+        String bucket = cosProperties.getBucketName();
+
+        if (!isBlank(region) && !isBlank(bucket)) {
+            // 拼接标准 COS 公网访问域名
+            this.cosBaseUrl = String.format("https://%s.cos.%s.myqcloud.com/", bucket, region);
+            log.info("[CosService] COS 基础 URL 初始化完成：{}", this.cosBaseUrl);
+        } else {
+            log.warn("[CosService] COS 配置不完整（region 或 bucket 为空），真实 COS URL 将不可用");
+            this.cosBaseUrl = "";
+        }
+    }
+
+    /**
+     * 获取文件的公开访问 URL
+     *
+     * @param key COS 对象键，如 "models/kaiping.splat"
+     * @return 完整公开 URL
+     */
+    public String getFileUrl(String key) {
+        // 参数校验
+        if (isBlank(key)) {
+            throw new BusinessException("文件 key 不能为空");
+        }
+
+        // Mock 模式：返回本地静态资源路径
+        if (appProperties.isMockMode()) {
+            String mockUrl = "/mock/" + key;
+            log.debug("[CosService] Mock 模式返回本地 URL：{}", mockUrl);
+            return mockUrl;
+        }
+
+        // 真实 COS 模式：拼接公开 URL
+        if (isBlank(cosBaseUrl)) {
+            throw new BusinessException("COS 配置不完整，无法生成文件 URL");
+        }
+
+        String url = cosBaseUrl + key;
+        log.debug("[CosService] 生成 COS 公开 URL：{}", url);
+        return url;
+    }
+
+    /**
+     * 安全获取文件 URL：key 为空或异常时返回 null，不抛异常
+     * 适用于素材可选场景（如封面图未上传时回退到 AI 生成图）
+     *
+     * @param key COS 对象键，可为 null
+     * @return 完整公开 URL，或 null
+     */
+    public String getUrlSafely(String key) {
+        if (isBlank(key)) {
+            return null;
+        }
+        // Mock 模式：返回本地静态资源路径
+        if (appProperties.isMockMode()) {
+            return "/mock/" + key;
+        }
+        // 真实 COS 模式：拼接公开 URL
+        if (isBlank(cosBaseUrl)) {
+            return null;
+        }
+        return cosBaseUrl + key;
+    }
+
+    // ==================== 建筑相关方法 ====================
+
+    /**
+     * 根据建筑 ID 获取 3D 模型 URL
+     */
+    public String getModelUrl(Integer buildingId) {
+        AppProperties.Building building = findBuildingById(buildingId);
+        if (building == null) {
+            throw new BusinessException("建筑不存在：ID=" + buildingId);
+        }
+        return getFileUrl(building.getModelKey());
+    }
+
+    /**
+     * 根据建筑 ID 获取 4K 视频 URL
+     */
+    public String getVideoUrl(Integer buildingId) {
+        AppProperties.Building building = findBuildingById(buildingId);
+        if (building == null) {
+            throw new BusinessException("建筑不存在：ID=" + buildingId);
+        }
+        return getFileUrl(building.getVideoKey());
+    }
+
+    /**
+     * 根据建筑 ID 获取封面图 URL
+     */
+    public String getCoverImageUrl(Integer buildingId) {
+        AppProperties.Building building = findBuildingById(buildingId);
+        if (building == null) {
+            throw new BusinessException("建筑不存在：ID=" + buildingId);
+        }
+        return getFileUrl(building.getCoverImage());
+    }
+
+    /**
+     * 查找建筑信息
+     */
+    public AppProperties.Building findBuildingById(Integer buildingId) {
+        if (buildingId == null || appProperties.getBuildings() == null) {
+            return null;
+        }
+        return appProperties.getBuildings().stream()
+                .filter(b -> buildingId.equals(b.getId()))
+                .findFirst()
+                .orElse(null);
+    }
+
+    // ==================== 地点相关方法（景区导航） ====================
+
+    /**
+     * 获取所有地点列表
+     */
+    public java.util.List<AppProperties.Location> getAllLocations() {
+        if (appProperties.getLocations() == null) {
+            return java.util.Collections.emptyList();
+        }
+        return appProperties.getLocations();
+    }
+
+    /**
+     * 根据地点 ID 获取地点信息
+     */
+    public AppProperties.Location findLocationById(Integer locationId) {
+        if (locationId == null || appProperties.getLocations() == null) {
+            return null;
+        }
+        return appProperties.getLocations().stream()
+                .filter(l -> locationId.equals(l.getId()))
+                .findFirst()
+                .orElse(null);
+    }
+
+    /**
+     * 根据地点 ID 获取 3D 模型 URL
+     */
+    public String getLocationModelUrl(Integer locationId) {
+        AppProperties.Location location = findLocationById(locationId);
+        if (location == null) {
+            throw new BusinessException("地点不存在：ID=" + locationId);
+        }
+        return getFileUrl(location.getModelKey());
+    }
+
+    /**
+     * 根据地点 ID 获取图片 URL
+     */
+    public String getLocationImageUrl(Integer locationId) {
+        AppProperties.Location location = findLocationById(locationId);
+        if (location == null) {
+            throw new BusinessException("地点不存在：ID=" + locationId);
+        }
+        return getFileUrl(location.getImageKey());
+    }
+
+    /**
+     * 根据地点 ID 获取 AI 讲解文本
+     */
+    public String getLocationAudioText(Integer locationId) {
+        AppProperties.Location location = findLocationById(locationId);
+        if (location == null) {
+            throw new BusinessException("地点不存在：ID=" + locationId);
+        }
+        return location.getAudioText();
+    }
+
+    // ==================== 工具方法 ====================
+
+    private boolean isBlank(String str) {
+        return str == null || str.trim().isEmpty();
+    }
+
+    /**
+     * 通用素材 URL Map 构造器
+     * 遍历列表，将每个对象的素材 key 转换为 COS URL，按 id 索引返回
+     * key 为空或异常时该 id 不出现在 Map 中（模板可 fallback 到 AI 生成图）
+     *
+     * @param list      数据列表
+     * @param idGetter  id 提取函数
+     * @param keyGetter 素材 key 提取函数
+     * @param <T>       数据类型
+     * @return Map<id, COS URL>
+     */
+    public <T> java.util.Map<Integer, String> buildUrlMap(java.util.List<T> list,
+                                                          java.util.function.Function<T, Integer> idGetter,
+                                                          java.util.function.Function<T, String> keyGetter) {
+        java.util.Map<Integer, String> map = new java.util.HashMap<>();
+        if (list == null) {
+            return map;
+        }
+        for (T item : list) {
+            Integer id = idGetter.apply(item);
+            String key = keyGetter.apply(item);
+            String url = getUrlSafely(key);
+            if (id != null && url != null) {
+                map.put(id, url);
+            }
+        }
+        return map;
+    }
+}

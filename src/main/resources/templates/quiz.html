@@ -1,0 +1,188 @@
+﻿<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>知识答题 - 侨乡建筑数字化云游平台</title>
+    <link rel="stylesheet" href="/css/qiaoyun.css">
+    <style>
+        .quiz-container { max-width: 800px; margin: 2rem auto; }
+        .quiz-card { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 16px; padding: 2rem; margin-bottom: 1.5rem; backdrop-filter: blur(15px); transition: all 0.3s; }
+        .quiz-card.answered { border-color: var(--warm-gold); }
+        .quiz-number { display: inline-block; padding: 0.25rem 0.75rem; background: rgba(212, 175, 55, 0.15); color: var(--warm-gold); border-radius: 20px; font-size: 0.8rem; margin-bottom: 0.75rem; }
+        .quiz-question { color: var(--text-primary); font-size: 1.15rem; line-height: 1.6; margin-bottom: 1.25rem; font-weight: 500; }
+        .quiz-options { display: flex; flex-direction: column; gap: 0.75rem; }
+        .quiz-option { display: flex; align-items: center; gap: 0.75rem; padding: 0.85rem 1rem; background: rgba(0,0,0,0.25); border: 1px solid var(--glass-border); border-radius: 8px; cursor: pointer; transition: all 0.2s; color: var(--text-secondary); }
+        .quiz-option:hover { border-color: var(--warm-gold); background: rgba(212, 175, 55, 0.08); }
+        .quiz-option.selected { border-color: var(--warm-gold); background: rgba(212, 175, 55, 0.15); color: var(--text-primary); }
+        .quiz-option.correct { border-color: #4ade80; background: rgba(74, 222, 128, 0.15); color: #4ade80; }
+        .quiz-option.wrong { border-color: #f87171; background: rgba(248, 113, 113, 0.15); color: #f87171; }
+        .quiz-option-letter { width: 28px; height: 28px; border-radius: 50%; background: rgba(212, 175, 55, 0.2); color: var(--warm-gold); display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 0.85rem; flex-shrink: 0; }
+        .quiz-explanation { margin-top: 1rem; padding: 1rem; background: rgba(0,0,0,0.3); border-left: 3px solid var(--warm-gold); border-radius: 4px; color: var(--text-secondary); font-size: 0.9rem; line-height: 1.6; display: none; }
+        .quiz-explanation.show { display: block; }
+        .quiz-result { text-align: center; padding: 3rem 2rem; background: var(--glass-bg); border: 1px solid var(--warm-gold); border-radius: 16px; margin-top: 2rem; display: none; }
+        .quiz-result.show { display: block; }
+        .quiz-score { font-size: 3.5rem; color: var(--warm-gold); font-weight: 700; }
+        .quiz-score-label { color: var(--text-muted); font-size: 0.95rem; margin-top: 0.5rem; }
+        .quiz-actions { display: flex; gap: 1rem; justify-content: center; margin-top: 1.5rem; }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <div class="header-left"><a href="/" class="header-logo">薪火侨乡</a></div>
+            <nav class="header-nav">
+                <a href="/">云游</a><a href="/#buildings">建筑图鉴</a><a href="/knowledge">知识库</a>
+                <a href="/stories">侨乡故事</a><a href="/archive">田野档案</a><a href="/about">关于我们</a>
+            </nav>
+            <div class="header-right"><button class="header-btn" onclick="window.location.href='/map'">开始云游</button></div>
+        </div>
+    </header>
+
+    <main class="main">
+        <section class="page-hero">
+            <div class="page-hero-content">
+                <span class="page-hero-label">QUIZ CHALLENGE</span>
+                <h1 class="page-hero-title">知识答题挑战</h1>
+                <p class="page-hero-subtitle">答题闯关，赢取专属印章</p>
+            </div>
+        </section>
+
+        <div class="page-content">
+            <section class="section">
+                <div class="section-header">
+                    <span class="section-label">趣味挑战</span>
+                    <h2 class="section-title">侨乡知识大闯关</h2>
+                    <p class="section-subtitle">正确率≥80%可解锁"答题高手"印章</p>
+                </div>
+
+                <div class="quiz-container" id="quiz-container" th:if="${quizzes != null and !quizzes.isEmpty()}">
+                    <div class="quiz-card" th:each="q, iter : ${quizzes}"
+                         th:data-id="${q.id}" th:data-answer="${q.answer}">
+                        <span class="quiz-number" th:text="'第 ' + ${iter.count} + ' 题 · ' + ${q.category} + ' · ' + ${q.difficulty}"></span>
+                        <div class="quiz-question" th:text="${q.question}">题目</div>
+                        <div class="quiz-options">
+                            <div class="quiz-option" th:each="opt, oIter : ${q.options}"
+                                 th:data-index="${oIter.index}"
+                                 onclick="selectOption(this)">
+                                <span class="quiz-option-letter" th:text="${oIter.index == 0} ? 'A' : (${oIter.index == 1} ? 'B' : (${oIter.index == 2} ? 'C' : 'D'))">A</span>
+                                <span th:text="${opt}">选项</span>
+                            </div>
+                        </div>
+                        <div class="quiz-explanation" th:text="'💡 ' + ${q.explanation}">解析</div>
+                    </div>
+
+                    <div style="text-align: center; margin: 2rem 0;">
+                        <button class="hero-btn-primary" onclick="submitQuiz()">提交答题</button>
+                        <button class="hero-btn-secondary" onclick="resetQuiz()" style="margin-left: 1rem;">重新作答</button>
+                    </div>
+
+                    <div class="quiz-result" id="quiz-result">
+                        <div class="quiz-score" id="quiz-score">0</div>
+                        <div class="quiz-score-label" id="quiz-score-label">答题完成</div>
+                        <div class="quiz-actions">
+                            <button class="hero-btn-primary" onclick="resetQuiz()">再试一次</button>
+                            <button class="hero-btn-secondary" onclick="window.location.href='/stamps'">查看印章</button>
+                        </div>
+                    </div>
+                </div>
+                <div th:if="${quizzes == null or quizzes.isEmpty()}" style="text-align: center; padding: 3rem; color: var(--text-muted);">
+                    题库整理中，敬请期待。
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-logo">薪火侨乡</div>
+            <p><span class="project-name">侨韵薪火</span> - 江门侨乡建筑数字化云游平台</p>
+        </div>
+        <div class="footer-links">
+            <a href="/">首页</a><a href="/#buildings">建筑图鉴</a><a href="/stories">侨乡故事</a>
+            <a href="/archive">田野档案</a><a href="/map">景区导航</a><a href="/about">关于我们</a>
+        </div>
+        <div class="footer-bottom">
+            <p>技术支持：3D高斯泼溅技术(3DGS) · 腾讯云COS · AI语音合成</p>
+            <p style="margin-top: 0.5rem;">© 2024 侨韵薪火实践团 版权所有</p>
+        </div>
+    </footer>
+
+    <button class="ai-guide-btn" onclick="toggleAiGuide()">🎧</button>
+    <div class="ai-guide-panel" id="ai-guide-panel">
+        <h3 class="ai-guide-title">AI智能讲解</h3>
+        <div class="ai-guide-text">选择答案后点击"提交答题"，系统将自动评分并显示解析。</div>
+        <div class="ai-guide-controls">
+            <button class="ai-control-btn primary" onclick="playPageIntro()">播放介绍</button>
+        </div>
+    </div>
+
+    <script>
+        const answers = {};
+        function selectOption(opt) {
+            const card = opt.closest('.quiz-card');
+            const qid = card.dataset.id;
+            const idx = parseInt(opt.dataset.index);
+            card.querySelectorAll('.quiz-option').forEach(o => o.classList.remove('selected'));
+            opt.classList.add('selected');
+            answers[qid] = idx;
+        }
+        function submitQuiz() {
+            const cards = document.querySelectorAll('.quiz-card');
+            let correct = 0, total = 0;
+            cards.forEach(card => {
+                const qid = card.dataset.id;
+                const correctAns = parseInt(card.dataset.answer);
+                const userAns = answers[qid];
+                total++;
+                card.classList.add('answered');
+                const opts = card.querySelectorAll('.quiz-option');
+                opts.forEach((o, i) => {
+                    o.classList.remove('correct', 'wrong');
+                    if (i === correctAns) o.classList.add('correct');
+                    if (i === userAns && userAns !== correctAns) o.classList.add('wrong');
+                });
+                card.querySelector('.quiz-explanation').classList.add('show');
+                if (userAns === correctAns) correct++;
+            });
+            const score = total === 0 ? 0 : Math.round(correct * 100 / total);
+            document.getElementById('quiz-score').textContent = score + '分';
+            let label = '继续加油！';
+            if (score >= 80) label = '太棒了！已解锁"答题高手"印章 🏆';
+            else if (score >= 60) label = '及格了，再接再厉！';
+            document.getElementById('quiz-score-label').textContent = `答对 ${correct}/${total} 题 · ${label}`;
+            document.getElementById('quiz-result').classList.add('show');
+            document.getElementById('quiz-result').scrollIntoView({ behavior: 'smooth' });
+            // 答题高手印章本地解锁
+            if (score >= 80) unlockStamp(7);
+        }
+        function resetQuiz() {
+            answers.length = 0;
+            for (const k in answers) delete answers[k];
+            document.querySelectorAll('.quiz-option').forEach(o => o.classList.remove('selected', 'correct', 'wrong'));
+            document.querySelectorAll('.quiz-card').forEach(c => c.classList.remove('answered'));
+            document.querySelectorAll('.quiz-explanation').forEach(e => e.classList.remove('show'));
+            document.getElementById('quiz-result').classList.remove('show');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+        function unlockStamp(id) {
+            try {
+                let unlocked = JSON.parse(localStorage.getItem('qiaoyun_stamps') || '[]');
+                if (!unlocked.includes(id)) {
+                    unlocked.push(id);
+                    localStorage.setItem('qiaoyun_stamps', JSON.stringify(unlocked));
+                }
+            } catch(e) {}
+        }
+        function toggleAiGuide() { document.getElementById('ai-guide-panel').classList.toggle('active'); }
+        function playPageIntro() {
+            if (window.speechSynthesis) {
+                window.speechSynthesis.cancel();
+                const u = new SpeechSynthesisUtterance('欢迎参加知识答题挑战。本挑战共10道题，涵盖宝源坊历史、碉楼建筑、侨批文化、侨乡方言等内容。每题选择答案后，点击提交答题按钮，系统将自动评分并显示详细解析。正确率达到80%以上，即可解锁答题高手专属印章。');
+                u.lang = 'zh-CN'; u.rate = 0.95;
+                window.speechSynthesis.speak(u);
+            }
+        }
+    </script>
+</body>
+</html>

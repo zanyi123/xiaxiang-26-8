@@ -1,0 +1,205 @@
+﻿<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title th:text="${location.name} + ' - 薪火侨乡'">地点详情</title>
+    <link rel="stylesheet" href="/css/qiaoyun.css">
+    <style>
+        #canvas-container {
+            width: 100%;
+            height: 500px;
+            position: relative;
+            background: var(--ink-black);
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid var(--glass-border);
+        }
+        .model-controls {
+            position: absolute;
+            bottom: 1rem;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 0.5rem;
+            z-index: 100;
+        }
+        .model-btn {
+            padding: 0.5rem 1rem;
+            background: rgba(0, 0, 0, 0.7);
+            border: 1px solid var(--warm-gold);
+            border-radius: 6px;
+            color: var(--warm-gold);
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+        }
+        .model-btn:hover {
+            background: rgba(212, 175, 55, 0.2);
+        }
+        .model-info {
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            color: var(--warm-gold);
+            font-size: 0.85rem;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <div class="header-left">
+                <a href="/" class="header-logo">侨韵薪火</a>
+            </div>
+            <nav class="header-nav">
+                <a href="/">首页</a>
+                <a href="/map">景区导航</a>
+                <a href="/#locations">地点导览</a>
+                <a href="/#about">关于我们</a>
+            </nav>
+            <div class="header-right">
+                <a href="/map" class="back-link">← 返回地图</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="main">
+        <div class="location-detail-page">
+            <div class="location-header">
+                <div class="location-number" th:text="${location.number}"></div>
+                <div class="location-info">
+                    <h1 class="location-name" th:text="${location.name}"></h1>
+                    <p class="location-desc" th:text="${location.description}"></p>
+                </div>
+            </div>
+
+            <div class="location-content">
+                <div class="content-left">
+                    <div id="canvas-container">
+                        <div class="model-info">3D高斯泼溅模型 · 支持鼠标旋转缩放</div>
+                        <canvas id="3d-canvas"></canvas>
+                        <div class="model-controls">
+                            <button class="model-btn" onclick="resetCamera()">重置视角</button>
+                            <button class="model-btn" onclick="autoRotate()">自动旋转</button>
+                            <button class="model-btn" onclick="downloadModel()">下载模型</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="content-right">
+                    <div class="info-card">
+                        <h3 class="info-card-title">历史背景</h3>
+                        <p class="info-card-content" th:text="${location.history}"></p>
+                    </div>
+
+                    <div class="info-card">
+                        <h3 class="info-card-title">AI智能讲解</h3>
+                        <div class="guide-text" id="guide-text" th:text="${location.audioText}"></div>
+                        <div class="guide-controls">
+                            <button class="guide-btn" onclick="playGuide()">
+                                ▶️ 播放讲解
+                            </button>
+                            <button class="guide-btn" onclick="pauseGuide()">
+                                ⏸️ 暂停
+                            </button>
+                            <button class="guide-btn" onclick="stopGuide()">
+                                ⏹️ 停止
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="info-card">
+                        <h3 class="info-card-title">相关地点</h3>
+                        <div class="related-locations">
+                            <a th:each="loc : ${otherLocations}" 
+                               th:href="|/location/${loc.id}|" 
+                               class="related-link"
+                               th:text="${loc.name}">
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <button class="ai-guide-btn" id="ai-guide-btn" onclick="toggleAiGuide()">
+        🎧
+    </button>
+
+    <div class="ai-guide-panel" id="ai-guide-panel">
+        <h3 class="ai-guide-title">AI智能讲解</h3>
+        <div class="ai-guide-text" id="ai-guide-text" th:text="${location.audioText}"></div>
+        <div class="ai-guide-controls">
+            <button class="ai-control-btn" onclick="playGuide()">播放</button>
+            <button class="ai-control-btn" onclick="pauseGuide()">暂停</button>
+            <button class="ai-control-btn" onclick="stopGuide()">停止</button>
+        </div>
+    </div>
+
+    <script src="/js/building-3d.js"></script>
+    <script th:inline="javascript">
+        const audioText = /*[[${location.audioText}]]*/ '';
+
+        function playGuide() {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance(audioText);
+                utterance.lang = 'zh-CN';
+                utterance.rate = 0.9;
+                utterance.pitch = 1;
+                window.speechSynthesis.speak(utterance);
+                
+                const btn = document.getElementById('ai-guide-btn');
+                btn.classList.add('playing');
+                utterance.onend = () => {
+                    btn.classList.remove('playing');
+                };
+            } else {
+                alert('您的浏览器不支持语音合成功能');
+            }
+        }
+
+        function pauseGuide() {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.pause();
+                document.getElementById('ai-guide-btn').classList.remove('playing');
+            }
+        }
+
+        function stopGuide() {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                document.getElementById('ai-guide-btn').classList.remove('playing');
+            }
+        }
+
+        function toggleAiGuide() {
+            const panel = document.getElementById('ai-guide-panel');
+            panel.classList.toggle('active');
+        }
+
+        function resetCamera() {
+            if (window.resetCamera) {
+                window.resetCamera();
+            }
+        }
+
+        function autoRotate() {
+            if (window.toggleAutoRotate) {
+                window.toggleAutoRotate();
+            }
+        }
+
+        function downloadModel() {
+            alert('3D模型下载功能开发中，敬请期待！');
+        }
+
+        playGuide();
+    </script>
+</body>
+</html>

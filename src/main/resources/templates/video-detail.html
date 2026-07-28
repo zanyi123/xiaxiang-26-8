@@ -1,0 +1,236 @@
+﻿<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${video.title} + ' - 视频详情 - 薪火侨乡'">视频详情 - 薪火侨乡</title>
+    <link rel="stylesheet" href="/css/qiaoyun.css">
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <div class="header-left">
+                <a href="/" class="header-logo">薪火侨乡</a>
+            </div>
+            <nav class="header-nav">
+                <a href="/">云游</a>
+                <a href="/#buildings">建筑图鉴</a>
+                <a href="/knowledge">知识库</a>
+                <a href="/stories">侨乡故事</a>
+                <a href="/archive">田野档案</a>
+                <a href="/about">关于我们</a>
+            </nav>
+            <div class="header-right">
+                <button class="header-btn" onclick="window.location.href='/map'">开始云游</button>
+            </div>
+        </div>
+    </header>
+
+    <main class="main" th:if="${video != null}">
+        <div class="page-content">
+            <!-- 返回链接 -->
+            <a href="/about" class="detail-back back-link">← 返回关于我们</a>
+
+            <!-- 两栏布局：主视频区 + 相关视频侧栏 -->
+            <div style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 2.5rem; align-items: start; margin-top: 1rem;">
+
+                <!-- 左栏：视频播放区与详情 -->
+                <div>
+                    <!-- 16:9 视频播放容器（占位：封面图 + 播放按钮 + 时长徽章） -->
+                    <div class="video-player-wrapper" style="position: relative; width: 100%; padding-bottom: 56.25%; border-radius: 16px; overflow: hidden; background: #000; border: 1px solid var(--glass-border-light); box-shadow: 0 20px 60px rgba(0,0,0,0.5);">
+                        <!-- 真实视频文件存在时显示 video 元素，否则显示封面图占位 -->
+                        <video th:if="${videoUrl != null}" id="real-video-player" controls preload="metadata" th:poster="${coverUrl != null} ? ${coverUrl} : ''" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; background: #000;">
+                            <source th:src="${videoUrl}" type="video/mp4">
+                            您的浏览器不支持视频播放
+                        </video>
+                        <img th:if="${videoUrl == null}" th:src="${coverUrl != null} ? ${coverUrl} : |https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=${video.title}%20kaiping%20qiaoxiang%20village%20cinematic%20documentary%20golden%20hour&image_size=square|" th:alt="${video.title}" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0.85;">
+
+                        <!-- 播放按钮覆盖层（仅当无真实视频时显示） -->
+                        <button th:if="${videoUrl == null}" class="video-play-btn" onclick="playVideo()" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 88px; height: 88px; border-radius: 50%; background: rgba(212, 175, 55, 0.9); border: none; color: #1a1a2e; font-size: 2rem; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 30px rgba(212, 175, 55, 0.5); transition: transform 0.3s ease, background 0.3s ease;">▶</button>
+
+                        <!-- 时长徽章 -->
+                        <span class="video-duration" th:text="${video.duration}" style="position: absolute; bottom: 1rem; right: 1rem; padding: 0.35rem 0.85rem; background: rgba(0, 0, 0, 0.75); color: var(--warm-gold); font-size: 0.9rem; border-radius: 6px; backdrop-filter: blur(4px); z-index: 2;">00:00</span>
+                    </div>
+
+                    <!-- 视频标题 -->
+                    <h1 class="detail-title" th:text="${video.title}" style="margin-top: 1.5rem;"></h1>
+
+                    <!-- 视频元信息 -->
+                    <div class="detail-meta">
+                        <span>⏱️ 时长：<span th:text="${video.duration}"></span></span>
+                        <span>👁️ <span th:text="${video.views}"></span> 次观看</span>
+                    </div>
+
+                    <!-- AI 讲解按钮 -->
+                    <div style="margin: 1.5rem 0;">
+                        <button class="hero-btn-primary" id="ai-narration-btn" onclick="toggleAiNarration()">
+                            <span class="play-icon">▶</span>
+                            <span id="narration-btn-text">AI讲解</span>
+                        </button>
+                    </div>
+
+                    <!-- 视频简介 -->
+                    <div class="detail-content" id="video-description">
+                        <h3 style="color: var(--warm-gold); margin-bottom: 0.75rem;">视频简介</h3>
+                        <p th:text="${video.description}" style="line-height: 1.9; color: var(--text-primary);"></p>
+
+                        <p>
+                            本视频由侨韵薪火实践团在江门开平宝源坊实地拍摄与制作，结合3D高斯泼溅技术（3DGS）采集的数字化资产，力求还原百年侨乡建筑最真实的风貌与质感。镜头从村口的古榕树缓缓推进，穿过青砖灰瓦的巷弄，最终定格于雕花精美的碉楼之上，记录下侨乡文化在岁月流转中沉淀的厚重与温度。
+                        </p>
+                        <p>
+                            视频中穿插了老村民的口述回忆与建筑学者的专业解读，让观众既能感受到华侨漂洋过海的家国情怀，也能了解侨乡建筑中西合璧的独特艺术价值。我们希望以影像为媒，让更多人认识宝源坊、走近侨乡文化，共同守护这份属于全体华人的文化记忆。
+                        </p>
+                    </div>
+                </div>
+
+                <!-- 右栏：相关视频侧栏 -->
+                <aside>
+                    <div class="section-header" style="margin-bottom: 1rem;">
+                        <span class="section-label">Related Videos</span>
+                        <h2 class="section-title" style="font-size: 1.5rem;">相关视频</h2>
+                        <p class="section-subtitle">继续探索侨乡的影像记忆</p>
+                    </div>
+
+                    <div th:if="${otherVideos != null and #lists.size(otherVideos) > 0}" style="display: flex; flex-direction: column; gap: 1rem;">
+                        <a th:each="other : ${otherVideos}" th:href="@{/video/{id}(id=${other.id})}" class="video-card" style="text-decoration: none; color: inherit; display: flex; gap: 0.85rem; padding: 0.75rem; background: var(--glass-bg); border: 1px solid var(--glass-border-light); border-radius: 12px; transition: transform 0.25s ease, border-color 0.25s ease;">
+                            <div class="video-thumbnail" style="position: relative; flex: 0 0 130px; width: 130px; height: 80px; border-radius: 8px; overflow: hidden;">
+                                <img th:src="${coverUrls != null and coverUrls[other.id] != null} ? ${coverUrls[other.id]} : |https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=${other.title}%20kaiping%20qiaoxiang%20village%20cinematic%20documentary%20golden%20hour&image_size=square|" th:alt="${other.title}" loading="lazy" style="width: 100%; height: 100%; object-fit: cover;">
+                                <span class="video-duration" th:text="${other.duration}" style="position: absolute; bottom: 4px; right: 4px; padding: 2px 6px; background: rgba(0,0,0,0.8); color: var(--warm-gold); font-size: 0.72rem; border-radius: 4px;">00:00</span>
+                            </div>
+                            <div class="video-info" style="flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: center;">
+                                <h4 class="video-title" th:text="${other.title}" style="font-size: 0.95rem; line-height: 1.4; margin: 0 0 0.4rem; color: var(--text-primary); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;"></h4>
+                                <div class="video-meta" style="font-size: 0.78rem; color: var(--text-secondary);">
+                                    <span>⏱️ <span th:text="${other.duration}"></span></span>
+                                    <span style="margin-left: 0.6rem;">👁️ <span th:text="${other.views}"></span></span>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+
+                    <div th:if="${otherVideos == null or #lists.size(otherVideos) == 0}" style="text-align: center; color: var(--text-secondary); padding: 2rem 1rem; background: var(--glass-bg); border: 1px solid var(--glass-border-light); border-radius: 12px;">
+                        暂无相关视频
+                    </div>
+                </aside>
+            </div>
+        </div>
+    </main>
+
+    <!-- 数据缺失兜底 -->
+    <main class="main" th:if="${video == null}">
+        <div class="page-content" style="text-align: center; padding: 4rem 1rem;">
+            <h2 class="detail-title">视频不存在</h2>
+            <p style="color: var(--text-secondary); margin: 1rem 0 2rem;">您访问的视频可能已被删除或链接有误。</p>
+            <a href="/about" class="hero-btn-primary" style="display: inline-block; text-decoration: none; padding: 0.9rem 2.2rem;">← 返回关于我们</a>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-logo">薪火侨乡</div>
+            <p><span class="project-name">侨韵薪火</span> - 江门侨乡建筑数字化云游平台</p>
+            <p>广东工业大学三下乡社会实践项目 · 2024</p>
+        </div>
+        <div class="footer-links">
+            <a href="/">首页</a>
+            <a href="/#buildings">建筑图鉴</a>
+            <a href="/stories">侨乡故事</a>
+            <a href="/archive">田野档案</a>
+            <a href="/map">景区导航</a>
+            <a href="/about">关于我们</a>
+        </div>
+        <div class="footer-bottom">
+            <p>技术支持：3D高斯泼溅技术(3DGS) · 腾讯云COS · AI语音合成</p>
+            <p style="margin-top: 0.5rem;">© 2024 侨韵薪火实践团 版权所有</p>
+        </div>
+    </footer>
+
+    <button class="ai-guide-btn" id="ai-guide-btn" onclick="toggleAiGuide()">🎧</button>
+    <div class="ai-guide-panel" id="ai-guide-panel">
+        <h3 class="ai-guide-title">AI智能讲解</h3>
+        <div class="ai-guide-text" id="ai-guide-text">欢迎观看视频，点击"AI讲解"按钮即可聆听视频内容的语音介绍。</div>
+        <div class="ai-guide-controls">
+            <button class="ai-control-btn primary" onclick="playPageIntro()">播放介绍</button>
+            <button class="ai-control-btn" onclick="window.location.href='/map'">开始云游</button>
+        </div>
+    </div>
+
+    <script>
+        function toggleAiGuide() {
+            const panel = document.getElementById('ai-guide-panel');
+            panel.classList.toggle('active');
+        }
+        function speak(text) {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'zh-CN';
+                utterance.rate = 0.9;
+                window.speechSynthesis.speak(utterance);
+                const btn = document.getElementById('ai-guide-btn');
+                btn.classList.add('playing');
+                utterance.onend = () => { btn.classList.remove('playing'); };
+            }
+        }
+        function playPageIntro() {
+            const titleEl = document.querySelector('.detail-title');
+            const title = titleEl ? titleEl.textContent.trim() : '视频详情';
+            const descEl = document.querySelector('#video-description p');
+            const desc = descEl ? descEl.textContent.trim() : '';
+            const text = '欢迎观看视频：' + title + '。' + (desc ? desc + '。' : '') + '本视频由侨韵薪火实践团在宝源坊实地拍摄，结合3D高斯泼溅技术，带您云端漫游百年侨乡。您也可以点击页面中的AI讲解按钮，聆听更详细的语音介绍。';
+            speak(text);
+        }
+
+        /* 视频播放占位 */
+        function playVideo() {
+            alert('视频资源准备中，敬请期待！我们将尽快上线高清影像内容。');
+        }
+
+        /* AI 讲解：朗读视频描述 */
+        let isNarrating = false;
+        function toggleAiNarration() {
+            const btn = document.getElementById('ai-narration-btn');
+            const btnText = document.getElementById('narration-btn-text');
+            const playIcon = btn.querySelector('.play-icon');
+            if (isNarrating) {
+                window.speechSynthesis.cancel();
+                isNarrating = false;
+                if (btnText) btnText.textContent = 'AI讲解';
+                if (playIcon) playIcon.textContent = '▶';
+                return;
+            }
+            const titleEl = document.querySelector('.detail-title');
+            const title = titleEl ? titleEl.textContent.trim() : '';
+            const descEl = document.querySelector('#video-description p');
+            const desc = descEl ? descEl.textContent.trim() : '';
+            const text = (title ? title + '。' : '') + (desc ? desc : '');
+            if (!text.trim()) return;
+            if (!('speechSynthesis' in window)) {
+                alert('您的浏览器不支持语音合成功能');
+                return;
+            }
+            window.speechSynthesis.cancel();
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'zh-CN';
+            utterance.rate = 0.9;
+            isNarrating = true;
+            if (btnText) btnText.textContent = '停止讲解';
+            if (playIcon) playIcon.textContent = '■';
+            const guideBtn = document.getElementById('ai-guide-btn');
+            guideBtn.classList.add('playing');
+            utterance.onend = () => {
+                isNarrating = false;
+                if (btnText) btnText.textContent = 'AI讲解';
+                if (playIcon) playIcon.textContent = '▶';
+                guideBtn.classList.remove('playing');
+            };
+            utterance.onerror = () => {
+                isNarrating = false;
+                if (btnText) btnText.textContent = 'AI讲解';
+                if (playIcon) playIcon.textContent = '▶';
+                guideBtn.classList.remove('playing');
+            };
+            window.speechSynthesis.speak(utterance);
+        }
+    </script>
+</body>
+</html>

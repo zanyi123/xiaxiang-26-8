@@ -1,0 +1,209 @@
+﻿<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>田野档案 - 侨乡建筑数字化云游平台</title>
+    <link rel="stylesheet" href="/css/qiaoyun.css">
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <div class="header-left">
+                <a href="/" class="header-logo">薪火侨乡</a>
+            </div>
+            <nav class="header-nav">
+                <a href="/">云游</a>
+                <a href="/#buildings">建筑图鉴</a>
+                <a href="/knowledge">知识库</a>
+                <a href="/stories">侨乡故事</a>
+                <a href="/archive">田野档案</a>
+                <a href="/about">关于我们</a>
+            </nav>
+            <div class="header-right">
+                <button class="header-btn" onclick="window.location.href='/map'">开始云游</button>
+            </div>
+        </div>
+    </header>
+
+    <main class="main">
+        <section class="page-hero">
+            <div class="page-hero-content">
+                <span class="page-hero-label">FIELD ARCHIVE</span>
+                <h1 class="page-hero-title">田野档案</h1>
+                <p class="page-hero-subtitle">三下乡实践团实地调研成果</p>
+            </div>
+        </section>
+
+        <div class="page-content">
+            <section class="section">
+                <div class="section-header">
+                    <span class="section-label">数据档案</span>
+                    <h2 class="section-title">田野调查数据</h2>
+                    <p class="section-subtitle">三下乡实践团实地调研成果汇总</p>
+                </div>
+                <div class="archive-detail-grid" th:if="${archives != null and !archives.isEmpty()}">
+                    <a th:each="item : ${archives}"
+                       th:href="@{/archive/{id}(id=${item.id})}"
+                       class="archive-detail-card"
+                       style="text-decoration: none; color: inherit; cursor: pointer; display: block;">
+                        <div class="archive-detail-icon" th:text="${item.icon}"></div>
+                        <div class="archive-detail-title" th:text="${item.title}"></div>
+                        <div class="archive-detail-count" th:text="${item.count}"></div>
+                        <div class="archive-detail-unit" th:text="${item.unit}"></div>
+                        <div style="margin-top: 0.5rem; font-size: 0.8rem; color: var(--warm-gold);">查看详情 →</div>
+                    </a>
+                </div>
+                <div th:if="${archives == null or archives.isEmpty()}" style="text-align: center; padding: 3rem; color: var(--text-muted);">
+                    档案数据整理中，敬请期待。
+                </div>
+            </section>
+
+            <section class="section">
+                <div class="section-header">
+                    <span class="section-label">历史时间线</span>
+                    <h2 class="section-title">百年岁月流转</h2>
+                    <p class="section-subtitle">宝源坊历史发展的重要节点</p>
+                </div>
+                <div class="timeline" th:if="${timeline != null and !timeline.isEmpty()}">
+                    <div class="timeline-item" th:each="item : ${timeline}">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-content">
+                            <div class="timeline-year" th:text="${item.year}"></div>
+                            <div class="timeline-title" th:text="${item.title}"></div>
+                            <div class="timeline-desc" th:text="${item.description}"></div>
+                        </div>
+                    </div>
+                </div>
+                <div th:if="${timeline == null or timeline.isEmpty()}" style="text-align: center; padding: 3rem; color: var(--text-muted);">
+                    时间线整理中，敬请期待。
+                </div>
+            </section>
+
+            <section class="section">
+                <div class="section-header">
+                    <span class="section-label">实地影像</span>
+                    <h2 class="section-title">田野调研影像</h2>
+                    <p class="section-subtitle">实践团在宝源坊实地拍摄记录</p>
+                </div>
+                <div class="culture-grid">
+                    <div class="culture-card">
+                        <div class="culture-image">
+                            <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=kaiping%20diaolou%20historical%20photo%20archive%20black%20and%20white%20vintage&image_size=square" alt="碉楼全景">
+                            <div class="culture-overlay">
+                                <span class="culture-category">碉楼全景</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="culture-card">
+                        <div class="culture-image">
+                            <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=kaiping%20village%20old%20street%20field%20survey%20archive%20cinematic&image_size=square" alt="古村街巷">
+                            <div class="culture-overlay">
+                                <span class="culture-category">古村街巷</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="culture-card">
+                        <div class="culture-image">
+                            <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=traditional%20lingnan%20architecture%20detail%20archive%20carving%20warm%20light&image_size=square" alt="建筑细节">
+                            <div class="culture-overlay">
+                                <span class="culture-category">建筑细节</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="culture-card">
+                        <div class="culture-image">
+                            <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=baoyuanfang%20ancient%20stone%20well%20historical%20village%20archive&image_size=square" alt="百年古井">
+                            <div class="culture-overlay">
+                                <span class="culture-category">百年古井</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="culture-card">
+                        <div class="culture-image">
+                            <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=kaiping%20diaolou%20tower%20facade%20archive%20warm%20golden%20hour&image_size=square" alt="侨乡风貌">
+                            <div class="culture-overlay">
+                                <span class="culture-category">侨乡风貌</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="culture-card">
+                        <div class="culture-image">
+                            <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=lingnan%20village%20ancestral%20hall%20field%20research%20archive&image_size=square" alt="祠堂建筑">
+                            <div class="culture-overlay">
+                                <span class="culture-category">祠堂建筑</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="section" style="text-align: center; background: linear-gradient(135deg, rgba(212, 175, 55, 0.08), rgba(196, 98, 16, 0.08)); border-radius: 16px;">
+                <div style="max-width: 700px; margin: 0 auto; padding: 3rem 2rem;">
+                    <h2 style="font-size: 1.6rem; color: var(--warm-gold); margin-bottom: 1rem; letter-spacing: 3px;">实地探访，记录历史</h2>
+                    <p style="color: var(--text-secondary); margin-bottom: 2rem; line-height: 1.8;">
+                        三下乡实践团深入宝源坊，走访村民、测绘建筑、整理口述史料，让每一份档案都成为侨乡记忆的见证。
+                    </p>
+                    <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+                        <button class="hero-btn-primary" onclick="window.location.href='/map'">实地云游 →</button>
+                        <button class="hero-btn-secondary" onclick="window.location.href='/stories'">侨乡故事</button>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-logo">薪火侨乡</div>
+            <p><span class="project-name">侨韵薪火</span> - 江门侨乡建筑数字化云游平台</p>
+            <p>广东工业大学三下乡社会实践项目 · 2024</p>
+        </div>
+        <div class="footer-links">
+            <a href="/">首页</a>
+            <a href="/#buildings">建筑图鉴</a>
+            <a href="/stories">侨乡故事</a>
+            <a href="/archive">田野档案</a>
+            <a href="/map">景区导航</a>
+            <a href="/about">关于我们</a>
+        </div>
+        <div class="footer-bottom">
+            <p>技术支持：3D高斯泼溅技术(3DGS) · 腾讯云COS · AI语音合成</p>
+            <p style="margin-top: 0.5rem;">© 2024 侨韵薪火实践团 版权所有</p>
+        </div>
+    </footer>
+
+    <button class="ai-guide-btn" id="ai-guide-btn" onclick="toggleAiGuide()">🎧</button>
+    <div class="ai-guide-panel" id="ai-guide-panel">
+        <h3 class="ai-guide-title">AI智能讲解</h3>
+        <div class="ai-guide-text" id="ai-guide-text">欢迎来到田野档案，这里记录了三下乡实践团实地调研成果与百年宝源坊的历史印记。</div>
+        <div class="ai-guide-controls">
+            <button class="ai-control-btn primary" onclick="playPageIntro()">播放介绍</button>
+            <button class="ai-control-btn" onclick="window.location.href='/map'">开始云游</button>
+        </div>
+    </div>
+
+    <script>
+        function toggleAiGuide() {
+            const panel = document.getElementById('ai-guide-panel');
+            panel.classList.toggle('active');
+        }
+        function speak(text) {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'zh-CN';
+                utterance.rate = 0.9;
+                window.speechSynthesis.speak(utterance);
+                const btn = document.getElementById('ai-guide-btn');
+                btn.classList.add('playing');
+                utterance.onend = () => { btn.classList.remove('playing'); };
+            }
+        }
+        function playPageIntro() {
+            const text = "欢迎来到田野档案页面。这里是广东工业大学三下乡实践团的实地调研成果汇总，包含田野调查数据、百年历史时间线以及实地影像记录，让我们一起回顾宝源坊的历史印记。";
+            speak(text);
+        }
+    </script>
+</body>
+</html>

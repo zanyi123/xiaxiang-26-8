@@ -1,0 +1,189 @@
+﻿<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${post.title} + ' - 实践日志 - 薪火侨乡'">实践日志 - 薪火侨乡</title>
+    <link rel="stylesheet" href="/css/qiaoyun.css">
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <div class="header-left">
+                <a href="/" class="header-logo">薪火侨乡</a>
+            </div>
+            <nav class="header-nav">
+                <a href="/">云游</a>
+                <a href="/#buildings">建筑图鉴</a>
+                <a href="/knowledge">知识库</a>
+                <a href="/stories">侨乡故事</a>
+                <a href="/archive">田野档案</a>
+                <a href="/about">关于我们</a>
+            </nav>
+            <div class="header-right">
+                <button class="header-btn" onclick="window.location.href='/map'">开始云游</button>
+            </div>
+        </div>
+    </header>
+
+    <main class="main" th:if="${post != null}">
+        <div class="detail-page">
+            <!-- 返回链接 -->
+            <a href="/about" class="detail-back back-link">← 返回关于我们</a>
+
+            <!-- 封面大图 -->
+            <div class="detail-hero-image">
+                <img th:src="${coverUrl != null} ? ${coverUrl} : |https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=${post.title}%20qiaoxiang%20village%20summer%20practice%20team%20documentary%20warm%20golden%20hour&image_size=square|" th:alt="${post.title}">
+                <span class="detail-category-tag" th:text="${post.category}"></span>
+            </div>
+
+            <!-- 标题与元信息 -->
+            <h1 class="detail-title" th:text="${post.title}"></h1>
+            <div class="detail-meta">
+                <span>✍️ <span th:text="${post.author}"></span></span>
+                <span>📅 <span th:text="${post.date}"></span></span>
+                <span>🏷️ <span th:text="${post.category}"></span></span>
+            </div>
+
+            <!-- 摘要高亮引用 -->
+            <blockquote style="margin: 2rem 0; padding: 1.5rem 2rem; background: linear-gradient(135deg, rgba(212, 175, 55, 0.10), rgba(196, 98, 16, 0.06)); border-left: 4px solid var(--warm-gold); border-radius: 8px; color: var(--text-primary); font-size: 1.1rem; line-height: 1.8; font-style: italic;">
+                <span style="color: var(--warm-gold); font-size: 1.8rem; line-height: 1;">“</span>
+                <span th:text="${post.summary}"></span>
+                <span style="color: var(--warm-gold); font-size: 1.8rem; line-height: 1;">”</span>
+            </blockquote>
+
+            <!-- 日志正文：基于摘要扩展为多段富文本 -->
+            <div class="detail-content">
+                <p th:utext="${post.summary}"></p>
+
+                <p>
+                    清晨的宝源坊还笼着一层薄雾，青砖灰瓦的碉楼在晨光中显出百年沉淀的厚重感。今天，侨韵薪火实践团再次踏上这条被岁月磨得发亮的石板路，开始了一整天的田野调查与数字化采集工作。对于这支由广东工业大学多个专业学子组成的队伍而言，每一次下乡，都是一次与历史对话、与乡土共鸣的过程。
+                </p>
+
+                <h3 style="margin-top: 2rem; color: var(--warm-gold);">一、走进宝源坊：触摸百年侨乡的脉搏</h3>
+                <p>
+                    宝源坊始建于1909年，是开平碉楼与村落世界文化遗产的重要组成部分。队员们手持测绘仪器与相机，穿梭在一座座碉楼之间，记录每一处雕花、每一块铭牌、每一段被苔藓覆盖的墙基。带队同学一边讲解华侨漂洋过海的艰辛历史，一边指导新队员如何辨认中西合璧的建筑细节——罗马柱与青砖墙并存，巴洛克山花下是传统的岭南趟栊门。
+                </p>
+                <p>
+                    在村口的老榕树下，几位年过八旬的老村民向我们讲述了他们父辈"下南洋、闯金山"的故事。那些泛黄的老照片、褪色的侨批信件，都是侨乡文化最真实的见证。我们用录音笔与摄像机一一记录，生怕遗漏任何一个细节。
+                </p>
+
+                <h3 style="margin-top: 2rem; color: var(--warm-gold);">二、技术赋能：3DGS 数字化采集</h3>
+                <p>
+                    下午，技术组同学开始进行3D高斯泼溅（3DGS）的数据采集工作。我们在碉楼内外布设了上百个拍摄点位，用相机环绕采集多角度图像，为后续的点云重建与云端漫游模型做准备。每一帧画面，都是百年侨乡建筑在数字世界中获得"永生"的基石。
+                </p>
+                <p>
+                    采集过程中也遇到了不少挑战：光线变化、植被遮挡、狭窄巷道的拍摄死角……但队员们分工协作、反复调整方案，最终完成了当日的采集任务。这些数据将通过腾讯云COS进行云端存储与处理，最终呈现在"江门侨乡建筑数字化云游平台"上，让世界各地的侨胞都能足不出户，云端回望故土。
+                </p>
+
+                <h3 style="margin-top: 2rem; color: var(--warm-gold);">三、青年思考：让侨韵薪火代代相传</h3>
+                <p>
+                    夜幕降临，实践团在驻地围坐复盘。大家分享着各自的见闻与思考：有人感叹华侨家国情怀的深沉，有人思考数字技术如何更好地服务于文化传承，也有人反思青年学子在乡村振兴中应当扮演的角色。我们相信，文化传承不仅是博物馆里的陈列，更是流动在每一代人心中的活水。
+                </p>
+                <p>
+                    以数字之火，燃侨乡之韵。侨韵薪火实践团的脚步不会停歇。我们愿以青年之力，守护侨乡文化的根脉，让百年宝源坊的故事，在数字时代继续薪火相传，照亮每一个思乡的灵魂。
+                </p>
+            </div>
+
+            <!-- 返回日志列表按钮 -->
+            <div style="margin: 2.5rem 0; text-align: center;">
+                <a href="/about" class="hero-btn-primary" style="display: inline-block; text-decoration: none; padding: 0.9rem 2.2rem;">
+                    ← 返回日志列表
+                </a>
+            </div>
+
+            <!-- 其他日志 -->
+            <section class="section" th:if="${otherPosts != null and #lists.size(otherPosts) > 0}">
+                <div class="section-header">
+                    <span class="section-label">延伸阅读</span>
+                    <h2 class="section-title">其他日志</h2>
+                    <p class="section-subtitle">继续翻阅实践团的下乡点滴</p>
+                </div>
+                <div class="blog-grid">
+                    <div class="blog-card" th:each="other : ${otherPosts}">
+                        <div class="blog-image">
+                            <img th:src="${coverUrls != null and coverUrls[other.id] != null} ? ${coverUrls[other.id]} : |https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=${other.title}%20qiaoxiang%20village%20summer%20practice%20team%20documentary%20warm%20golden%20hour&image_size=square|" th:alt="${other.title}" loading="lazy">
+                            <div class="blog-category" th:text="${other.category}"></div>
+                        </div>
+                        <div class="blog-content">
+                            <div class="blog-meta">
+                                <span class="blog-author" th:text="${other.author}"></span>
+                                <span th:text="${other.date}"></span>
+                            </div>
+                            <h4 class="blog-title" th:text="${other.title}"></h4>
+                            <p class="blog-summary" th:text="${other.summary}"></p>
+                            <a th:href="@{/blog/{id}(id=${other.id})}" class="blog-link">阅读全文 →</a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- 数据缺失兜底 -->
+    <main class="main" th:if="${post == null}">
+        <div class="detail-page" style="text-align: center; padding: 4rem 1rem;">
+            <h2 class="detail-title">日志不存在</h2>
+            <p style="color: var(--text-secondary); margin: 1rem 0 2rem;">您访问的实践日志可能已被删除或链接有误。</p>
+            <a href="/about" class="hero-btn-primary" style="display: inline-block; text-decoration: none; padding: 0.9rem 2.2rem;">← 返回关于我们</a>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-logo">薪火侨乡</div>
+            <p><span class="project-name">侨韵薪火</span> - 江门侨乡建筑数字化云游平台</p>
+            <p>广东工业大学三下乡社会实践项目 · 2024</p>
+        </div>
+        <div class="footer-links">
+            <a href="/">首页</a>
+            <a href="/#buildings">建筑图鉴</a>
+            <a href="/stories">侨乡故事</a>
+            <a href="/archive">田野档案</a>
+            <a href="/map">景区导航</a>
+            <a href="/about">关于我们</a>
+        </div>
+        <div class="footer-bottom">
+            <p>技术支持：3D高斯泼溅技术(3DGS) · 腾讯云COS · AI语音合成</p>
+            <p style="margin-top: 0.5rem;">© 2024 侨韵薪火实践团 版权所有</p>
+        </div>
+    </footer>
+
+    <button class="ai-guide-btn" id="ai-guide-btn" onclick="toggleAiGuide()">🎧</button>
+    <div class="ai-guide-panel" id="ai-guide-panel">
+        <h3 class="ai-guide-title">AI智能讲解</h3>
+        <div class="ai-guide-text" id="ai-guide-text">欢迎阅读实践日志，这里记录了侨韵薪火实践团在宝源坊的下乡点滴与思考。</div>
+        <div class="ai-guide-controls">
+            <button class="ai-control-btn primary" onclick="playPageIntro()">播放介绍</button>
+            <button class="ai-control-btn" onclick="window.location.href='/map'">开始云游</button>
+        </div>
+    </div>
+
+    <script>
+        function toggleAiGuide() {
+            const panel = document.getElementById('ai-guide-panel');
+            panel.classList.toggle('active');
+        }
+        function speak(text) {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'zh-CN';
+                utterance.rate = 0.9;
+                window.speechSynthesis.speak(utterance);
+                const btn = document.getElementById('ai-guide-btn');
+                btn.classList.add('playing');
+                utterance.onend = () => { btn.classList.remove('playing'); };
+            }
+        }
+        function playPageIntro() {
+            const titleEl = document.querySelector('.detail-title');
+            const title = titleEl ? titleEl.textContent.trim() : '实践日志';
+            const summaryEl = document.querySelector('blockquote span:nth-child(2)');
+            const summary = summaryEl ? summaryEl.textContent.trim() : '';
+            const text = '欢迎阅读实践日志：' + title + '。' + (summary ? summary + '。' : '') + '本页面记录了侨韵薪火实践团在江门开平宝源坊的下乡点滴与思考，让我们一同走进百年侨乡，感受华侨文化的厚重与青年的担当。';
+            speak(text);
+        }
+    </script>
+</body>
+</html>

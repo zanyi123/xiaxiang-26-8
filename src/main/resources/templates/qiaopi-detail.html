@@ -1,0 +1,354 @@
+﻿<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${qiaopi} != null ? ${qiaopi.title} + ' - 侨批详情' : '侨批详情 - 薪火侨乡'">侨批详情 - 薪火侨乡</title>
+    <link rel="stylesheet" href="/css/qiaoyun.css">
+    <style>
+        .detail-back {
+            display: inline-block;
+            color: var(--warm-gold);
+            text-decoration: none;
+            font-size: 0.95rem;
+            margin-bottom: 1rem;
+            transition: opacity 0.3s;
+            padding: 0.5rem 0;
+        }
+        .detail-back:hover { opacity: 0.8; }
+
+        .qiaopi-detail-hero {
+            width: 100%;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 2rem;
+            border: 1px solid var(--glass-border);
+            background: var(--glass-bg);
+        }
+        .qiaopi-detail-hero img {
+            width: 100%;
+            aspect-ratio: 4/3;
+            object-fit: cover;
+            display: block;
+            filter: sepia(0.55);
+            transition: filter 0.5s;
+        }
+        .qiaopi-detail-hero img:hover { filter: sepia(0.3); }
+
+        .detail-title {
+            color: var(--warm-gold);
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            line-height: 1.3;
+        }
+
+        .qiaopi-detail-meta {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+            padding: 1.25rem;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            backdrop-filter: blur(15px);
+        }
+        .qiaopi-detail-meta .meta-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+        .qiaopi-detail-meta .meta-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            letter-spacing: 0.05em;
+        }
+        .qiaopi-detail-meta .meta-value {
+            font-size: 0.98rem;
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+        .qiaopi-detail-meta .meta-value.amount {
+            color: var(--warm-gold);
+            font-weight: 600;
+        }
+
+        .detail-section { margin-bottom: 2.5rem; }
+        .detail-section .section-label { color: var(--warm-gold); }
+
+        .qiaopi-letter {
+            background: linear-gradient(135deg, #f5e6c8, #e8d5a8);
+            color: #3a2a1a;
+            padding: 2rem;
+            border-radius: 8px;
+            font-family: 'KaiTi', 'STKaiti', '楷体', serif;
+            line-height: 2;
+            font-size: 1.05rem;
+            border: 1px solid #d4b896;
+            white-space: pre-wrap;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2), inset 0 0 40px rgba(180, 140, 80, 0.15);
+            position: relative;
+        }
+        .qiaopi-letter::before {
+            content: '原 文';
+            position: absolute;
+            top: 0.75rem;
+            right: 1rem;
+            font-size: 0.7rem;
+            color: #8b6b3d;
+            letter-spacing: 0.2em;
+            font-family: serif;
+        }
+
+        .qiaopi-translation {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 1.75rem;
+            color: var(--text-secondary);
+            line-height: 1.8;
+            font-size: 0.98rem;
+            backdrop-filter: blur(15px);
+            white-space: pre-wrap;
+        }
+        .qiaopi-translation .translation-tag {
+            display: inline-block;
+            padding: 0.2rem 0.75rem;
+            background: rgba(212, 175, 55, 0.15);
+            color: var(--warm-gold);
+            border-radius: 20px;
+            font-size: 0.75rem;
+            margin-bottom: 0.75rem;
+            letter-spacing: 0.05em;
+        }
+
+        .related-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 1.25rem;
+            margin-top: 1.5rem;
+        }
+        .related-card {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 10px;
+            overflow: hidden;
+            text-decoration: none;
+            color: inherit;
+            transition: all 0.3s;
+            backdrop-filter: blur(15px);
+            display: block;
+        }
+        .related-card:hover {
+            border-color: var(--warm-gold);
+            transform: translateY(-4px);
+        }
+        .related-card img {
+            width: 100%;
+            aspect-ratio: 4/3;
+            object-fit: cover;
+            display: block;
+            filter: sepia(0.4);
+        }
+        .related-card .related-body { padding: 0.9rem 1rem; }
+        .related-card .related-title {
+            color: var(--warm-gold);
+            font-size: 0.95rem;
+            line-height: 1.4;
+        }
+
+        .error-block {
+            text-align: center;
+            padding: 4rem 1rem;
+            color: var(--text-muted);
+        }
+        .error-block .error-icon { font-size: 3rem; margin-bottom: 1rem; }
+        .error-block h2 { color: var(--text-secondary); margin-bottom: 0.5rem; }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <div class="header-left">
+                <a href="/" class="header-logo">薪火侨乡</a>
+            </div>
+            <nav class="header-nav">
+                <a href="/">云游</a>
+                <a href="/#buildings">建筑图鉴</a>
+                <a href="/knowledge">知识库</a>
+                <a href="/stories">侨乡故事</a>
+                <a href="/archive">田野档案</a>
+                <a href="/about">关于我们</a>
+            </nav>
+            <div class="header-right">
+                <button class="header-btn" onclick="window.location.href='/map'">开始云游</button>
+            </div>
+        </div>
+    </header>
+
+    <main class="main">
+        <!-- 侨批不存在时的错误提示 -->
+        <div class="page-content" th:if="${qiaopi == null}">
+            <div class="error-block">
+                <div class="error-icon">✉</div>
+                <h2>侨批不存在</h2>
+                <p>抱歉，您查找的侨批可能已下线或链接有误。</p>
+                <a href="/qiaopi" class="detail-back" style="margin-top: 1.5rem;">← 返回侨批列表</a>
+            </div>
+        </div>
+
+        <!-- 侨批详情 -->
+        <th:block th:if="${qiaopi != null}">
+            <section class="page-hero">
+                <div class="page-hero-content">
+                    <span class="page-hero-label">QIAOPI DETAIL</span>
+                    <h1 class="page-hero-title" th:text="${qiaopi.title}">侨批标题</h1>
+                    <p class="page-hero-subtitle">一封家书，万金难抵；纸短情长，跨越重洋</p>
+                </div>
+            </section>
+
+            <div class="page-content">
+                <a href="/qiaopi" class="detail-back">← 返回侨批列表</a>
+
+                <!-- 侨批图片 -->
+                <div class="qiaopi-detail-hero">
+                    <img th:src="|https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=${qiaopi.title}%20qiaopi%20letter%20vintage%20chinese%20calligraphy%20sepia&image_size=landscape_4_3|"
+                         th:alt="${qiaopi.title}">
+                </div>
+
+                <!-- 元信息 -->
+                <div class="qiaopi-detail-meta">
+                    <div class="meta-item">
+                        <span class="meta-label">寄信人</span>
+                        <span class="meta-value" th:text="${qiaopi.sender}">寄信人</span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="meta-label">收信人</span>
+                        <span class="meta-value" th:text="${qiaopi.recipient}">收信人</span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="meta-label">寄出地</span>
+                        <span class="meta-value" th:text="${qiaopi.sendFrom}">寄出地</span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="meta-label">年份</span>
+                        <span class="meta-value" th:text="${qiaopi.year}">年份</span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="meta-label">汇款金额</span>
+                        <span class="meta-value amount" th:text="${qiaopi.amount}">金额</span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="meta-label">分类</span>
+                        <span class="meta-value" th:text="${qiaopi.category}">分类</span>
+                    </div>
+                </div>
+
+                <!-- 书信原文 -->
+                <section class="section detail-section">
+                    <div class="section-header">
+                        <span class="section-label">ORIGINAL TEXT</span>
+                        <h2 class="section-title">书信原文</h2>
+                        <p class="section-subtitle">字里行间，皆是海外游子的乡愁与牵挂</p>
+                    </div>
+                    <div class="qiaopi-letter" th:text="${qiaopi.content}">书信原文内容</div>
+                </section>
+
+                <!-- 现代解读 -->
+                <section class="section detail-section">
+                    <div class="section-header">
+                        <span class="section-label">MODERN INTERPRETATION</span>
+                        <h2 class="section-title">现代解读</h2>
+                        <p class="section-subtitle">将百年家书译作今时之言，便于今人共情</p>
+                    </div>
+                    <div class="qiaopi-translation">
+                        <span class="translation-tag">今译</span>
+                        <div th:text="${qiaopi.translation}">现代解读内容</div>
+                    </div>
+                </section>
+
+                <!-- 相关侨批推荐 -->
+                <section class="section" th:if="${otherQiaopi != null and !otherQiaopi.isEmpty()}">
+                    <div class="section-header">
+                        <span class="section-label">RELATED QIAOPI</span>
+                        <h2 class="section-title">相关侨批</h2>
+                        <p class="section-subtitle">继续翻阅这些跨越重洋的家书</p>
+                    </div>
+                    <div class="related-grid">
+                        <a th:each="other : ${otherQiaopi}"
+                           class="related-card"
+                           th:href="@{/qiaopi/{id}(id=${other.id})}">
+                            <img th:src="|https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=${other.title}%20qiaopi%20letter%20vintage%20chinese%20calligraphy%20sepia&image_size=landscape_4_3|"
+                                 th:alt="${other.title}" loading="lazy">
+                            <div class="related-body">
+                                <h3 class="related-title" th:text="${other.title}">相关侨批标题</h3>
+                            </div>
+                        </a>
+                    </div>
+                </section>
+            </div>
+        </th:block>
+    </main>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-logo">薪火侨乡</div>
+            <p><span class="project-name">侨韵薪火</span> - 江门侨乡建筑数字化云游平台</p>
+            <p>广东工业大学三下乡社会实践项目 · 2024</p>
+        </div>
+        <div class="footer-links">
+            <a href="/">首页</a>
+            <a href="/#buildings">建筑图鉴</a>
+            <a href="/stories">侨乡故事</a>
+            <a href="/archive">田野档案</a>
+            <a href="/map">景区导航</a>
+            <a href="/about">关于我们</a>
+        </div>
+        <div class="footer-bottom">
+            <p>技术支持：3D高斯泼溅技术(3DGS) · 腾讯云COS · AI语音合成</p>
+            <p style="margin-top: 0.5rem;">© 2024 侨韵薪火实践团 版权所有</p>
+        </div>
+    </footer>
+
+    <button class="ai-guide-btn" id="ai-guide-btn" onclick="toggleAiGuide()">🎧</button>
+    <div class="ai-guide-panel" id="ai-guide-panel">
+        <h3 class="ai-guide-title">AI智能讲解</h3>
+        <div class="ai-guide-text" id="ai-guide-text" th:if="${qiaopi != null}"
+             th:text="'正在为您讲解：' + ${qiaopi.title}">
+            欢迎查看侨批详情。
+        </div>
+        <div class="ai-guide-text" th:if="${qiaopi == null}">
+            侨批是海外华侨寄回国内的汇款与书信结合物，2013年入选《世界记忆名录》。
+        </div>
+        <div class="ai-guide-controls">
+            <button class="ai-control-btn primary" onclick="playPageIntro()">播放介绍</button>
+            <button class="ai-control-btn" onclick="window.location.href='/qiaopi'">返回列表</button>
+        </div>
+    </div>
+
+    <script>
+        function toggleAiGuide() {
+            const panel = document.getElementById('ai-guide-panel');
+            panel.classList.toggle('active');
+        }
+        function playPageIntro() {
+            if (!('speechSynthesis' in window)) {
+                alert('您的浏览器不支持语音合成功能');
+                return;
+            }
+            window.speechSynthesis.cancel();
+            const sendFrom = /*[[${qiaopi != null ? qiaopi.sendFrom : ''}]]*/ '';
+            const sender = /*[[${qiaopi != null ? qiaopi.sender : ''}]]*/ '';
+            const recipient = /*[[${qiaopi != null ? qiaopi.recipient : ''}]]*/ '';
+            const text = '欢迎查看侨批详情。这是一封来自' + sendFrom + '的侨批，由' + sender + '寄给' + recipient + '。';
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'zh-CN';
+            utterance.rate = 0.95;
+            const btn = document.getElementById('ai-guide-btn');
+            btn.classList.add('playing');
+            utterance.onend = () => { btn.classList.remove('playing'); };
+            window.speechSynthesis.speak(utterance);
+        }
+    </script>
+</body>
+</html>
