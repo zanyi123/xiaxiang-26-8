@@ -1,0 +1,1152 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>素材管理 - 薪火侨乡</title>
+    <link rel="stylesheet" href="/css/qiaoyun.css">
+    <style>
+        * { box-sizing: border-box; }
+        body { background: var(--bg-dark); color: var(--text-primary); min-height: 100vh; }
+
+        .admin-container { max-width: 1100px; margin: 0 auto; padding: 2rem 1.5rem; }
+
+        /* 顶部信息栏 */
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1.25rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--glass-border);
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+        .admin-header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        }
+        .admin-header h1 { color: var(--warm-gold); font-size: 1.4rem; letter-spacing: 2px; margin: 0; }
+        .admin-header .bucket-info { font-size: 0.8rem; color: var(--text-muted); }
+        .user-chip {
+            display: inline-flex; align-items: center; gap: 0.5rem;
+            padding: 0.35rem 0.65rem;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            font-size: 0.78rem;
+            color: var(--text-secondary);
+        }
+        .user-chip .user-name { color: var(--warm-gold); font-weight: 600; }
+        .btn-logout {
+            margin-left: 0.5rem;
+            padding: 0.25rem 0.6rem;
+            background: rgba(244, 67, 54, 0.1);
+            border: 1px solid rgba(244, 67, 54, 0.35);
+            color: #ef9a9a;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 0.75rem;
+        }
+        .btn-logout:hover { background: rgba(244, 67, 54, 0.2); }
+
+        /* Tab 切换 */
+        .admin-tabs {
+            display: flex;
+            gap: 0.25rem;
+            background: rgba(0,0,0,0.25);
+            padding: 0.25rem;
+            border-radius: 10px;
+            width: fit-content;
+        }
+        .admin-tab {
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+        }
+        .admin-tab:hover { color: var(--text-secondary); }
+        .admin-tab.active {
+            background: rgba(212, 175, 55, 0.18);
+            color: var(--warm-gold);
+            font-weight: 600;
+        }
+        .tab-panel { display: none; }
+        .tab-panel.active { display: block; }
+
+        /* 匹配中心整体布局 */
+        .match-layout {
+            display: grid;
+            grid-template-columns: 1.15fr 0.9fr 1.4fr;
+            gap: 0.75rem;
+            margin-top: 0.5rem;
+        }
+        .match-col {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 0.8rem;
+            min-height: 560px;
+            max-height: 720px;
+            overflow-y: auto;
+        }
+        .match-col-title {
+            color: var(--warm-gold);
+            font-size: 0.85rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            padding-bottom: 0.5rem;
+            margin-bottom: 0.5rem;
+            border-bottom: 1px solid var(--glass-border);
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .match-col-title .col-badge {
+            padding: 0.15rem 0.45rem;
+            background: rgba(212,175,55,0.15);
+            border-radius: 6px;
+            font-size: 0.7rem;
+        }
+        .slot-row {
+            display: flex; align-items: center; gap: 0.4rem;
+            padding: 0.4rem 0.35rem;
+            border-radius: 8px;
+            margin-bottom: 0.2rem;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .slot-row:hover { background: rgba(212,175,55,0.06); }
+        .slot-row.selected { background: rgba(212,175,55,0.12); border: 1px solid var(--warm-gold); }
+        .slot-row .slot-id {
+            font-family: monospace;
+            font-size: 0.72rem;
+            padding: 0.12rem 0.35rem;
+            background: rgba(212,175,55,0.1);
+            color: var(--warm-gold);
+            border-radius: 5px;
+            white-space: nowrap;
+            min-width: 88px;
+        }
+        .slot-row .slot-type-icon { font-size: 0.8rem; }
+        .slot-row .slot-desc {
+            flex: 1;
+            color: var(--text-secondary);
+            font-size: 0.75rem;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .status-tag {
+            padding: 0.12rem 0.4rem;
+            border-radius: 5px;
+            font-size: 0.68rem;
+            white-space: nowrap;
+        }
+        .status-filled { background: rgba(76,175,80,0.18); color: #81c784; }
+        .status-empty { background: rgba(244,67,54,0.15); color: #ef9a9a; }
+        .status-pending { background: rgba(255,193,7,0.2); color: #ffc107; }
+
+        .cos-file-item {
+            padding: 0.45rem 0.5rem;
+            background: rgba(0,0,0,0.25);
+            border-radius: 8px;
+            margin-bottom: 0.35rem;
+            border: 1px solid transparent;
+            transition: all 0.15s;
+        }
+        .cos-file-item:hover { border-color: var(--glass-border); }
+        .cos-file-top {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 0.3rem;
+        }
+        .cos-file-key {
+            font-family: monospace;
+            font-size: 0.72rem;
+            color: var(--text-secondary);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            max-width: 75%;
+        }
+        .cos-file-sz { color: var(--text-muted); font-size: 0.68rem; white-space: nowrap; }
+        .match-select {
+            width: 100%;
+            padding: 0.25rem 0.35rem;
+            background: rgba(0,0,0,0.4);
+            border: 1px solid var(--glass-border);
+            border-radius: 6px;
+            color: var(--text-primary);
+            font-size: 0.72rem;
+        }
+        .match-select:focus { outline: none; border-color: var(--warm-gold); }
+        .btn-confirm-group {
+            display: flex; gap: 0.5rem;
+            margin-top: 0.75rem;
+            padding: 0.75rem;
+            background: rgba(0,0,0,0.3);
+            border-radius: 10px;
+        }
+        .progress-summary {
+            margin-bottom: 0.5rem;
+            padding: 0.5rem 0.75rem;
+            background: rgba(0,0,0,0.25);
+            border-radius: 8px;
+            display: flex;
+            gap: 1rem;
+            font-size: 0.78rem;
+        }
+        .progress-summary .ps-item { display: flex; gap: 0.3rem; align-items: center; }
+        .progress-summary .ps-num { font-weight: 700; color: var(--warm-gold); }
+        .type-filter-bar {
+            display: flex; gap: 0.25rem; margin-bottom: 0.5rem; flex-wrap: wrap;
+        }
+        .type-filter-btn {
+            padding: 0.2rem 0.5rem;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid var(--glass-border);
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+        }
+        .type-filter-btn.active {
+            border-color: var(--warm-gold);
+            color: var(--warm-gold);
+            background: rgba(212,175,55,0.12);
+        }
+        @media (max-width: 980px) {
+            .match-layout { grid-template-columns: 1fr; }
+            .match-col { min-height: auto; max-height: none; }
+        }
+        .mock-warning {
+            display: inline-block; padding: 0.2rem 0.6rem;
+            background: rgba(255, 193, 7, 0.15); color: #ffc107;
+            border-radius: 8px; font-size: 0.75rem; margin-left: 0.5rem;
+        }
+        .mock-off {
+            background: rgba(76, 175, 80, 0.15); color: #4caf50;
+        }
+
+        /* 统计卡片 */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+        .stat-card {
+            padding: 1rem;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            text-align: center;
+        }
+        .stat-card .stat-dir { color: var(--warm-gold); font-size: 0.85rem; font-weight: 600; }
+        .stat-card .stat-num { color: var(--text-primary); font-size: 1.4rem; font-weight: 700; margin: 0.3rem 0; }
+        .stat-card .stat-size { color: var(--text-muted); font-size: 0.72rem; }
+
+        /* 分类选择 */
+        .category-bar {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+        .category-btn {
+            padding: 0.5rem 1rem;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 10px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+        }
+        .category-btn:hover { border-color: var(--warm-gold); color: var(--warm-gold); }
+        .category-btn.active {
+            background: rgba(212, 175, 55, 0.15);
+            border-color: var(--warm-gold);
+            color: var(--warm-gold);
+        }
+
+        /* 拖拽上传区 */
+        .drop-zone {
+            border: 2px dashed var(--glass-border);
+            border-radius: 16px;
+            padding: 3rem 2rem;
+            text-align: center;
+            transition: all 0.3s;
+            cursor: pointer;
+            background: var(--glass-bg);
+        }
+        .drop-zone:hover { border-color: var(--warm-gold); }
+        .drop-zone.dragover {
+            border-color: var(--warm-gold);
+            background: rgba(212, 175, 55, 0.08);
+            transform: scale(1.01);
+        }
+        .drop-icon { font-size: 3rem; margin-bottom: 0.5rem; }
+        .drop-text { color: var(--text-secondary); font-size: 0.95rem; margin-bottom: 0.3rem; }
+        .drop-hint { color: var(--text-muted); font-size: 0.78rem; }
+        .drop-zone input[type="file"] { display: none; }
+
+        /* 自定义文件名输入 */
+        .custom-name-row {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+            margin-top: 0.75rem;
+            padding: 0.75rem;
+            background: rgba(0,0,0,0.2);
+            border-radius: 10px;
+            display: none;
+        }
+        .custom-name-row.show { display: flex; }
+        .custom-name-row label { color: var(--text-muted); font-size: 0.8rem; white-space: nowrap; }
+        .custom-name-row input {
+            flex: 1;
+            padding: 0.4rem 0.6rem;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid var(--glass-border);
+            border-radius: 6px;
+            color: var(--text-primary);
+            font-size: 0.85rem;
+        }
+
+        /* 上传队列 */
+        .upload-queue { margin-top: 1.5rem; }
+        .queue-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.6rem 0.75rem;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 8px;
+            margin-bottom: 0.4rem;
+        }
+        .queue-item .qi-icon { font-size: 1.2rem; }
+        .queue-item .qi-name { flex: 1; color: var(--text-secondary); font-size: 0.85rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .queue-item .qi-size { color: var(--text-muted); font-size: 0.75rem; white-space: nowrap; }
+        .queue-item .qi-status { font-size: 0.8rem; white-space: nowrap; }
+        .queue-item .qi-status.success { color: #4caf50; }
+        .queue-item .qi-status.fail { color: #f44336; }
+        .queue-item .qi-status.uploading { color: var(--warm-gold); }
+
+        /* 文件列表 */
+        .file-list-section { margin-top: 2rem; }
+        .section-title {
+            color: var(--warm-gold);
+            font-size: 1rem;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .file-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .file-table th {
+            text-align: left;
+            padding: 0.5rem;
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            border-bottom: 1px solid var(--glass-border);
+        }
+        .file-table td {
+            padding: 0.5rem;
+            color: var(--text-secondary);
+            font-size: 0.82rem;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .file-table tr:hover td { background: rgba(212, 175, 55, 0.05); }
+        .file-key { color: var(--warm-gold); font-family: monospace; }
+        .file-url { color: var(--text-muted); font-size: 0.72rem; max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .btn-delete {
+            padding: 0.2rem 0.5rem;
+            background: rgba(244, 67, 54, 0.1);
+            border: 1px solid rgba(244, 67, 54, 0.3);
+            color: #f44336;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.72rem;
+        }
+        .btn-delete:hover { background: rgba(244, 67, 54, 0.2); }
+
+        /* 按钮组 */
+        .btn-group { display: flex; gap: 0.5rem; margin-top: 1rem; }
+        .btn-upload {
+            padding: 0.6rem 1.5rem;
+            background: var(--warm-gold);
+            color: #1a1a2e;
+            border: none;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-upload:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3); }
+        .btn-upload:disabled { opacity: 0.5; cursor: not-allowed; }
+        .btn-clear {
+            padding: 0.6rem 1.2rem;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            color: var(--text-secondary);
+            border-radius: 10px;
+            font-size: 0.9rem;
+            cursor: pointer;
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            padding: 0.75rem 1.25rem;
+            background: var(--glass-bg);
+            border: 1px solid var(--warm-gold);
+            border-radius: 10px;
+            color: var(--warm-gold);
+            font-size: 0.85rem;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+            z-index: 9999;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s;
+        }
+        .toast.show { transform: translateY(0); opacity: 1; }
+
+        @media (max-width: 768px) {
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <div class="header-left">
+                <a href="/" class="header-logo">薪火侨乡</a>
+                <span style="color: var(--text-muted); margin-left: 0.5rem; font-size: 0.8rem;">/ 素材管理</span>
+            </div>
+            <nav class="header-nav">
+                <a href="/#hero">首页</a>
+                <a href="/sitemap">网站导览</a>
+                <a href="/#tour">云游侨乡</a>
+                <a href="/#life">我的侨乡人生</a>
+                <a href="/#building-story">建筑故事</a>
+                <a href="/#achievement">项目成果</a>
+                <a href="/about">关于我们</a>
+            </nav>
+            <div class="header-right">
+                <button class="header-btn" onclick="window.location.href='/'">返回网站</button>
+            </div>
+        </div>
+    </header>
+
+    <div class="admin-container">
+        <!-- 顶部信息 -->
+        <div class="admin-header">
+            <div class="admin-header-row">
+                <div>
+                    <h1>📦 素材管理中心</h1>
+                    <div class="bucket-info" th:text="'存储桶: ' + ${bucketName} + ' · 区域: ' + ${region}"></div>
+                </div>
+                <div style="display: flex; align-items: center;">
+                    <span class="mock-warning" th:classappend="${!mockMode} ? 'mock-off' : ''">
+                        <span th:text="${mockMode} ? '⚠️ Mock模式' : '✅ COS直连'"></span>
+                    </span>
+                    <span class="user-chip" style="margin-left: 0.75rem;">
+                        👤 <span class="user-name" id="cur-user">加载中...</span>
+                        <span id="cur-role" style="color: var(--text-muted); font-size: 0.72rem;"></span>
+                    </span>
+                    <button class="btn-logout" onclick="doLogout()">退出</button>
+                </div>
+            </div>
+            <!-- Tab 切换 -->
+            <div class="admin-tabs">
+                <div class="admin-tab active" onclick="switchTab('upload')" id="tab-upload">📤 素材上传</div>
+                <div class="admin-tab" onclick="switchTab('match')" id="tab-match">🎯 素材匹配中心</div>
+            </div>
+        </div>
+
+        <!-- ===== Tab1: 素材上传 ===== -->
+        <div class="tab-panel active" id="panel-upload">
+        <!-- 统计卡片 -->
+        <div class="stats-grid" id="stats-grid">
+            <div class="stat-card"><div class="stat-dir">images/</div><div class="stat-num" id="stat-images">-</div><div class="stat-size" id="stat-images-size">-</div></div>
+            <div class="stat-card"><div class="stat-dir">audio/</div><div class="stat-num" id="stat-audio">-</div><div class="stat-size" id="stat-audio-size">-</div></div>
+            <div class="stat-card"><div class="stat-dir">videos/</div><div class="stat-num" id="stat-videos">-</div><div class="stat-size" id="stat-videos-size">-</div></div>
+            <div class="stat-card"><div class="stat-dir">models/</div><div class="stat-num" id="stat-models">-</div><div class="stat-size" id="stat-models-size">-</div></div>
+            <div class="stat-card"><div class="stat-dir">根目录</div><div class="stat-num" id="stat-root">-</div><div class="stat-size" id="stat-root-size">-</div></div>
+        </div>
+
+        <!-- 分类选择 -->
+        <div class="category-bar">
+            <button class="category-btn active" data-category="images" onclick="selectCategory('images')">🖼️ images/ 图片</button>
+            <button class="category-btn" data-category="audio" onclick="selectCategory('audio')">🎵 audio/ 音频</button>
+            <button class="category-btn" data-category="videos" onclick="selectCategory('videos')">🎬 videos/ 视频</button>
+            <button class="category-btn" data-category="models" onclick="selectCategory('models')">🧊 models/ 3D模型</button>
+            <button class="category-btn" data-category="" onclick="selectCategory('')">📁 根目录 建筑封面</button>
+        </div>
+
+        <!-- 拖拽上传区 -->
+        <div class="drop-zone" id="drop-zone" onclick="document.getElementById('file-input').click()">
+            <div class="drop-icon">📤</div>
+            <div class="drop-text">拖拽文件到此处，或点击选择文件</div>
+            <div class="drop-hint">支持批量上传 · 当前上传到: <span id="current-cat" style="color: var(--warm-gold);">images/</span></div>
+            <input type="file" id="file-input" multiple>
+        </div>
+
+        <!-- 自定义文件名（单文件时显示） -->
+        <div class="custom-name-row" id="custom-name-row">
+            <label>自定义文件名:</label>
+            <input type="text" id="custom-name" placeholder="留空则用原文件名，如 cover-kaiping.jpg">
+        </div>
+
+        <!-- 上传队列 -->
+        <div class="upload-queue" id="upload-queue"></div>
+
+        <!-- 按钮组 -->
+        <div class="btn-group">
+            <button class="btn-upload" id="btn-start-upload" onclick="startUpload()" disabled>开始上传</button>
+            <button class="btn-clear" onclick="clearQueue()">清空队列</button>
+        </div>
+
+        <!-- COS 文件列表 -->
+        <div class="file-list-section">
+            <div class="section-title">
+                📋 COS 文件列表
+                <button class="btn-clear" style="padding: 0.3rem 0.8rem; font-size: 0.78rem;" onclick="loadFileList()">刷新</button>
+            </div>
+            <table class="file-table">
+                <thead>
+                    <tr>
+                        <th style="width: 40%">文件路径 (Key)</th>
+                        <th style="width: 10%">大小</th>
+                        <th style="width: 15%">修改时间</th>
+                        <th style="width: 25%">访问URL</th>
+                        <th style="width: 10%">操作</th>
+                    </tr>
+                </thead>
+                <tbody id="file-list-body">
+                    <tr><td colspan="5" style="text-align:center; color: var(--text-muted); padding: 2rem;">点击刷新查看文件列表</td></tr>
+                </tbody>
+            </table>
+        </div>
+        </div><!-- /panel-upload -->
+
+        <!-- ===== Tab2: 素材匹配中心 ===== -->
+        <div class="tab-panel" id="panel-match">
+            <!-- 整体进度 -->
+            <div class="progress-summary" id="match-summary">
+                <div class="ps-item">📌 Slot 总数 <span class="ps-num" id="total-slots">-</span></div>
+                <div class="ps-item">✅ 已填充 <span class="ps-num" id="filled-slots">-</span></div>
+                <div class="ps-item">⏳ 待确认 <span class="ps-num" id="pending-slots">0</span></div>
+                <div class="ps-item">❌ 空缺 <span class="ps-num" id="empty-slots">-</span></div>
+                <div class="ps-item" style="margin-left:auto;">完成度 <span class="ps-num" id="fill-rate">-</span></div>
+            </div>
+
+            <!-- 类型筛选 -->
+            <div class="type-filter-bar" id="type-filter">
+                <button class="type-filter-btn active" onclick="filterSlots('all')">全部</button>
+                <button class="type-filter-btn" onclick="filterSlots('IMG')">🖼️ 图片</button>
+                <button class="type-filter-btn" onclick="filterSlots('AUD')">🎵 音频</button>
+                <button class="type-filter-btn" onclick="filterSlots('VID')">🎬 视频</button>
+                <button class="type-filter-btn" onclick="filterSlots('MDL')">🧊 模型</button>
+            </div>
+
+            <!-- 三列布局 -->
+            <div class="match-layout">
+                <!-- 左列：Slot 列表 -->
+                <div class="match-col">
+                    <div class="match-col-title">
+                        📍 网站素材空位 (Slot)
+                        <span class="col-badge" id="slots-col-count">-</span>
+                    </div>
+                    <div id="slots-list">加载中...</div>
+                </div>
+                <!-- 中列：状态 -->
+                <div class="match-col">
+                    <div class="match-col-title">
+                        🔄 填充状态
+                        <span class="col-badge">实时</span>
+                    </div>
+                    <div id="status-list">请选择左侧Slot或右侧素材下拉选项...</div>
+                </div>
+                <!-- 右列：COS素材 + 匹配下拉 -->
+                <div class="match-col">
+                    <div class="match-col-title">
+                        📦 COS 已有素材
+                        <span class="col-badge" id="cos-col-count">-</span>
+                    </div>
+                    <div style="margin-bottom: 0.5rem;">
+                        <button class="btn-clear" style="padding: 0.25rem 0.6rem; font-size: 0.72rem;" onclick="loadMatchCenter()">🔄 重新加载</button>
+                    </div>
+                    <div id="cos-files-list">加载中...</div>
+                </div>
+            </div>
+
+            <!-- 确认/取消按钮 -->
+            <div class="btn-confirm-group">
+                <button class="btn-upload" style="flex:1;" onclick="confirmMatches()" id="btn-confirm-match" disabled>确认导入（<span id="pending-count">0</span>项待确认）</button>
+                <button class="btn-clear" onclick="cancelMatches()">取消</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        let currentCategory = 'images';
+        let uploadQueue = [];
+
+        // 当前用户 & 全局初始化
+        window.addEventListener('load', async () => {
+            await loadMe();
+            loadStats();
+        });
+
+        async function loadMe() {
+            try {
+                const r = await fetch('/admin/api/me');
+                const j = await r.json();
+                if (j.success) {
+                    document.getElementById('cur-user').textContent = j.data.name || j.data.username;
+                    document.getElementById('cur-role').textContent = ' · ' + (j.data.role === 'ADMIN' ? '管理员' : '实践同学');
+                } else {
+                    document.getElementById('cur-user').textContent = '未登录';
+                }
+            } catch(e) { console.warn('获取用户信息失败', e); }
+        }
+
+        function doLogout() {
+            if (!confirm('确认退出登录？')) return;
+            fetch('/admin/api/logout', {method:'POST'}).then(()=>{ location.href = '/admin/login'; });
+        }
+
+        // Tab 切换
+        function switchTab(name) {
+            document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+            document.getElementById('tab-' + name).classList.add('active');
+            document.getElementById('panel-' + name).classList.add('active');
+            if (name === 'match') {
+                loadMatchCenter();
+            }
+        }
+
+        // 选择分类
+        function selectCategory(cat) {
+            currentCategory = cat;
+            document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
+            document.querySelector(`[data-category="${cat}"]`).classList.add('active');
+            document.getElementById('current-cat').textContent = cat ? cat + '/' : '根目录';
+        }
+
+        // 拖拽事件
+        const dropZone = document.getElementById('drop-zone');
+        const fileInput = document.getElementById('file-input');
+
+        dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
+        dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+        dropZone.addEventListener('drop', e => {
+            e.preventDefault();
+            dropZone.classList.remove('dragover');
+            handleFiles(e.dataTransfer.files);
+        });
+        fileInput.addEventListener('change', e => handleFiles(e.target.files));
+
+        // 处理选中的文件
+        function handleFiles(files) {
+            if (files.length === 0) return;
+
+            // 单文件显示自定义名输入
+            const nameRow = document.getElementById('custom-name-row');
+            if (files.length === 1) {
+                nameRow.classList.add('show');
+                document.getElementById('custom-name').value = '';
+            } else {
+                nameRow.classList.remove('show');
+            }
+
+            for (const file of files) {
+                uploadQueue.push({ file, status: 'pending', customName: null });
+            }
+            renderQueue();
+            document.getElementById('btn-start-upload').disabled = false;
+        }
+
+        // 渲染上传队列
+        function renderQueue() {
+            const container = document.getElementById('upload-queue');
+            if (uploadQueue.length === 0) {
+                container.innerHTML = '';
+                document.getElementById('btn-start-upload').disabled = true;
+                return;
+            }
+
+            container.innerHTML = uploadQueue.map((item, i) => {
+                const sizeStr = formatSize(item.file.size);
+                let statusStr = '';
+                let statusClass = '';
+                if (item.status === 'pending') { statusStr = '⏳ 等待中'; }
+                else if (item.status === 'uploading') { statusStr = '⬆️ 上传中...'; statusClass = 'uploading'; }
+                else if (item.status === 'success') { statusStr = '✅ 成功'; statusClass = 'success'; }
+                else if (item.status === 'fail') { statusStr = '❌ 失败'; statusClass = 'fail'; }
+
+                return `
+                    <div class="queue-item">
+                        <div class="qi-icon">${getFileIcon(item.file.name)}</div>
+                        <div class="qi-name">${item.file.name}</div>
+                        <div class="qi-size">${sizeStr}</div>
+                        <div class="qi-status ${statusClass}">${statusStr}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // 开始上传
+        async function startUpload() {
+            const btn = document.getElementById('btn-start-upload');
+            btn.disabled = true;
+            btn.textContent = '上传中...';
+
+            const customName = document.getElementById('custom-name').value.trim();
+
+            for (let i = 0; i < uploadQueue.length; i++) {
+                const item = uploadQueue[i];
+                if (item.status === 'success') continue;
+
+                item.status = 'uploading';
+                renderQueue();
+
+                const formData = new FormData();
+                formData.append('file', item.file);
+                formData.append('category', currentCategory);
+
+                // 单文件时传自定义名
+                if (uploadQueue.length === 1 && customName) {
+                    formData.append('customName', customName);
+                }
+
+                try {
+                    const resp = await fetch('/admin/api/upload', { method: 'POST', body: formData });
+                    const result = await resp.json();
+
+                    if (result.success) {
+                        item.status = 'success';
+                        item.key = result.data.key;
+                        item.url = result.data.url;
+                        showToast('✅ ' + item.file.name + ' → ' + item.key);
+                    } else {
+                        item.status = 'fail';
+                        item.error = result.message;
+                        showToast('❌ ' + item.file.name + ': ' + result.message);
+                    }
+                } catch (e) {
+                    item.status = 'fail';
+                    item.error = e.message;
+                    showToast('❌ 网络错误: ' + e.message);
+                }
+                renderQueue();
+            }
+
+            btn.textContent = '开始上传';
+            btn.disabled = false;
+            loadStats();
+            loadFileList();
+        }
+
+        // 清空队列
+        function clearQueue() {
+            uploadQueue = [];
+            renderQueue();
+            document.getElementById('custom-name-row').classList.remove('show');
+        }
+
+        // 加载统计
+        async function loadStats() {
+            try {
+                const resp = await fetch('/admin/api/stats');
+                const result = await resp.json();
+                if (result.success) {
+                    const d = result.data;
+                    const dirs = ['images', 'audio', 'videos', 'models', 'root'];
+                    dirs.forEach(dir => {
+                        const numEl = document.getElementById('stat-' + dir);
+                        const sizeEl = document.getElementById('stat-' + dir + '-size');
+                        if (numEl) numEl.textContent = d[dir + '_count'] ?? 0;
+                        if (sizeEl) sizeEl.textContent = formatSize(d[dir + '_size'] ?? 0);
+                    });
+                }
+            } catch (e) {
+                console.error('加载统计失败', e);
+            }
+        }
+
+        // 加载文件列表
+        async function loadFileList() {
+            const tbody = document.getElementById('file-list-body');
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color: var(--text-muted); padding: 1rem;">加载中...</td></tr>';
+
+            try {
+                const resp = await fetch('/admin/api/list?prefix=' + encodeURIComponent(currentCategory));
+                const result = await resp.json();
+
+                if (result.success && result.data.length > 0) {
+                    tbody.innerHTML = result.data.map(f => `
+                        <tr>
+                            <td class="file-key">${f.key}</td>
+                            <td>${formatSize(f.size)}</td>
+                            <td style="font-size:0.72rem; color:var(--text-muted);">${f.lastModified}</td>
+                            <td class="file-url" title="${f.url}">${f.url}</td>
+                            <td><button class="btn-delete" onclick="deleteFile('${f.key}')">删除</button></td>
+                        </tr>
+                    `).join('');
+                } else {
+                    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color: var(--text-muted); padding: 1rem;">该目录下暂无文件</td></tr>';
+                }
+            } catch (e) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color: #f44336; padding: 1rem;">加载失败: ' + e.message + '</td></tr>';
+            }
+        }
+
+        // 删除文件
+        async function deleteFile(key) {
+            if (!confirm('确定删除 ' + key + ' ?')) return;
+
+            try {
+                const resp = await fetch('/admin/api/delete?key=' + encodeURIComponent(key), { method: 'DELETE' });
+                const result = await resp.json();
+                if (result.success) {
+                    showToast('✅ 已删除: ' + key);
+                    loadFileList();
+                    loadStats();
+                } else {
+                    showToast('❌ 删除失败: ' + result.message);
+                }
+            } catch (e) {
+                showToast('❌ 网络错误: ' + e.message);
+            }
+        }
+
+        // Toast
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            toast.textContent = msg;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
+        // 工具：格式化文件大小
+        function formatSize(bytes) {
+            if (!bytes || bytes === 0) return '0 B';
+            const k = 1024;
+            const sizes = ['B', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+        }
+
+        // 工具：文件图标
+        function getFileIcon(name) {
+            const ext = name.split('.').pop().toLowerCase();
+            if (['jpg','jpeg','png','gif','webp','bmp'].includes(ext)) return '🖼️';
+            if (['mp3','wav','aac','m4a'].includes(ext)) return '🎵';
+            if (['mp4','mov','m4v'].includes(ext)) return '🎬';
+            if (['splat','ply','obj','glb','gltf','fbx'].includes(ext)) return '🧊';
+            return '📄';
+        }
+
+        // ==================== 匹配中心 ====================
+        let allSlots = [];
+        let allCosFiles = [];
+        let currentTypeFilter = 'all';
+        let pendingMatches = {};   // slotId -> cosKey（待确认）
+        let selectedSlotId = null;
+
+        async function loadMatchCenter() {
+            try {
+                const [s, f] = await Promise.all([
+                    fetch('/admin/api/slots').then(r=>r.json()),
+                    fetch('/admin/api/list').then(r=>r.json())
+                ]);
+                if (s.success) {
+                    allSlots = s.data;
+                    document.getElementById('slots-col-count').textContent = allSlots.length;
+                }
+                if (f.success) {
+                    allCosFiles = f.data.filter(o => !o.key.endsWith('/'));
+                    document.getElementById('cos-col-count').textContent = allCosFiles.length;
+                }
+                renderSlots();
+                renderCosFiles();
+                updateMatchStats();
+            } catch (e) {
+                console.error(e);
+                showToast('❌ 加载匹配中心失败: ' + e.message);
+            }
+        }
+
+        function filterSlots(type) {
+            currentTypeFilter = type;
+            document.querySelectorAll('.type-filter-btn').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+            renderSlots();
+        }
+
+        function computeSlotStatus(s) {
+            if (pendingMatches[s.slotId]) return 'pending';
+            return s.filled ? 'filled' : 'empty';
+        }
+
+        function renderSlots() {
+            const filtered = currentTypeFilter === 'all'
+                ? allSlots
+                : allSlots.filter(s => s.slotId.startsWith(currentTypeFilter));
+            const container = document.getElementById('slots-list');
+            if (filtered.length === 0) {
+                container.innerHTML = '<div style="color:var(--text-muted); font-size:0.8rem; padding:1rem;">没有匹配的Slot</div>';
+                return;
+            }
+            container.innerHTML = filtered.map(s => {
+                const st = computeSlotStatus(s);
+                const tagCls = st === 'filled' ? 'status-filled' : (st === 'pending' ? 'status-pending' : 'status-empty');
+                const tagTxt = st === 'filled' ? '已填充' : (st === 'pending' ? '待确认' : '空缺');
+                return `
+                    <div class="slot-row ${selectedSlotId === s.slotId ? 'selected' : ''}" onclick="selectSlot('${s.slotId}')" title="${s.description}">
+                        <span class="slot-id">${s.slotId}</span>
+                        <span class="slot-type-icon">${getTypeIcon(s.slotId)}</span>
+                        <span class="slot-desc" title="${s.page} · ${s.description}">${s.page} · ${s.description}</span>
+                        <span class="status-tag ${tagCls}">${tagTxt}</span>
+                    </div>`;
+            }).join('');
+        }
+
+        function getTypeIcon(slotId) {
+            if (slotId.startsWith('IMG')) return '🖼️';
+            if (slotId.startsWith('AUD')) return '🎵';
+            if (slotId.startsWith('VID')) return '🎬';
+            if (slotId.startsWith('MDL')) return '🧊';
+            return '📄';
+        }
+
+        function selectSlot(slotId) {
+            selectedSlotId = slotId;
+            renderSlots();
+            renderStatusPanel();
+        }
+
+        function renderStatusPanel() {
+            const target = selectedSlotId ? allSlots.find(s => s.slotId === selectedSlotId) : null;
+            const container = document.getElementById('status-list');
+            if (!target) {
+                const pendingCount = Object.keys(pendingMatches).length;
+                if (pendingCount === 0) {
+                    container.innerHTML = '<div style="color:var(--text-muted); font-size:0.8rem; padding:1rem;">请选择左侧Slot，或在右侧下拉框为COS素材分配Slot。</div>';
+                    return;
+                }
+                // 展示所有待确认
+                container.innerHTML = '<div style="color:var(--warm-gold); font-size:0.8rem; margin-bottom:0.5rem;">⏳ 待确认导入列表：</div>' +
+                    Object.entries(pendingMatches).map(([sid,key]) => {
+                        const s = allSlots.find(x => x.slotId === sid);
+                        return `<div style="padding:0.4rem; background:rgba(255,193,7,0.08); border-radius:6px; margin-bottom:0.25rem; font-size:0.75rem;">
+                                <b style="color:var(--warm-gold);">${sid}</b> → ${key}
+                                <div style="color:var(--text-muted); font-size:0.7rem; margin-top:0.15rem;">${s ? s.page+' · '+s.description : ''}</div>
+                            </div>`;
+                    }).join('');
+                return;
+            }
+            const st = computeSlotStatus(target);
+            const pendingKey = pendingMatches[target.slotId];
+            const curVal = pendingKey || target.assignedFile || '（未填充）';
+            container.innerHTML = `
+                <div style="padding:0.5rem; border-radius:8px; background:rgba(212,175,55,0.08); margin-bottom:0.5rem;">
+                    <div style="font-family:monospace; color:var(--warm-gold); font-size:0.9rem;">${target.slotId}</div>
+                    <div style="margin-top:0.3rem; font-size:0.78rem; color:var(--text-secondary);">📄 ${target.page}</div>
+                    <div style="margin-top:0.15rem; font-size:0.78rem; color:var(--text-secondary);">📝 ${target.description}</div>
+                </div>
+                <div style="font-size:0.78rem; margin-bottom:0.5rem;">
+                    <div style="color:var(--text-muted); margin-bottom:0.15rem;">当前素材：</div>
+                    <div style="background:rgba(0,0,0,0.25); padding:0.35rem 0.5rem; border-radius:6px; font-family:monospace; font-size:0.72rem; color:var(--text-primary); word-break:break-all;">${curVal}</div>
+                </div>
+                <div style="font-size:0.78rem;">
+                    <div style="color:var(--text-muted); margin-bottom:0.15rem;">YAML路径：</div>
+                    <div style="background:rgba(0,0,0,0.25); padding:0.35rem 0.5rem; border-radius:6px; font-family:monospace; font-size:0.7rem; color:var(--text-secondary); word-break:break-all;">${target.yamlPath}</div>
+                </div>
+                ${pendingKey ? `
+                    <div style="margin-top:0.75rem;">
+                        <button class="btn-upload" style="width:100%; padding:0.5rem; font-size:0.8rem;" onclick="applySingleMatch('${target.slotId}')">仅确认此条导入</button>
+                        <button class="btn-clear" style="width:100%; margin-top:0.3rem; padding:0.45rem; font-size:0.78rem;" onclick="clearPending('${target.slotId}')">取消此条分配</button>
+                    </div>` : ''}
+            `;
+        }
+
+        function renderCosFiles() {
+            const container = document.getElementById('cos-files-list');
+            if (allCosFiles.length === 0) {
+                container.innerHTML = '<div style="color:var(--text-muted); font-size:0.8rem; padding:1rem;">桶内暂无文件，请先到"素材上传"Tab上传。</div>';
+                return;
+            }
+            // 找反向映射：cosKey -> 已分配的 slotId(s)
+            const assignMap = {};
+            allSlots.forEach(s => {
+                if (s.assignedFile) (assignMap[s.assignedFile] = assignMap[s.assignedFile] || []).push(s.slotId);
+            });
+            Object.entries(pendingMatches).forEach(([sid, key]) => {
+                (assignMap[key] = assignMap[key] || []).push(sid+'(待确认)');
+            });
+
+            container.innerHTML = allCosFiles.map(f => {
+                const preAssigned = (assignMap[f.key] || []);
+                const current = pendingMatchesReverse(f.key);
+                const opts = buildSlotOptionsForFile(f.key);
+                return `
+                    <div class="cos-file-item">
+                        <div class="cos-file-top">
+                            <span class="cos-file-key" title="${f.key}">${getFileIcon(f.key)} ${f.key}</span>
+                            <span class="cos-file-sz">${formatSize(f.size)}</span>
+                        </div>
+                        ${preAssigned.length ? `
+                            <div style="font-size:0.68rem; color:var(--text-muted); margin-bottom:0.25rem;">
+                                已分配：${preAssigned.map(id=>`<span style="background:rgba(76,175,80,0.15); color:#81c784; padding:0.05rem 0.3rem; border-radius:4px; margin-right:0.2rem;">${id}</span>`).join('')}
+                            </div>` : ''}
+                        <select class="match-select" onchange="onMatchSelect(this, '${f.key}')">
+                            <option value="">← 选择Slot分配该素材</option>
+                            ${opts}
+                        </select>
+                    </div>`;
+            }).join('');
+        }
+
+        function pendingMatchesReverse(key) {
+            return Object.entries(pendingMatches).filter(([s,k])=>k===key).map(([s])=>s);
+        }
+
+        function buildSlotOptionsForFile(cosKey) {
+            const type = guessFileSlotType(cosKey);
+            const typeMap = { IMG:'图片', AUD:'音频', VID:'视频', MDL:'模型' };
+            const typeLabel = typeMap[type] || '通用';
+            const eligible = allSlots.filter(s => type === 'UNKNOWN' || s.slotId.startsWith(type));
+            const groups = {};
+            eligible.forEach(s => {
+                (groups[s.page] = groups[s.page] || []).push(s);
+            });
+            const currentVal = Object.entries(pendingMatches).find(([s,k])=>k===cosKey)?.[0] || '';
+
+            let html = `<optgroup label="全部${typeLabel}Slot（${eligible.length}）">`;
+            Object.entries(groups).forEach(([page, list]) => {
+                html += `<optgroup label="  📄 ${page}（${list.length}）">`;
+                list.forEach(s => {
+                    const selected = currentVal === s.slotId ? 'selected' : '';
+                    const st = computeSlotStatus(s);
+                    const suffix = st === 'filled' ? ' ✅' : (st === 'pending' ? ' ⏳' : '');
+                    html += `<option value="${s.slotId}" ${selected}>${s.slotId} · ${s.description}${suffix}</option>`;
+                });
+                html += `</optgroup>`;
+            });
+            html += `</optgroup>`;
+            return html;
+        }
+
+        function guessFileSlotType(key) {
+            const ext = key.split('.').pop().toLowerCase();
+            if (['jpg','jpeg','png','gif','webp','bmp'].includes(ext)) return 'IMG';
+            if (['mp3','wav','aac','m4a'].includes(ext)) return 'AUD';
+            if (['mp4','mov','m4v'].includes(ext)) return 'VID';
+            if (['splat','ply','obj','glb','gltf','fbx'].includes(ext)) return 'MDL';
+            return 'UNKNOWN';
+        }
+
+        function onMatchSelect(sel, cosKey) {
+            const sid = sel.value;
+            if (!sid) {
+                // 取消此素材的分配
+                const exist = Object.entries(pendingMatches).find(([s,k])=>k===cosKey)?.[0];
+                if (exist) delete pendingMatches[exist];
+            } else {
+                pendingMatches[sid] = cosKey;
+            }
+            refreshPendingUI();
+        }
+
+        function clearPending(slotId) {
+            delete pendingMatches[slotId];
+            refreshPendingUI();
+        }
+
+        function cancelMatches() {
+            const n = Object.keys(pendingMatches).length;
+            if (n === 0) return;
+            if (!confirm(`确定取消 ${n} 条待确认的分配？`)) return;
+            pendingMatches = {};
+            refreshPendingUI();
+        }
+
+        function refreshPendingUI() {
+            const pendN = Object.keys(pendingMatches).length;
+            document.getElementById('pending-count').textContent = pendN;
+            document.getElementById('pending-slots').textContent = pendN;
+            document.getElementById('btn-confirm-match').disabled = pendN === 0;
+            renderSlots();
+            renderCosFiles();
+            renderStatusPanel();
+            updateMatchStats();
+        }
+
+        function updateMatchStats() {
+            const total = allSlots.length;
+            let filled = 0;
+            const currentAssigned = new Set();
+            allSlots.forEach(s => { if (s.filled || pendingMatches[s.slotId]) { filled++; currentAssigned.add(s.slotId); } });
+            const pending = Object.keys(pendingMatches).length;
+            const filledOnly = filled - pending;
+            const empty = total - filled;
+            document.getElementById('total-slots').textContent = total;
+            document.getElementById('filled-slots').textContent = filledOnly;
+            document.getElementById('empty-slots').textContent = empty;
+            document.getElementById('fill-rate').textContent = total === 0 ? '0%' : Math.round(filledOnly * 100 / total) + '%';
+        }
+
+        async function applySingleMatch(slotId) {
+            const cosKey = pendingMatches[slotId];
+            if (!cosKey) return;
+            const one = { [slotId]: cosKey };
+            if (!confirm('确认导入：\n' + slotId + ' ← ' + cosKey)) return;
+            await submitMatches(one);
+        }
+
+        async function confirmMatches() {
+            const n = Object.keys(pendingMatches).length;
+            if (n === 0) return;
+            const list = Object.entries(pendingMatches).map(([s,k]) => `  ${s} ← ${k}`).join('\n');
+            if (!confirm(`确认导入 ${n} 条匹配：\n${list}\n\n系统将把对应COS key写入application.yml对应字段`)) return;
+            await submitMatches(pendingMatches);
+        }
+
+        async function submitMatches(matchObj) {
+            try {
+                const resp = await fetch('/admin/api/match', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ matches: matchObj })
+                });
+                const j = await resp.json();
+                if (j.success) {
+                    showToast('✅ 导入成功！' + (j.message || '') + '（建议重启项目使所有字段生效）');
+                    pendingMatches = {};
+                    await loadMatchCenter();
+                } else {
+                    showToast('❌ 导入失败：' + j.message);
+                }
+            } catch (e) {
+                showToast('❌ 网络错误：' + e.message);
+            }
+        }
+    </script>
+</body>
+</html>

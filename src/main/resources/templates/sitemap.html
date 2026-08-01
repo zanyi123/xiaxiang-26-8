@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>网站导览 - 薪火侨乡</title>
+    <link rel="stylesheet" href="/css/qiaoyun.css">
+    <style>
+        * { box-sizing: border-box; }
+        html, body { height: 100%; margin: 0; }
+        body { display: flex; flex-direction: column; min-height: 100vh; }
+        .portal-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem 1.5rem;
+        }
+        .portal-title {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .portal-title h1 {
+            color: var(--warm-gold);
+            font-size: 2rem;
+            letter-spacing: 4px;
+            margin-bottom: 0.5rem;
+        }
+        .portal-title p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+        .portal-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.25rem;
+            width: 100%;
+            max-width: 1100px;
+        }
+        .portal-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 1.75rem 1rem;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            text-decoration: none;
+            color: inherit;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+        }
+        .portal-card:hover {
+            border-color: var(--warm-gold);
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(212, 175, 55, 0.2);
+        }
+        .portal-card-icon {
+            font-size: 2.5rem;
+            margin-bottom: 0.75rem;
+        }
+        .portal-card-title {
+            color: var(--warm-gold);
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 0.3rem;
+            letter-spacing: 0.5px;
+        }
+        .portal-card-desc {
+            color: var(--text-muted);
+            font-size: 0.78rem;
+            line-height: 1.4;
+        }
+        .portal-card.primary {
+            background: linear-gradient(135deg, rgba(212, 175, 55, 0.12), rgba(196, 98, 16, 0.08));
+            border-color: rgba(212, 175, 55, 0.4);
+        }
+        .portal-card.primary .portal-card-icon {
+            color: var(--warm-gold);
+        }
+        .portal-footer {
+            text-align: center;
+            padding: 1rem;
+            color: var(--text-muted);
+            font-size: 0.82rem;
+        }
+        .portal-footer a {
+            color: var(--warm-gold);
+            text-decoration: none;
+        }
+        @media (max-width: 900px) {
+            .portal-grid { grid-template-columns: repeat(2, 1fr); }
+            .portal-title h1 { font-size: 1.5rem; }
+        }
+        @media (max-width: 480px) {
+            .portal-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <div class="header-left">
+                <a href="/" class="header-logo">薪火侨乡</a>
+            </div>
+            <nav class="header-nav">
+                <a href="/#hero">首页</a>
+                <a href="/sitemap">网站导览</a>
+                <a href="/#tour">云游侨乡</a>
+                <a href="/#life">我的侨乡人生</a>
+                <a href="/#building-story">建筑故事</a>
+                <a href="/#achievement">项目成果</a>
+                <a href="/about">关于我们</a>
+            </nav>
+            <div class="header-right">
+                <button class="header-btn" onclick="window.location.href='/map'">开始云游</button>
+            </div>
+        </div>
+    </header>
+
+    <div class="portal-container">
+        <div class="portal-title">
+            <h1>🗺️ 网站导览</h1>
+            <p>选择一个入口，开始探索薪火侨乡</p>
+        </div>
+
+        <div class="portal-grid">
+            <!-- 01 首页 -->
+            <a href="/" class="portal-card primary">
+                <div class="portal-card-icon">🏠</div>
+                <div class="portal-card-title">首页</div>
+                <div class="portal-card-desc">遇见薪火侨乡</div>
+            </a>
+
+            <!-- 02 云游侨乡 -->
+            <a href="/map" class="portal-card primary">
+                <div class="portal-card-icon">🗺️</div>
+                <div class="portal-card-title">云游侨乡</div>
+                <div class="portal-card-desc">宝源坊3D全景</div>
+            </a>
+
+            <!-- 03 我的侨乡人生 -->
+            <a href="/#life" class="portal-card primary">
+                <div class="portal-card-icon">✨</div>
+                <div class="portal-card-title">我的侨乡人生</div>
+                <div class="portal-card-desc">互动体验 · 五分钟</div>
+            </a>
+
+            <!-- 04 建筑故事 -->
+            <a href="/#building-story" class="portal-card primary">
+                <div class="portal-card-icon">🏛️</div>
+                <div class="portal-card-title">建筑故事</div>
+                <div class="portal-card-desc">宝源坊6栋特色建筑</div>
+            </a>
+
+            <!-- 05 项目成果 -->
+            <a href="/#achievement" class="portal-card primary">
+                <div class="portal-card-icon">📊</div>
+                <div class="portal-card-title">项目成果</div>
+                <div class="portal-card-desc">航拍 · 建模 · 记录</div>
+            </a>
+
+            <!-- 06 知识库 -->
+            <a href="/knowledge" class="portal-card">
+                <div class="portal-card-icon">📚</div>
+                <div class="portal-card-title">知识库</div>
+                <div class="portal-card-desc">侨乡建筑知识</div>
+            </a>
+
+            <!-- 07 侨乡故事 -->
+            <a href="/stories" class="portal-card">
+                <div class="portal-card-icon">📖</div>
+                <div class="portal-card-title">侨乡故事</div>
+                <div class="portal-card-desc">华侨远行与归来</div>
+            </a>
+
+            <!-- 08 田野档案 -->
+            <a href="/archive" class="portal-card">
+                <div class="portal-card-icon">📂</div>
+                <div class="portal-card-title">田野档案</div>
+                <div class="portal-card-desc">实地调研采集</div>
+            </a>
+
+            <!-- 09 建筑解剖 -->
+            <a href="/anatomy" class="portal-card">
+                <div class="portal-card-icon">🔬</div>
+                <div class="portal-card-title">建筑解剖</div>
+                <div class="portal-card-desc">拆解建筑结构</div>
+            </a>
+
+            <!-- 10 老照片对比 -->
+            <a href="/photo-compare" class="portal-card">
+                <div class="portal-card-icon">📷</div>
+                <div class="portal-card-title">老照片对比</div>
+                <div class="portal-card-desc">百年变迁对比</div>
+            </a>
+
+            <!-- 11 侨批文化 -->
+            <a href="/qiaopi" class="portal-card">
+                <div class="portal-card-icon">✉️</div>
+                <div class="portal-card-title">侨批文化</div>
+                <div class="portal-card-desc">华侨家书故事</div>
+            </a>
+
+            <!-- 12 方言学习 -->
+            <a href="/dialect" class="portal-card">
+                <div class="portal-card-icon">🗣️</div>
+                <div class="portal-card-title">方言学习</div>
+                <div class="portal-card-desc">学几句开平话</div>
+            </a>
+
+            <!-- 13 知识答题 -->
+            <a href="/quiz" class="portal-card">
+                <div class="portal-card-icon">🧠</div>
+                <div class="portal-card-title">知识答题</div>
+                <div class="portal-card-desc">侨乡文化挑战</div>
+            </a>
+
+            <!-- 14 虚拟盖章 -->
+            <a href="/stamps" class="portal-card">
+                <div class="portal-card-icon">📮</div>
+                <div class="portal-card-title">虚拟盖章</div>
+                <div class="portal-card-desc">收集特色印章</div>
+            </a>
+
+            <!-- 15 关于我们 -->
+            <a href="/about" class="portal-card">
+                <div class="portal-card-icon">🏢</div>
+                <div class="portal-card-title">关于我们</div>
+                <div class="portal-card-desc">团队 · 合作 · 项目</div>
+            </a>
+
+            <!-- 16 返回首页 -->
+            <a href="/" class="portal-card">
+                <div class="portal-card-icon">←</div>
+                <div class="portal-card-title">返回首页</div>
+                <div class="portal-card-desc">遇见薪火侨乡</div>
+            </a>
+        </div>
+    </div>
+
+    <div class="portal-footer">
+        <p>© 2024 侨韵薪火实践团 · <a href="/">薪火侨乡</a> · <a href="/admin/upload" style="color: var(--text-muted); text-decoration: none;">管理入口</a></p>
+    </div>
+</body>
+</html>

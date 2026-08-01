@@ -38,3 +38,6 @@ credentials.json
 # Temp files
 tmp/
 *.tmp
+
+# 3D reconstruction workspace (large binary data, not source code)
+colmap-workspace/
