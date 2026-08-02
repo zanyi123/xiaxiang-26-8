@@ -48,6 +48,9 @@ public class UploadController {
     @Autowired
     private org.example.xiaxiang.service.SlotService slotService;
 
+    @Autowired
+    private org.example.xiaxiang.service.CosService cosService;
+
     /** 允许上传的文件扩展名 */
     private static final List<String> ALLOWED_EXTENSIONS = Arrays.asList(
             ".jpg", ".jpeg", ".png", ".gif", ".webp", ".bmp",
@@ -73,6 +76,17 @@ public class UploadController {
         return m;
     }
 
+    /**
+     * 写操作环境校验：dev 环境禁止所有对 COS / YAML 的写入，防止污染正式环境
+     */
+    private Result<?> ensureProdForWrites() {
+        if (!appProperties.isProdEnv()) {
+            return Result.fail("当前为本地开发环境（app.env=dev），所有上传/绑定/删除等写入操作已禁用。"
+                    + "请在正式网站后台（prod环境）进行素材管理操作，或在本地 application.yml 中设置 app.env=prod（仅限临时调试）");
+        }
+        return null;
+    }
+
     // ==================== 页面 ====================
 
     @GetMapping("/upload")
@@ -81,6 +95,8 @@ public class UploadController {
         model.addAttribute("bucketName", cosProperties.getBucketName());
         model.addAttribute("region", cosProperties.getRegion());
         model.addAttribute("mockMode", appProperties.isMockMode());
+        model.addAttribute("env", appProperties.getEnv());
+        model.addAttribute("isProd", appProperties.isProdEnv());
         return "admin/upload";
     }
 
@@ -98,6 +114,9 @@ public class UploadController {
             @RequestParam("file") MultipartFile file,
             @RequestParam(value = "category", defaultValue = "images") String category,
             @RequestParam(value = "customName", required = false) String customName) {
+
+        Result<?> guard = ensureProdForWrites();
+        if (guard != null) return (Result<Map<String, Object>>) guard;
 
         if (file.isEmpty()) {
             return Result.fail("文件为空");
@@ -156,6 +175,9 @@ public class UploadController {
 
             log.info("[上传成功] {} → {} ({}KB)", originalName, key, file.getSize() / 1024);
 
+            // 上传成功后清除文件存在性缓存，确保主页立即反映新素材
+            cosService.clearCache();
+
             Map<String, Object> data = new HashMap<>();
             data.put("key", key);
             data.put("url", url);
@@ -185,6 +207,9 @@ public class UploadController {
     public Result<List<Map<String, Object>>> uploadBatch(
             @RequestParam("files") MultipartFile[] files,
             @RequestParam(value = "category", defaultValue = "images") String category) {
+
+        Result<?> guard = ensureProdForWrites();
+        if (guard != null) return (Result<List<Map<String, Object>>>) guard;
 
         List<Map<String, Object>> results = new ArrayList<>();
         int success = 0;
@@ -252,9 +277,14 @@ public class UploadController {
     @DeleteMapping("/api/delete")
     @ResponseBody
     public Result<Void> deleteFile(@RequestParam("key") String key) {
+        Result<?> guard = ensureProdForWrites();
+        if (guard != null) return (Result<Void>) guard;
+
         try {
             cosClient.deleteObject(cosProperties.getBucketName(), key);
             log.info("[删除成功] {}", key);
+            // 删除后清除缓存，确保主页立即反映删除
+            cosService.clearCache();
             return Result.success(null, "删除成功: " + key);
         } catch (Exception e) {
             log.error("[删除失败] {}", e.getMessage());
@@ -329,6 +359,9 @@ public class UploadController {
     public Result<java.util.Map<String, Object>> applyMatches(
             @RequestBody java.util.Map<String, Object> body) {
 
+        Result<?> guard = ensureProdForWrites();
+        if (guard != null) return (Result<java.util.Map<String, Object>>) guard;
+
         @SuppressWarnings("unchecked")
         java.util.Map<String, String> matches = (java.util.Map<String, String>) body.get("matches");
         if (matches == null || matches.isEmpty()) {
@@ -336,6 +369,9 @@ public class UploadController {
         }
 
         org.example.xiaxiang.service.SlotService.MatchResult r = slotService.applyMatches(matches);
+
+        // 匹配写入YAML后清除缓存，确保主页重新判定填充状态
+        cosService.clearCache();
 
         java.util.Map<String, Object> resp = new HashMap<>();
         resp.put("successCount", r.getSuccess().size());
@@ -350,6 +386,31 @@ public class UploadController {
             msg += "（YAML 落盘 " + r.getYamlWrittenCount() + " 条）";
         }
         return Result.success(resp, msg);
+    }
+
+    /**
+     * POST /admin/api/unmatch?slotId=IMG-01-01
+     * 取消单个Slot的素材绑定（将YAML字段置空），用于错误绑定的解绑或重新绑定
+     */
+    @PostMapping("/api/unmatch")
+    @ResponseBody
+    public Result<java.util.Map<String, Object>> unmatchSlot(@RequestParam String slotId) {
+        Result<?> guard = ensureProdForWrites();
+        if (guard != null) return (Result<java.util.Map<String, Object>>) guard;
+
+        org.example.xiaxiang.service.SlotService.MatchResult r = slotService.unbindSlot(slotId);
+        java.util.Map<String, Object> resp = new HashMap<>();
+        resp.put("successCount", r.getSuccess().size());
+        resp.put("failCount", r.getFail().size());
+        resp.put("yamlWrittenCount", r.getYamlWrittenCount());
+        resp.put("successIds", r.getSuccess());
+        resp.put("failDetails", r.getFail());
+
+        if (r.getFail().isEmpty()) {
+            return Result.success(resp, "已取消绑定：" + slotId);
+        } else {
+            return Result.fail("取消绑定失败：" + String.join(", ", r.getFail()));
+        }
     }
 
     // ==================== 工具方法 ====================

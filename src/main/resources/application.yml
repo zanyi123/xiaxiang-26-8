@@ -1,0 +1,811 @@
+# ============================================================
+# 通用配置（提交到 Git，服务器和本地共用）
+# 密钥通过环境变量注入，本地开发可使用 application-local.yml 覆盖
+#
+# ===== 服务器部署 =====
+# export COS_SECRET_ID="你的SecretId"
+# export COS_SECRET_KEY="你的SecretKey"
+# java -jar xiaxiang-building-tour.jar
+#
+# ===== 本地开发 =====
+# 1. 创建 application-local.yml（被 .gitignore 忽略，不会提交）
+# 2. 启动时加参数：-Dspring.profiles.active=local
+#    或在 application-local.yml 中写好密钥直接跑
+# ============================================================
+
+server:
+  port: 8080
+
+spring:
+  thymeleaf:
+    cache: false
+    prefix: classpath:/templates/
+    suffix: .html
+    mode: HTML
+    encoding: UTF-8
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+  config:
+    # 尝试加载 application-local.yml，如果不存在也不报错
+    import: optional:classpath:application-local.yml
+
+# ========== 腾讯云 COS 配置（密钥通过环境变量 / application-local.yml 注入）==========
+cos:
+  secret-id: ${COS_SECRET_ID:}
+  secret-key: ${COS_SECRET_KEY:}
+  region: ${COS_REGION:ap-guangzhou}
+  bucket-name: ${COS_BUCKET_NAME:qiaoyun-2026-gdut-100050675333-1453696876}
+
+# ========== 应用配置（默认 prod，本地用 application-local.yml 改为 dev）==========
+app:
+  mock-mode: false
+  env: prod
+
+  buildings:
+    - id: 1
+      name: "开平碉楼"
+      description: "世界文化遗产，融合中西建筑风格的经典之作"
+    - id: 2
+      name: "自力村碉楼群"
+      description: "村落与碉楼和谐共生，展现侨乡独特风貌"
+    - id: 3
+      name: "赤坎古镇骑楼"
+      description: "保存完好的骑楼建筑群，承载百年商埠记忆"
+
+  locations:
+    - id: 1
+      number: "01"
+      name: "宝源坊碉楼群"
+      description: "三座百年碉楼，融合岭南骑楼与西洋建筑风格"
+      history: "宝源坊始建于1909年，三座碉楼见证了华侨回乡建设的辉煌历史。这些碉楼融合了岭南建筑特色与西洋建筑风格，八角形窗户是其标志性特征，展现了侨乡人民对美好生活的向往和对建筑艺术的追求。"
+      x-coordinate: 50
+      y-coordinate: 50
+      audio-text: "宝源坊始建于1909年，三座碉楼见证了华侨回乡建设的辉煌历史。这些碉楼融合了岭南建筑特色与西洋建筑风格，八角形窗户是其标志性特征。站在这里，仿佛能听到百年前工匠们叮叮当当的锤击声，感受到华侨们对故土深深的眷恋。"
+    - id: 2
+      number: "02"
+      name: "方形古井"
+      description: "百年历史，村民日常取水交流的重要场所"
+      history: "这口水井已有百年历史，由青石板围砌而成。井水清澈甘甜，至今仍在使用。这里曾是村民日常取水、交流的重要场所，每一位村民都在这里留下了生活的印记。"
+      x-coordinate: 30
+      y-coordinate: 70
+      audio-text: "这口水井已有百年历史，是村民日常取水、交流的重要场所。井水清澈甘甜，至今仍在使用。每当清晨，村里的妇女们就会来到这里打水、洗衣、聊天，这里曾是村庄最热闹的社交中心。"
+    - id: 3
+      number: "03"
+      name: "青石板路"
+      description: "鹅卵石与青石板铺就，见证侨乡岁月"
+      history: "青石板路由华侨从海外带回的石材铺设，每一块都承载着乡愁。这条路上曾走过无数辛勤劳作的村民，也走过衣锦还乡的华侨，每一块石板都记录着宝源坊的变迁。"
+      x-coordinate: 70
+      y-coordinate: 30
+      audio-text: "青石板路由华侨从海外带回的石材铺设，每一块都承载着乡愁。走在这条路上，仿佛能听到百年前村民们的脚步声，感受到时光的流转。这条路不仅是村庄的通道，更是连接过去与现在的时光隧道。"
+    - id: 4
+      number: "04"
+      name: "古榕树群"
+      description: "百年古树，遮天蔽日的村民休憩场所"
+      history: "这些古榕树已有上百年树龄，枝繁叶茂，遮天蔽日。树下是村民休憩聊天的场所，也是孩子们玩耍的乐园。古树见证了村庄的兴衰变迁，是宝源坊最珍贵的自然遗产。"
+      x-coordinate: 20
+      y-coordinate: 30
+      audio-text: "这些古榕树已有上百年树龄，遮天蔽日。树下是村民休憩聊天的场所，也是孩子们玩耍的乐园。夏天，老人们坐在树下乘凉、下棋；孩子们在树间追逐嬉戏。古树见证了一代又一代人的成长。"
+    - id: 5
+      number: "05"
+      name: "陈氏宗祠"
+      description: "宗族文化核心，雕梁画栋记录家族历史"
+      history: "陈氏宗祠是宝源坊宗族文化的核心，雕梁画栋，气势恢宏。祠堂记录着陈氏家族的辉煌历史，供奉着历代祖先的牌位。每年清明，族人们都会在这里举行盛大的祭祖仪式，传承家族文化。"
+      x-coordinate: 80
+      y-coordinate: 60
+      audio-text: "陈氏宗祠是宝源坊宗族文化的核心，雕梁画栋，记录着陈氏家族的辉煌历史。每年清明，族人们都会在这里举行祭祖仪式，缅怀祖先、传承家风。这座祠堂不仅是建筑艺术的杰作，更是家族凝聚力的象征。"
+    - id: 6
+      number: "06"
+      name: "侨批馆"
+      description: "展示华侨汇款凭证和书信往来历史"
+      history: "侨批馆展示了华侨汇款凭证和书信往来历史。侨批是华侨与家乡联系的纽带，每一封侨批都饱含着对家人的思念。这里收藏的侨批记录了华侨在海外艰苦奋斗的历程，以及他们对家乡亲人深深的牵挂。"
+      x-coordinate: 40
+      y-coordinate: 20
+      audio-text: "侨批馆展示了华侨汇款凭证和书信往来历史。侨批是华侨与家乡联系的纽带，每一封侨批都饱含着对家人的思念。透过这些泛黄的信纸，我们仿佛能看到华侨们在海外辛勤劳作的身影，感受到他们对家乡亲人深深的牵挂。"
+
+  stories:
+    - id: 1
+      title: "下南洋的记忆"
+      category: "口述历史"
+      summary: "宝源坊的每一块青砖，都承载着华侨们漂洋过海的故事"
+      content: "清朝末年，国难当头，无数开平乡亲远渡重洋，在异国他乡艰苦奋斗，又将血汗钱寄回家乡，建起了这一座座中西合璧的碉楼。当年我阿公带着五块大洋下南洋，在金山做了十年苦力，终于攒钱建起了这座楼。他说，楼建起来了，根就留住了。"
+      author: "陈伯"
+      date: "2024-07-15"
+      views: 1256
+    - id: 2
+      title: "一封侨批的旅程"
+      category: "侨批文化"
+      summary: "每一封侨批都是一封家书，承载着海外游子对家乡的思念"
+      content: "侨批，简称作'批'，是海外华侨通过民间渠道寄回国内的汇款与书信的结合物。一封侨批从海外寄到家乡，要经过水客、批局、邮局等多个环节，历时数月甚至更久。每一封侨批背后，都有一个感人的故事。"
+      author: "李老师"
+      date: "2024-07-16"
+      views: 892
+    - id: 3
+      title: "碉楼里的读书声"
+      category: "教育故事"
+      summary: "华侨们不仅寄钱建楼，更重视家乡的教育事业"
+      content: "宝源坊的碉楼里，曾走出过许多优秀的学子。华侨们深知知识改变命运的道理，他们在家乡兴办学校，设立奖学金，鼓励后辈读书上进。陈氏宗祠里的族学，曾是村里孩子们读书的地方。"
+      author: "陈校长"
+      date: "2024-07-17"
+      views: 678
+    - id: 4
+      title: "古井的传说"
+      category: "民间传说"
+      summary: "百年古井，见证了宝源坊无数的故事与传说"
+      content: "相传宝源坊的古井挖于清末，井水清澈甘甜，百年来从未干涸。老人们说，这口井连着地下河，是风水宝地。抗战时期，村民们躲在碉楼里，全靠这口井的井水才渡过难关。"
+      author: "王阿婆"
+      date: "2024-07-18"
+      views: 1024
+
+  timeline:
+    - id: 1
+      year: "1909"
+      title: "宝源坊始建"
+      description: "华侨回乡购地建房，宝源坊村落雏形初现，首批碉楼开始动工兴建。"
+      type: "building"
+    - id: 2
+      year: "1920s"
+      title: "碉楼鼎盛期"
+      description: "侨汇源源不断，宝源坊三座主要碉楼相继建成，中西合璧建筑风格定型。"
+      type: "building"
+    - id: 3
+      year: "1930s"
+      title: "侨批业兴盛"
+      description: "侨批局在开平遍地开花，每年通过侨批汇入的款项数额巨大。"
+      type: "culture"
+    - id: 4
+      year: "1940s"
+      title: "抗战岁月"
+      description: "碉楼成为村民躲避战乱的庇护所，见证了中华民族不屈的抗争精神。"
+      type: "history"
+    - id: 5
+      year: "1950s"
+      title: "土地改革"
+      description: "新中国成立后，宝源坊经历土地改革，碉楼收归集体所有。"
+      type: "history"
+    - id: 6
+      year: "1980s"
+      title: "改革开放"
+      description: "改革开放后，华侨回乡探亲观光，碉楼重新受到重视。"
+      type: "history"
+    - id: 7
+      year: "2007"
+      title: "世遗提名"
+      description: "开平碉楼与村落入选世界文化遗产名录，宝源坊迎来新的历史机遇。"
+      type: "milestone"
+    - id: 8
+      year: "2023"
+      title: "广东省古村落"
+      description: "宝源坊入选第八批'广东省古村落'，文化保护工作全面展开。"
+      type: "milestone"
+    - id: 9
+      year: "2024"
+      title: "数字云游上线"
+      description: "广东工业大学'侨韵薪火'实践团打造数字化云游平台，让世界看见宝源坊。"
+      type: "milestone"
+
+  archives:
+    - id: 1
+      title: "历史建筑"
+      category: "建筑档案"
+      description: "已登记的历史建筑清单，包括碉楼、祠堂、民居等"
+      icon: "🏛️"
+      count: "12"
+      unit: "栋已登记建筑"
+      detail-url: "/archive#buildings"
+    - id: 2
+      title: "历史文献"
+      category: "文献档案"
+      description: "侨批、族谱、地契等珍贵历史文献资料"
+      icon: "📜"
+      count: "50+"
+      unit: "份珍贵史料"
+      detail-url: "/archive#documents"
+    - id: 3
+      title: "口述录音"
+      category: "口述历史"
+      description: "采访老村民录制的口述历史音频资料"
+      icon: "🎙️"
+      count: "20+"
+      unit: "小时采访录音"
+      detail-url: "/archive#audio"
+    - id: 4
+      title: "影像资料"
+      category: "影像档案"
+      description: "实地拍摄的照片、视频等影像资料"
+      icon: "📷"
+      count: "2000+"
+      unit: "张照片/视频"
+      detail-url: "/archive#photos"
+    - id: 5
+      title: "民俗非遗"
+      category: "文化档案"
+      description: "传统民俗、非物质文化遗产记录"
+      icon: "🎭"
+      count: "8"
+      unit: "项民俗活动"
+      detail-url: "/archive#folk"
+    - id: 6
+      title: "族谱家族"
+      category: "家族档案"
+      description: "各家族族谱、家族历史记录"
+      icon: "👨‍👩‍👧‍👦"
+      count: "6"
+      unit: "部家族族谱"
+      detail-url: "/archive#family"
+    - id: 7
+      title: "建筑测绘"
+      category: "技术档案"
+      description: "建筑测绘图纸、3D模型数据"
+      icon: "📐"
+      count: "12"
+      unit: "份测绘数据"
+      detail-url: "/archive#survey"
+    - id: 8
+      title: "研究论文"
+      category: "学术档案"
+      description: "相关学术研究论文与报告"
+      icon: "📚"
+      count: "30+"
+      unit: "篇研究文献"
+      detail-url: "/archive#research"
+
+  knowledge:
+    - id: 1
+      title: "碉楼建筑风格"
+      category: "建筑风格"
+      summary: "开平碉楼融合中西建筑风格，是侨乡文化的独特载体"
+      content: "开平碉楼的建筑风格独特，融合了中国传统建筑与西方建筑的元素。楼体一般为钢筋混凝土结构，外形多样，有中国式屋顶、西洋式立面、古罗马式柱廊等。这种中西合璧的建筑风格，反映了华侨对西方文化的接受和对传统文化的坚守。"
+      difficulty: "入门"
+    - id: 2
+      title: "碉楼建造工艺"
+      category: "建造技术"
+      summary: "百年前的华侨如何建造起如此坚固的碉楼"
+      content: "碉楼的建造材料主要是青砖、钢筋和混凝土。华侨从海外带回先进的建筑技术和材料，结合本地工匠的技艺，建造出了一座座坚固美观的碉楼。墙体厚度可达50厘米以上，具有很强的防御功能。"
+      difficulty: "进阶"
+    - id: 3
+      title: "岭南建筑特色"
+      category: "地域建筑"
+      summary: "岭南地区独特的气候环境孕育了独特的建筑风格"
+      content: "岭南建筑具有通风、遮阳、防潮、隔热等特点，适应了岭南炎热潮湿的气候。常见的元素包括：骑楼、天井、冷巷、满洲窗等。这些设计既实用又美观，体现了古人的智慧。"
+      difficulty: "入门"
+    - id: 4
+      title: "侨批文化解读"
+      category: "文化研究"
+      summary: "侨批是华侨文化的重要载体，被誉为'跨海家书'"
+      content: "侨批，简称'批'，是海外华侨通过民间渠道及后来的金融邮政机构寄回国内的汇款与书信的结合物。侨批不仅是汇款凭证，更是家书，承载着华侨对家人的思念和对家乡的牵挂。2013年，'侨批档案'入选《世界记忆名录》。"
+      difficulty: "进阶"
+    - id: 5
+      title: "祠堂建筑文化"
+      category: "礼制建筑"
+      summary: "祠堂是宗族文化的物质载体，是族人精神家园的象征"
+      content: "祠堂是中国传统社会中宗族祭祀祖先和议事的场所。岭南祠堂建筑规模宏大，装饰精美，木雕、石雕、砖雕、灰塑等工艺精湛。祠堂不仅是祭祀场所，也是宗族议事、教育子弟、举办婚丧嫁娶等大事的地方。"
+      difficulty: "入门"
+    - id: 6
+      title: "骑楼建筑溯源"
+      category: "建筑类型"
+      summary: "骑楼是岭南城镇的标志性建筑，适应南方多雨炎热的气候"
+      content: "骑楼是一种近代商住建筑，建筑物底层沿街面后退且留出公共人行空间。骑楼建筑起源于古希腊，后传入东南亚，再由华侨传入中国南方。骑楼既能遮阳避雨，又能使店铺门面开阔，是商业建筑的典范。"
+      difficulty: "入门"
+
+  cultures:
+    - id: 1
+      name: "开平泮村灯会"
+      category: "传统节庆"
+      description: "每年正月十三举行，是泮村余族的传统民俗活动"
+    - id: 2
+      name: "龙舟竞渡"
+      category: "传统体育"
+      description: "端午节龙舟赛，是岭南地区重要的民俗活动"
+    - id: 3
+      name: "舞狮表演"
+      category: "民间艺术"
+      description: "广东醒狮，国家级非物质文化遗产"
+    - id: 4
+      name: "开平灰塑"
+      category: "传统工艺"
+      description: "建筑装饰工艺，用灰塑塑造各种图案造型"
+    - id: 5
+      name: "侨乡美食"
+      category: "饮食文化"
+      description: "黄鳝饭、豆腐角、马冈鹅等特色美食"
+    - id: 6
+      name: "广东音乐"
+      category: "传统音乐"
+      description: "岭南地区的传统民间音乐，旋律优美动听"
+
+  blog-posts:
+    - id: 1
+      title: "初到宝源坊：初见碉楼的震撼"
+      summary: "实践团第一天到达宝源坊，被眼前的碉楼群深深震撼..."
+      author: "张同学"
+      date: "2024-07-10"
+      category: "实践日志"
+    - id: 2
+      title: "采访陈伯：听老华侨讲那过去的故事"
+      summary: "我们采访了宝源坊最年长的村民陈伯，听他讲述华侨历史..."
+      author: "李同学"
+      date: "2024-07-12"
+      category: "人物专访"
+    - id: 3
+      title: "测绘进行时：用脚步丈量每一座碉楼"
+      summary: "团队成员对每一座碉楼进行细致的测绘和记录..."
+      author: "王同学"
+      date: "2024-07-14"
+      category: "技术记录"
+    - id: 4
+      title: "3D建模：让碉楼在数字世界重生"
+      summary: "使用摄影测量技术，为碉楼创建高精度3D模型..."
+      author: "陈同学"
+      date: "2024-07-16"
+      category: "技术记录"
+
+  videos:
+    - id: 1
+      title: "宝源坊航拍宣传片"
+      description: "无人机航拍宝源坊全景，感受百年侨乡的魅力"
+      duration: "05:32"
+      views: 3256
+    - id: 2
+      title: "碉楼建造工艺纪录"
+      description: "详细介绍开平碉楼的建造工艺和历史背景"
+      duration: "12:45"
+      views: 1892
+    - id: 3
+      title: "老村民口述历史"
+      description: "采访宝源坊老村民，记录珍贵的口述历史"
+      duration: "18:20"
+      views: 2134
+    - id: 4
+      title: "侨乡美食探访"
+      description: "品味开平特色美食，感受地道侨乡风味"
+      duration: "08:15"
+      views: 2789
+
+  team:
+    - id: 1
+      name: "张同学"
+      role: "队长"
+      major: "计算机科学与技术"
+      bio: "负责项目整体规划和后端开发"
+    - id: 2
+      name: "李同学"
+      role: "前端开发"
+      major: "软件工程"
+      bio: "负责前端页面开发和交互设计"
+    - id: 3
+      name: "王同学"
+      role: "3D建模"
+      major: "数字媒体技术"
+      bio: "负责3D模型制作和渲染优化"
+    - id: 4
+      name: "陈同学"
+      role: "调研采访"
+      major: "新闻传播学"
+      bio: "负责实地调研和口述历史采访"
+    - id: 5
+      name: "刘同学"
+      role: "文案策划"
+      major: "汉语言文学"
+      bio: "负责内容创作和文案撰写"
+    - id: 6
+      name: "黄同学"
+      role: "视觉设计"
+      major: "视觉传达设计"
+      bio: "负责UI设计和视觉效果优化"
+
+  anatomies:
+    - id: 1
+      building-id: 1
+      part-name: "碉楼屋顶"
+      part-name-en: "Roof"
+      category: "顶部结构"
+      description: "中式攒尖顶与西式穹顶结合，是碉楼最醒目的视觉标志"
+      function: "遮阳避雨，彰显主人品味与财力"
+      material: "钢筋混凝土、琉璃瓦"
+      era: "1920s"
+    - id: 2
+      building-id: 1
+      part-name: "八角窗"
+      part-name-en: "Octagonal Window"
+      category: "立面开口"
+      description: "融合中式园林窗棂与西式几何造型，碉楼标志性元素"
+      function: "通风采光兼观察防御"
+      material: "青砖、彩色玻璃"
+      era: "1920s"
+    - id: 3
+      building-id: 1
+      part-name: "燕子窝"
+      part-name-en: "Swallow Nest"
+      category: "防御设施"
+      description: "凸出墙体的瞭望塔，开设射击孔，是碉楼防御体系核心"
+      function: "居高临下观察敌情、防御匪患"
+      material: "钢筋混凝土"
+      era: "1920s"
+    - id: 4
+      building-id: 1
+      part-name: "青砖墙体"
+      part-name-en: "Blue Brick Wall"
+      category: "主体结构"
+      description: "厚达50厘米的青砖墙，坚固耐用，是碉楼百年不倒的根基"
+      function: "承重、防御、保温隔热"
+      material: "本地青砖、进口水泥"
+      era: "1920s"
+    - id: 5
+      building-id: 1
+      part-name: "灰塑装饰"
+      part-name-en: "Lime Plaster Decoration"
+      category: "装饰艺术"
+      description: "岭南传统灰塑工艺，塑造瑞兽、花卉、山水等吉祥图案"
+      function: "美化立面、寄托美好寓意"
+      material: "石灰、稻草、纸筋"
+      era: "1920s"
+
+  photo-compares:
+    - id: 1
+      title: "宝源坊碉楼群变迁"
+      location: "宝源坊主村口"
+      year-old: "1925"
+      year-new: "2024"
+      description: "百年时光流转，碉楼依旧，村貌已非"
+      story: "1925年的宝源坊刚落成不久，碉楼崭新挺立，周围是低矮的民居与稻田。百年后，碉楼依然矗立，但周边已变为现代化村落，唯有碉楼见证了岁月的更迭。"
+    - id: 2
+      title: "陈氏宗祠前世今生"
+      location: "陈氏宗祠"
+      year-old: "1932"
+      year-new: "2024"
+      description: "宗祠从繁荣到沉寂再到新生"
+      story: "1932年陈氏宗祠香火鼎盛，是族人议事祭祀的核心。历经战乱与时代变迁，宗祠一度破败。2024年经修缮重生，成为侨乡文化展示窗口。"
+    - id: 3
+      title: "青石板路的百年记忆"
+      location: "村中主道"
+      year-old: "1915"
+      year-new: "2024"
+      description: "华侨带回的青石板，走过百年风霜"
+      story: "1915年由南洋华侨捐赠的青石板铺就的主道，曾走过无数村民与归侨。百年磨砺，石板依旧光润，记录着宝源坊的脚步。"
+    - id: 4
+      title: "古井旁的时光剪影"
+      location: "方形古井"
+      year-old: "1928"
+      year-new: "2024"
+      description: "百年古井，从晨曦取水到如今成为景观"
+      story: "1928年的清晨，妇女们在古井边打水洗衣，是最热闹的社交场。如今古井已不再作为主要水源，但仍是村民怀念过去的精神坐标。"
+
+  qiaopi:
+    - id: 1
+      title: "陈启明寄母书"
+      sender: "陈启明"
+      recipient: "母亲大人"
+      send-from: "美国旧金山"
+      year: "1923"
+      amount: "美元五十元"
+      content: "母亲大人膝下：儿在金山一切安好，附上银信五十元，望用于家中修缮碉楼。儿日夜思念家乡，待积攒银两便归。"
+      translation: "这是陈启明从美国旧金山寄给母亲的家书兼汇款，提到修缮碉楼事宜"
+      category: "家书"
+    - id: 2
+      title: "李金福致妻书"
+      sender: "李金福"
+      recipient: "妻子王氏"
+      send-from: "加拿大温哥华"
+      year: "1928"
+      amount: "美元八十元"
+      content: "贤妻如晤：附上银信八十元，为子女束脩及家用。望勤俭持家，教导孩儿读书上进，勿念为盼。"
+      translation: "李金福从加拿大寄给妻子的侨批，强调子女教育"
+      category: "家书"
+    - id: 3
+      title: "黄氏家族侨批"
+      sender: "黄亚福"
+      recipient: "族长"
+      send-from: "马来西亚槟城"
+      year: "1935"
+      amount: "叻币一百二十元"
+      content: "族长大人台鉴：附上叻币一百二十元，作为宗祠修缮之资。愿先祖保佑族运昌隆，子孙繁盛。"
+      translation: "黄亚福从马来西亚汇款修缮宗祠的侨批"
+      category: "宗族"
+    - id: 4
+      title: "张明远劝学书"
+      sender: "张明远"
+      recipient: "弟张明德"
+      send-from: "澳大利亚墨尔本"
+      year: "1920"
+      amount: "澳镑三十镑"
+      content: "明德吾弟：寄上银信三十镑，专为吾弟求学之用。兄在海外深知无学之苦，望弟勤勉向学，他日成才报效家国。"
+      translation: "张明远从澳大利亚寄给弟弟的劝学侨批"
+      category: "教育"
+    - id: 5
+      title: "王添丁赈灾批"
+      sender: "王添丁"
+      recipient: "宝源坊乡公所"
+      send-from: "新加坡"
+      year: "1942"
+      amount: "国币五百元"
+      content: "乡公所鉴：闻家乡遭遇灾患，特寄国币五百元赈济乡邻。望公平分配，共渡时艰。"
+      translation: "王添丁从新加坡寄款赈灾家乡的侨批"
+      category: "公益"
+
+  dialects:
+    - id: 1
+      chinese: "回家"
+      dialect: "返屋企"
+      pinyin: "fǎn wū qǐ"
+      meaning: "回家"
+      example: "做完事就返屋企啦。"
+      category: "日常用语"
+    - id: 2
+      chinese: "吃饭"
+      dialect: "食饭"
+      pinyin: "sik faan"
+      meaning: "吃饭"
+      example: "食饭未啊？"
+      category: "日常用语"
+    - id: 3
+      chinese: "祖父"
+      dialect: "阿公"
+      pinyin: "aa gung"
+      meaning: "爷爷"
+      example: "阿公讲嘅故事好精彩。"
+      category: "称谓"
+    - id: 4
+      chinese: "祖母"
+      dialect: "阿婆"
+      pinyin: "aa po"
+      meaning: "奶奶"
+      example: "阿婆整饭好味道。"
+      category: "称谓"
+    - id: 5
+      chinese: "侨胞"
+      dialect: "金山客"
+      pinyin: "gam saan haak"
+      meaning: "出洋谋生的华侨"
+      example: "佢阿公系金山客，后尾返嚟起碉楼。"
+      category: "侨乡特有"
+    - id: 6
+      chinese: "汇款"
+      dialect: "寄银"
+      pinyin: "gei ngan"
+      meaning: "汇款（特指侨批汇款）"
+      example: "金山客又寄银返嚟啦。"
+      category: "侨乡特有"
+    - id: 7
+      chinese: "漂亮"
+      dialect: "靓"
+      pinyin: "leng"
+      meaning: "漂亮、好看"
+      example: "呢间碉楼起得好靓。"
+      category: "形容词"
+    - id: 8
+      chinese: "聊天"
+      dialect: "倾偈"
+      pinyin: "king gai"
+      meaning: "聊天、闲谈"
+      example: "我哋喺古井边倾偈。"
+      category: "日常用语"
+
+  quizzes:
+    - id: 1
+      question: "宝源坊始建于哪一年？"
+      options: ["1898", "1909", "1925", "1949"]
+      answer: 1
+      explanation: "宝源坊始建于1909年，由华侨回乡购地建房形成村落雏形。"
+      category: "历史"
+      difficulty: "入门"
+    - id: 2
+      question: "开平碉楼入选世界文化遗产名录是哪一年？"
+      options: ["2001", "2007", "2010", "2015"]
+      answer: 1
+      explanation: "2007年，开平碉楼与村落入选世界文化遗产名录。"
+      category: "历史"
+      difficulty: "入门"
+    - id: 3
+      question: "侨批是什么？"
+      options: ["一种糕点", "华侨书信与汇款结合物", "建筑构件", "传统节庆"]
+      answer: 1
+      explanation: "侨批是海外华侨寄回国内的汇款与书信的结合物，2013年入选《世界记忆名录》。"
+      category: "文化"
+      difficulty: "入门"
+    - id: 4
+      question: "碉楼的'燕子窝'主要功能是什么？"
+      options: ["储物", "养燕子", "防御瞭望", "通风"]
+      answer: 2
+      explanation: "燕子窝是凸出墙体的瞭望塔，开设射击孔，是碉楼防御体系的核心。"
+      category: "建筑"
+      difficulty: "进阶"
+    - id: 5
+      question: "开平碉楼的墙体厚度通常可达多少？"
+      options: ["10厘米", "30厘米", "50厘米以上", "100厘米"]
+      answer: 2
+      explanation: "碉楼墙体厚度可达50厘米以上，具有极强的防御功能。"
+      category: "建筑"
+      difficulty: "进阶"
+    - id: 6
+      question: "骑楼建筑起源于哪里？"
+      options: ["中国岭南", "古希腊", "印度", "日本"]
+      answer: 1
+      explanation: "骑楼起源于古希腊，后传入东南亚，再由华侨传入中国南方。"
+      category: "建筑"
+      difficulty: "进阶"
+    - id: 7
+      question: "岭南祠堂不包括以下哪种装饰工艺？"
+      options: ["木雕", "石雕", "砖雕", "玻璃幕墙"]
+      answer: 3
+      explanation: "岭南祠堂装饰包括木雕、石雕、砖雕、灰塑等传统工艺，玻璃幕墙是现代建筑元素。"
+      category: "文化"
+      difficulty: "进阶"
+    - id: 8
+      question: "'返屋企'在侨乡方言中是什么意思？"
+      options: ["去学校", "回家", "上班", "出差"]
+      answer: 1
+      explanation: "'返屋企'是粤语及侨乡方言，意为'回家'。"
+      category: "方言"
+      difficulty: "入门"
+    - id: 9
+      question: "宝源坊在哪一年入选广东省古村落？"
+      options: ["2020", "2023", "2024", "2018"]
+      answer: 1
+      explanation: "宝源坊在2023年入选第八批'广东省古村落'。"
+      category: "历史"
+      difficulty: "进阶"
+    - id: 10
+      question: "'金山客'指的是？"
+      options: ["淘金者", "出洋谋生的华侨", "本地富商", "游牧民族"]
+      answer: 1
+      explanation: "'金山客'是侨乡方言，特指赴海外（旧金山等地）谋生的华侨。"
+      category: "方言"
+      difficulty: "入门"
+
+  stamps:
+    - id: 1
+      name: "宝源坊初访"
+      location: "宝源坊村口"
+      description: "首次到访宝源坊，开启云游之旅"
+      unlock-condition: "访问宝源坊首页"
+      rarity: "普通"
+    - id: 2
+      name: "碉楼探秘"
+      location: "宝源坊碉楼群"
+      description: "深入探索百年碉楼，解锁建筑奥秘"
+      unlock-condition: "完成碉楼群3D浏览"
+      rarity: "普通"
+    - id: 3
+      name: "古井寻幽"
+      location: "方形古井"
+      description: "探访百年古井，聆听水的低语"
+      unlock-condition: "访问古井地点"
+      rarity: "普通"
+    - id: 4
+      name: "宗祠敬祖"
+      location: "陈氏宗祠"
+      description: "瞻仰宗祠，感受宗族文化"
+      unlock-condition: "访问陈氏宗祠"
+      rarity: "稀有"
+    - id: 5
+      name: "侨批传承"
+      location: "侨批馆"
+      description: "读懂侨批，传承华侨精神"
+      unlock-condition: "完成侨批文化学习"
+      rarity: "稀有"
+    - id: 6
+      name: "方言达人"
+      location: "方言学习角"
+      description: "学会5句以上侨乡方言"
+      unlock-condition: "学习5句方言"
+      rarity: "稀有"
+    - id: 7
+      name: "答题高手"
+      location: "知识答题挑战"
+      description: "答题正确率达80%以上"
+      unlock-condition: "答题正确率≥80%"
+      rarity: "史诗"
+    - id: 8
+      name: "宝源坊全览"
+      location: "全部6个景点"
+      description: "云游宝源坊所有核心地点"
+      unlock-condition: "访问全部6个地点"
+      rarity: "传说"
+
+  achievements:
+    - id: 1
+      icon: "🚁"
+      title: "航拍采集"
+      description: "多角航拍，高清影像记录古村全貌"
+    - id: 2
+      icon: "📐"
+      title: "三维建模"
+      description: "高精度建模与贴图，还原建筑细节"
+    - id: 3
+      icon: "📋"
+      title: "建筑记录"
+      description: "系统整理建筑信息，留存文化数据"
+    - id: 4
+      icon: "🤝"
+      title: "校地合作"
+      description: "广东工业大学携手地方，助力乡村振兴"
+
+logging:
+  level:
+    org.example.xiaxiang: INFO
+    org.springframework.web: WARN
+    com.qcloud.cos: WARN
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+
+# ==================== 后台身份系统（无数据库）====================
+admin:
+  session-timeout-minutes: 480
+  users:
+    - username: "huangkunshui001"
+      password: "Sanxiaxiang1"
+      role: "ADMIN"
+      name: "黄坤水"
+      description: "项目负责人·建筑数字化记录/建模"
+    - username: "liziran002"
+      password: "Sanxiaxiang2"
+      role: "ADMIN"
+      name: "李自然"
+      description: "总负责人·文献资料收集/现场采集"
+    - username: "pengyuxuan003"
+      password: "Sanxiaxiang3"
+      role: "ADMIN"
+      name: "彭宇轩"
+      description: "总负责人·文献资料收集/现场采集"
+    - username: "chenqixuan004"
+      password: "Sanxiaxiang4"
+      role: "VOLUNTEER"
+      name: "陈绮旋"
+      description: "宣传推文（排版以及对接发布）"
+    - username: "huangzhenyu005"
+      password: "Sanxiaxiang5"
+      role: "VOLUNTEER"
+      name: "黄振宇"
+      description: "摄影记录（无人机、相机）"
+    - username: "liyaojun006"
+      password: "Sanxiaxiang6"
+      role: "VOLUNTEER"
+      name: "李耀俊"
+      description: "调研报告"
+    - username: "lizidong007"
+      password: "Sanxiaxiang7"
+      role: "VOLUNTEER"
+      name: "李子东"
+      description: "宣传/纪录片"
+    - username: "linlang008"
+      password: "Sanxiaxiang8"
+      role: "VOLUNTEER"
+      name: "林琅"
+      description: "纪实图组"
+    - username: "lintao009"
+      password: "Sanxiaxiang9"
+      role: "VOLUNTEER"
+      name: "林滔"
+      description: "建筑数字化记录/建模（协助）"
+    - username: "linxiaotong010"
+      password: "Sanxiaxiang10"
+      role: "VOLUNTEER"
+      name: "林小彤"
+      description: "宣传推文（内容撰写）"
+    - username: "linying011"
+      password: "Sanxiaxiang11"
+      role: "VOLUNTEER"
+      name: "林颖"
+      description: "摄影记录（手机）"
+    - username: "liujiayi012"
+      password: "Sanxiaxiang12"
+      role: "VOLUNTEER"
+      name: "刘佳怡"
+      description: "调研报告"
+    - username: "suzixuan013"
+      password: "Sanxiaxiang13"
+      role: "VOLUNTEER"
+      name: "苏梓轩"
+      description: "地方对接"
+    - username: "weilili014"
+      password: "Sanxiaxiang14"
+      role: "VOLUNTEER"
+      name: "韦丽丽"
+      description: "调研报告"
+    - username: "zhanghuiru015"
+      password: "Sanxiaxiang15"
+      role: "VOLUNTEER"
+      name: "张惠茹"
+      description: "纪实图组"

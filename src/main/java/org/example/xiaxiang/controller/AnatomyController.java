@@ -38,8 +38,12 @@ public class AnatomyController {
         model.addAttribute("buildings", appProperties.getBuildings());
         model.addAttribute("parts", allParts);
 
-        // 为每个部位注入图片 URL（素材对接）
-        model.addAttribute("cosService", cosService);
+        // 构建部位 3D 模型 URL Map（id -> COS URL），供前端 3D 解剖展示使用
+        model.addAttribute("modelUrls", cosService.buildUrlMap(allParts,
+                AppProperties.BuildingAnatomy::getId, AppProperties.BuildingAnatomy::getModelKey));
+        // 构建部位图片 URL Map（id -> COS URL），作为 3D 模型未上传时的 fallback
+        model.addAttribute("imageUrls", cosService.buildUrlMap(allParts,
+                AppProperties.BuildingAnatomy::getId, AppProperties.BuildingAnatomy::getImageKey));
         return "anatomy";
     }
 

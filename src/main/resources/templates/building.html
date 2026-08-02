@@ -11,6 +11,7 @@
     <header class="header">
         <div class="header-content">
             <a href="/" class="back-link">← 返回首页</a>
+            <a href="/admin" style="margin-left: 1rem; color: var(--gold, #c8a85c); font-size: 0.85rem; text-decoration: none;">后台登录</a>
             <h1 class="title" th:text="${building.name}"></h1>
             <p class="subtitle" th:text="${building.description}"></p>
         </div>
@@ -18,6 +19,26 @@
 
     <!-- 主内容区 -->
     <main class="main">
+        <!-- 建筑封面大横幅（绑定后台IMG-01-xx立即生效） -->
+        <section style="position: relative; height: 280px; border-radius: 16px; overflow: hidden; margin-bottom: 1.5rem; border: 1px solid var(--glass-border); background: linear-gradient(135deg, rgba(26, 42, 74, 0.5), rgba(10, 10, 10, 0.8));">
+            <img th:if="${coverImageUrl != null and #strings.length(coverImageUrl) > 0}"
+                 th:src="${coverImageUrl}"
+                 th:alt="${building.name}"
+                 style="width: 100%; height: 100%; object-fit: cover; position: absolute; inset: 0;">
+            <div th:unless="${coverImageUrl != null and #strings.length(coverImageUrl) > 0}"
+                 class="slot-placeholder"
+                 style="position: absolute; inset: 0;"
+                 th:attr="data-slot-id=${'IMG-01-' + building.id}">
+                <div class="slot-type-icon">🖼️</div>
+                <div class="slot-badge" th:text="${'IMG-01-' + building.id}"></div>
+                <div class="slot-desc" th:text="${building.name} + ' · 封面图待填充'"></div>
+            </div>
+            <div style="position: absolute; bottom: 0; left: 0; right: 0; padding: 1.25rem; background: linear-gradient(transparent, rgba(0,0,0,0.85));">
+                <h2 style="color: var(--warm-gold); font-size: 1.3rem; margin-bottom: 0.35rem; letter-spacing: 1px;" th:text="${building.name}"></h2>
+                <p style="color: var(--text-secondary); font-size: 0.85rem; margin: 0;" th:text="${building.description}"></p>
+            </div>
+        </section>
+
         <!-- 内容选项卡 -->
         <div class="tabs">
             <button class="tab active" onclick="switchTab('model')">3D 云游</button>
@@ -27,7 +48,7 @@
 
         <!-- 3D 模型渲染区 -->
         <section id="tab-model" class="tab-content active">
-            <div class="canvas-wrapper">
+            <div class="canvas-wrapper" style="position: relative;">
                 <!-- Loading 动画 -->
                 <div id="loading" class="loading">
                     <div class="spinner"></div>
@@ -35,17 +56,35 @@
                     <p class="hint">模型文件较大，首次加载可能需要 30-60 秒</p>
                 </div>
                 <!-- Three.js 渲染画布 -->
-                <canvas id="canvas"></canvas>
+                <canvas id="3d-canvas"></canvas>
+                <!-- 3D 模型未加载时的占位符（MDL-01-{id}） -->
+                <div id="model-placeholder"
+                     class="slot-placeholder"
+                     style="position: absolute; inset: 0; border-radius: 12px; display: none;"
+                     th:attr="data-slot-id=${'MDL-01-' + building.id}">
+                    <div class="slot-type-icon">🧊</div>
+                    <div class="slot-badge" th:text="${'MDL-01-' + building.id}"></div>
+                    <div class="slot-desc" th:text="${building.name} + ' · 3D模型待填充'"></div>
+                    <div class="slot-status">3D 模型加载中或尚未上传</div>
+                </div>
             </div>
         </section>
 
         <!-- 4K 视频播放区 -->
         <section id="tab-video" class="tab-content">
-            <div class="video-wrapper">
-                <video id="video" controls>
+            <div class="video-wrapper" style="position: relative; min-height: 360px; display: flex; align-items: center; justify-content: center; overflow: hidden; border-radius: 12px;">
+                <video id="video" controls th:if="${videoUrl != null and #strings.length(videoUrl) > 0}" style="width: 100%;">
                     <source th:src="${videoUrl}" type="video/mp4">
                     您的浏览器不支持视频播放。
                 </video>
+                <div th:unless="${videoUrl != null and #strings.length(videoUrl) > 0}"
+                     class="slot-placeholder"
+                     style="position: absolute; inset: 0; border-radius: 12px;"
+                     th:attr="data-slot-id=${'VID-01-' + building.id}">
+                    <div class="slot-type-icon">🎬</div>
+                    <div class="slot-badge" th:text="${'VID-01-' + building.id}"></div>
+                    <div class="slot-desc" th:text="${building.name} + ' · 4K视频待填充'"></div>
+                </div>
             </div>
         </section>
 
@@ -73,23 +112,20 @@
     </main>
 
     <!-- 页脚 -->
-    <footer class="footer">
-        <p>&copy; 2026 广东工业大学侨韵薪火团队</p>
-    </footer>
-
-    <!-- 引入 Three.js 和 gsplat 渲染库（CDN） -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.150.0/examples/js/controls/OrbitControls.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/gsplat@0.1.0/build/gsplat.esm.js"></script>
-    <script src="/js/building-3d.js"></script>
-
-    <!-- 数据注入：Thymeleaf 将后端 modelUrl 安全传递给 JS -->
-    <script th:inline="javascript">
-        const modelUrl = /*[[${modelUrl}]]*/ '';
-        const coverImageUrl = /*[[${coverImageUrl}]]*/ '';
-    </script>
     <footer class="footer" style="text-align: center; padding: 1.5rem; border-top: 1px solid var(--border-color, #3a3a3a); margin-top: 2rem;">
+        <p>技术支持：3D高斯泼溅技术(3DGS) · 腾讯云COS</p>
         <p style="margin-top: 0.5rem;">© 2024 侨韵薪火实践团 版权所有 · <a href="/admin/upload" style="color: var(--text-muted); font-size: 0.78rem; text-decoration: none;">管理入口</a></p>
     </footer>
+
+    <!-- 数据注入：Thymeleaf 将后端 modelUrl 安全传递给 JS（必须在 3D 脚本之前） -->
+    <script th:inline="javascript">
+        window.modelUrl = /*[[${modelUrl}]]*/ '';
+        window.coverImageUrl = /*[[${coverImageUrl}]]*/ '';
+    </script>
+
+    <!-- 引入 Three.js 和 OrbitControls（统一 r128 版本，保证兼容） -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="/js/building-3d.js"></script>
 </body>
 </html>

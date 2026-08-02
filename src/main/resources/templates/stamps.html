@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="zh-CN">
 <head>
     <meta charset="UTF-8">
@@ -43,6 +43,7 @@
                 <a href="/#building-story">建筑故事</a>
                 <a href="/#achievement">项目成果</a>
                 <a href="/about">关于我们</a>
+                <a href="/admin">后台登录</a>
             </nav>
             <div class="header-right"><button class="header-btn" onclick="window.location.href='/map'">开始云游</button></div>
         </div>
@@ -80,7 +81,14 @@
                          th:data-id="${s.id}"
                          th:classappend="'rarity-' + ${s.rarity}">
                         <div class="stamp-img">
-                            <span th:text="${#strings.substring(s.name, 0, 1)}">印</span>
+                            <!-- 已上传图标则显示真实图片，否则显示 IMG-15 Slot 占位符（或首字兜底） -->
+                            <img th:if="${imageUrls != null and imageUrls[s.id] != null}"
+                                 th:src="${imageUrls[s.id]}"
+                                 th:alt="${s.name}"
+                                 style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">
+                            <span th:unless="${imageUrls != null and imageUrls[s.id] != null}"
+                                  th:attr="data-slot-id=${'IMG-15-' + s.id}"
+                                  th:text="${#strings.substring(s.name, 0, 1)}">印</span>
                         </div>
                         <div class="stamp-name" th:text="${s.name}">印章名称</div>
                         <div class="stamp-location" th:text="'📍 ' + ${s.location}">地点</div>

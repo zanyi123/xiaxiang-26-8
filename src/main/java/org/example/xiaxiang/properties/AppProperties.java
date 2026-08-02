@@ -18,6 +18,19 @@ public class AppProperties {
     /** Mock 模式开关：true 时返回本地静态资源 URL */
     private boolean mockMode = true;
 
+    /**
+     * 运行环境：dev / prod
+     * 用于区分本地开发和正式部署：
+     * - dev: 本地（本地IDEA启动，禁止对COS桶和yml做写入操作，防止污染正式环境
+     * - prod: 正式服务器，允许所有上传/绑定/解绑操作
+     * 服务器 application.yml 必须显式配置 app.env: prod
+     */
+    private String env = "dev";
+
+    public boolean isProdEnv() {
+        return "prod".equalsIgnoreCase(env);
+    }
+
     /** 建筑静态数据列表 */
     private List<Building> buildings;
 
@@ -65,6 +78,9 @@ public class AppProperties {
 
     /** 虚拟盖章数据 */
     private List<StampItem> stamps;
+
+    /** 项目成果数据 */
+    private List<AchievementItem> achievements;
 
     /**
      * 建筑信息子对象
@@ -300,5 +316,16 @@ public class AppProperties {
         private String imageKey;
         private String unlockCondition;
         private String rarity;
+    }
+
+    /**
+     * 项目成果
+     */
+    @Data
+    public static class AchievementItem {
+        private Integer id;
+        private String icon;
+        private String title;
+        private String description;
     }
 }

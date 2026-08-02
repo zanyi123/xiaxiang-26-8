@@ -3,6 +3,7 @@ package org.example.xiaxiang.controller;
 import lombok.extern.slf4j.Slf4j;
 import org.example.xiaxiang.common.Result;
 import org.example.xiaxiang.properties.AdminProperties;
+import org.example.xiaxiang.service.MemberStatusService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -34,9 +35,17 @@ public class AuthController {
     @Autowired
     private AdminProperties adminProperties;
 
+    @Autowired
+    private MemberStatusService memberStatusService;
+
     public static final String SESSION_USER_KEY = "CURRENT_ADMIN_USER";
 
     // ==================== 登录页 ====================
+
+    @GetMapping("")
+    public String adminRoot() {
+        return "redirect:/admin/login";
+    }
 
     @GetMapping("/login")
     public String loginPage(
@@ -68,6 +77,12 @@ public class AuthController {
         if (!user.getPassword().equals(password)) {
             log.warn("[登录失败] 密码错误: {}", username);
             return Result.fail("密码错误");
+        }
+
+        // 检查账号是否被管理员禁用
+        if (!memberStatusService.isEnabled(username)) {
+            log.warn("[登录失败] 账号已被禁用: {}", username);
+            return Result.fail("账号已被管理员禁用，请联系管理员");
         }
 
         // 创建会话
@@ -136,11 +151,59 @@ public class AuthController {
                     m.put("name", u.getName());
                     m.put("role", u.getRole());
                     m.put("description", u.getDescription());
+                    m.put("enabled", memberStatusService.isEnabled(u.getUsername()));
                     // 不返回密码
                     return m;
                 })
                 .collect(Collectors.toList());
 
         return Result.success(list);
+    }
+
+    // ==================== 成员权限管理 API（仅 ADMIN） ====================
+
+    /**
+     * 切换成员账号的启用/禁用状态
+     */
+    @PostMapping("/api/users/toggle")
+    @ResponseBody
+    public Result<Map<String, Object>> toggleUserStatus(
+            @RequestParam String username,
+            HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
+        if (session == null) {
+            return Result.fail("未登录");
+        }
+        Map<String, Object> cur = (Map<String, Object>) session.getAttribute(SESSION_USER_KEY);
+        if (cur == null || !"ADMIN".equals(cur.get("role"))) {
+            return Result.fail("仅管理员可操作");
+        }
+
+        // 不能禁用自己
+        if (cur.get("username").equals(username)) {
+            return Result.fail("不能禁用自己的账号");
+        }
+
+        // 查找用户是否存在
+        AdminProperties.AdminUser target = adminProperties.getUsers().stream()
+                .filter(u -> u.getUsername().equals(username))
+                .findFirst().orElse(null);
+        if (target == null) {
+            return Result.fail("用户不存在: " + username);
+        }
+
+        // 不能禁用管理员
+        if ("ADMIN".equals(target.getRole())) {
+            return Result.fail("不能禁用管理员账号");
+        }
+
+        boolean nowEnabled = memberStatusService.toggle(username);
+        log.info("[成员管理] {} {} 了用户 {}", cur.get("name"), nowEnabled ? "启用" : "禁用", target.getName());
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("username", username);
+        result.put("name", target.getName());
+        result.put("enabled", nowEnabled);
+        return Result.success(result, nowEnabled ? "已启用" : "已禁用");
     }
 }

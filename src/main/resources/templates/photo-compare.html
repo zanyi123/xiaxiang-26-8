@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="zh-CN">
 <head>
     <meta charset="UTF-8">
@@ -37,6 +37,7 @@
                 <a href="/#building-story">建筑故事</a>
                 <a href="/#achievement">项目成果</a>
                 <a href="/about">关于我们</a>
+                <a href="/admin">后台登录</a>
             </nav>
             <div class="header-right"><button class="header-btn" onclick="window.location.href='/map'">开始云游</button></div>
         </div>
@@ -63,12 +64,32 @@
                     <div class="compare-card" th:each="photo : ${photos}">
                         <div class="compare-slider" th:data-id="${photo.id}"
                              onmousedown="startDrag(event, this)" ontouchstart="startDrag(event, this)">
+                            <!-- 老照片（IMG-11-{奇数编号}：photo.id*2-1） -->
                             <img class="compare-img compare-img-old"
-                                 th:src="|https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=${photo.title}%20old%20vintage%20photo%20sepia%20kaiping%201920s&image_size=landscape_4_3|"
-                                 th:alt="${photo.title}">
+                                 th:if="${oldImageUrls != null and oldImageUrls[__${photo.id}__] != null}"
+                                 th:src="${oldImageUrls[__${photo.id}__]}"
+                                 th:alt="${photo.title} + '老照片'">
+                            <div th:unless="${oldImageUrls != null and oldImageUrls[__${photo.id}__] != null}"
+                                 class="slot-placeholder compare-img compare-img-old"
+                                 th:attr="data-slot-id=|IMG-11-${#numbers.formatInteger(photo.id * 2 - 1, 2, '0')}|"
+                                 style="background: var(--glass-bg);">
+                                <div class="slot-type-icon">🖼️</div>
+                                <div class="slot-badge" th:text="|IMG-11-${#numbers.formatInteger(photo.id * 2 - 1, 2, '0')}|"></div>
+                                <div class="slot-desc" th:text="${photo.title} + ' · 老照片待上传'"></div>
+                            </div>
+                            <!-- 新照片（IMG-11-{偶数编号}：photo.id*2） -->
                             <div class="compare-img-new-wrap">
-                                <img th:src="|https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=${photo.title}%20modern%20photo%20kaiping%202024%20cinematic&image_size=landscape_4_3|"
-                                     th:alt="${photo.title}">
+                                <img th:if="${newImageUrls != null and newImageUrls[__${photo.id}__] != null}"
+                                     th:src="${newImageUrls[__${photo.id}__]}"
+                                     th:alt="${photo.title} + '新照片'">
+                                <div th:unless="${newImageUrls != null and newImageUrls[__${photo.id}__] != null}"
+                                     class="slot-placeholder"
+                                     th:attr="data-slot-id=|IMG-11-${#numbers.formatInteger(photo.id * 2, 2, '0')}|"
+                                     style="width: 100%; height: 100%; background: var(--glass-bg);">
+                                    <div class="slot-type-icon">🖼️</div>
+                                    <div class="slot-badge" th:text="|IMG-11-${#numbers.formatInteger(photo.id * 2, 2, '0')}|"></div>
+                                    <div class="slot-desc" th:text="${photo.title} + ' · 新照片待上传'"></div>
+                                </div>
                             </div>
                             <div class="compare-handle"></div>
                             <span class="compare-label compare-label-old" th:text="${photo.yearOld}">1925</span>
@@ -153,5 +174,6 @@
             }
         }
     </script>
+    <script src="/js/slot-placeholder.js"></script>
 </body>
 </html>

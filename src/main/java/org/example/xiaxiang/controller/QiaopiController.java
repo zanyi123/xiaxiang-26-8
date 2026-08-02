@@ -3,6 +3,7 @@ package org.example.xiaxiang.controller;
 import lombok.extern.slf4j.Slf4j;
 import org.example.xiaxiang.common.Result;
 import org.example.xiaxiang.properties.AppProperties;
+import org.example.xiaxiang.service.CosService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -22,6 +24,9 @@ public class QiaopiController {
 
     @Autowired
     private AppProperties appProperties;
+
+    @Autowired
+    private CosService cosService;
 
     @GetMapping("/qiaopi")
     public String qiaopiPage(@RequestParam(required = false) String category, Model model) {
@@ -48,6 +53,8 @@ public class QiaopiController {
         model.addAttribute("qiaopiList", filtered);
         model.addAttribute("categories", categories);
         model.addAttribute("currentCategory", category != null ? category : "all");
+        model.addAttribute("qiaopiImageUrls", cosService.buildUrlMap(
+                allItems, AppProperties.QiaopiItem::getId, AppProperties.QiaopiItem::getImageKey));
         return "qiaopi";
     }
 
@@ -61,6 +68,8 @@ public class QiaopiController {
             return "error";
         }
         model.addAttribute("qiaopi", item);
+        // 当前侨批的扫描件图片 URL
+        model.addAttribute("imageUrl", cosService.getUrlSafely(item.getImageKey()));
 
         List<AppProperties.QiaopiItem> others = appProperties.getQiaopi() == null
                 ? Collections.emptyList()
@@ -69,6 +78,8 @@ public class QiaopiController {
                 .limit(3)
                 .collect(Collectors.toList());
         model.addAttribute("otherQiaopi", others);
+        // 相关侨批的扫描件图片 URL Map
+        model.addAttribute("imageUrls", cosService.buildUrlMap(others, AppProperties.QiaopiItem::getId, AppProperties.QiaopiItem::getImageKey));
 
         return "qiaopi-detail";
     }

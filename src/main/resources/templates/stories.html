@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="zh-CN">
 <head>
     <meta charset="UTF-8">
@@ -20,6 +20,7 @@
                 <a href="/#building-story">建筑故事</a>
                 <a href="/#achievement">项目成果</a>
                 <a href="/about">关于我们</a>
+                <a href="/admin">后台登录</a>
             </nav>
             <div class="header-right">
                 <button class="header-btn" onclick="window.location.href='/map'">开始云游</button>
@@ -52,7 +53,12 @@
                 <div class="story-item" th:each="story : ${stories}" th:data-category="${story.category}">
                     <a th:href="@{/story/{id}(id=${story.id})}" class="story-item-link" style="text-decoration: none; color: inherit; display: block;">
                         <div class="story-item-image">
-                            <img th:src="${coverUrls != null and coverUrls[story.id] != null} ? ${coverUrls[story.id]} : |https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=${story.title}%20traditional%20lingnan%20village%20story&image_size=square|" th:alt="${story.title}" loading="lazy">
+                            <img th:if="${coverUrls != null and coverUrls[story.id] != null}" th:src="${coverUrls[story.id]}" th:alt="${story.title}" loading="lazy">
+                            <div th:unless="${coverUrls != null and coverUrls[story.id] != null}" class="slot-placeholder" th:attr="data-slot-id=${'IMG-04-' + story.id}">
+                                <div class="slot-type-icon">🖼️</div>
+                                <div class="slot-badge" th:text="${'IMG-04-' + story.id}">IMG-04</div>
+                                <div class="slot-desc">待填充素材</div>
+                            </div>
                             <span class="story-item-category" th:text="${story.category}"></span>
                         </div>
                         <div class="story-item-content">
@@ -162,5 +168,6 @@
             }
         }
     </script>
+    <script src="/js/slot-placeholder.js"></script>
 </body>
 </html>

@@ -33,5 +33,6 @@ public class AdminProperties {
         private String role;        // ADMIN / VOLUNTEER
         private String name;
         private String description;
+        private boolean enabled = true;  // 账号是否激活，默认true
     }
 }

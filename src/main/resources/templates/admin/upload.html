@@ -230,6 +230,140 @@
             background: rgba(76, 175, 80, 0.15); color: #4caf50;
         }
 
+        /* ===== 管理成员 Tab 样式 ===== */
+        .members-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid var(--glass-border);
+        }
+        .members-summary {
+            display: flex;
+            gap: 1.25rem;
+            align-items: center;
+            padding: 0.6rem 0.9rem;
+            background: rgba(0,0,0,0.25);
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            font-size: 0.82rem;
+        }
+        .members-summary .ms-item { display: flex; gap: 0.4rem; align-items: center; color: var(--text-secondary); }
+        .members-summary .ms-num { font-weight: 700; color: var(--warm-gold); }
+
+        .members-list { display: flex; flex-direction: column; gap: 0.5rem; }
+        .member-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 10px;
+            transition: all 0.2s;
+        }
+        .member-row:hover { border-color: var(--warm-gold); }
+        .member-row.is-admin {
+            background: rgba(212, 175, 55, 0.06);
+            border-color: rgba(212, 175, 55, 0.3);
+        }
+        .member-row.is-disabled { opacity: 0.6; }
+
+        /* 左侧：成员名 + 账号 */
+        .member-left {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        .member-avatar {
+            width: 38px; height: 38px;
+            border-radius: 50%;
+            background: rgba(212,175,55,0.18);
+            color: var(--warm-gold);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.95rem; font-weight: 700;
+            flex-shrink: 0;
+        }
+        .member-info { display: flex; flex-direction: column; gap: 0.15rem; min-width: 0; }
+        .member-name {
+            color: var(--text-primary);
+            font-size: 0.92rem;
+            font-weight: 600;
+            display: flex; align-items: center; gap: 0.4rem;
+        }
+        .member-role-badge {
+            padding: 0.1rem 0.4rem;
+            border-radius: 4px;
+            font-size: 0.66rem;
+            font-weight: 600;
+        }
+        .role-admin { background: rgba(212,175,55,0.22); color: var(--warm-gold); }
+        .role-volunteer { background: rgba(100,181,246,0.18); color: #64b5f6; }
+        .member-account {
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            font-family: monospace;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .member-desc {
+            color: var(--text-muted);
+            font-size: 0.7rem;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        /* 右侧：权限状态 + 切换 */
+        .member-right {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 0.75rem;
+        }
+        .member-status-tag {
+            padding: 0.25rem 0.6rem;
+            border-radius: 6px;
+            font-size: 0.74rem;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        .status-active { background: rgba(76,175,80,0.2); color: #81c784; }
+        .status-disabled { background: rgba(244,67,54,0.18); color: #ef9a9a; }
+        .status-locked { background: rgba(212,175,55,0.15); color: var(--warm-gold); }
+
+        /* 切换开关 */
+        .toggle-switch {
+            position: relative;
+            width: 46px; height: 24px;
+            background: rgba(244,67,54,0.4);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: background 0.25s;
+            flex-shrink: 0;
+        }
+        .toggle-switch.on { background: rgba(76,175,80,0.55); }
+        .toggle-switch::after {
+            content: '';
+            position: absolute;
+            top: 2px; left: 2px;
+            width: 20px; height: 20px;
+            background: #fff;
+            border-radius: 50%;
+            transition: transform 0.25s;
+        }
+        .toggle-switch.on::after { transform: translateX(22px); }
+        .toggle-switch.disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+        @media (max-width: 720px) {
+            .member-row { grid-template-columns: 1fr; }
+            .member-right { justify-content: flex-start; }
+        }
+
         /* 统计卡片 */
         .stats-grid {
             display: grid;
@@ -460,6 +594,9 @@
                     <span class="mock-warning" th:classappend="${!mockMode} ? 'mock-off' : ''">
                         <span th:text="${mockMode} ? '⚠️ Mock模式' : '✅ COS直连'"></span>
                     </span>
+                    <span class="mock-warning" th:classappend="${isProd} ? 'mock-off' : ''" style="margin-left: 0.5rem;" id="env-badge">
+                        <span th:text="${isProd} ? '🟢 正式环境(prod)' : '🔴 本地环境(dev)·禁止写入'"></span>
+                    </span>
                     <span class="user-chip" style="margin-left: 0.75rem;">
                         👤 <span class="user-name" id="cur-user">加载中...</span>
                         <span id="cur-role" style="color: var(--text-muted); font-size: 0.72rem;"></span>
@@ -471,6 +608,7 @@
             <div class="admin-tabs">
                 <div class="admin-tab active" onclick="switchTab('upload')" id="tab-upload">📤 素材上传</div>
                 <div class="admin-tab" onclick="switchTab('match')" id="tab-match">🎯 素材匹配中心</div>
+                <div class="admin-tab" id="tab-members" style="display:none;" onclick="switchTab('members')">👥 管理成员</div>
             </div>
         </div>
 
@@ -597,11 +735,34 @@
                 <button class="btn-clear" onclick="cancelMatches()">取消</button>
             </div>
         </div>
+
+        <!-- ===== Tab3: 管理成员（仅 ADMIN 可见） ===== -->
+        <div class="tab-panel" id="panel-members">
+            <div class="members-header">
+                <h2 style="color: var(--warm-gold); font-size: 1.05rem; margin: 0;">👥 成员权限管理</h2>
+                <span style="color: var(--text-muted); font-size: 0.8rem;">默认激活 · 管理员可关闭指定实践成员权限</span>
+            </div>
+
+            <div class="members-summary" id="members-summary">
+                <div class="ms-item">总账号 <span class="ms-num" id="m-total">-</span></div>
+                <div class="ms-item">已激活 <span class="ms-num" style="color:#81c784;" id="m-active">-</span></div>
+                <div class="ms-item">已禁用 <span class="ms-num" style="color:#ef9a9a;" id="m-disabled">-</span></div>
+                <button class="btn-clear" style="margin-left:auto; padding: 0.3rem 0.8rem; font-size: 0.78rem;" onclick="loadMembers()">🔄 刷新</button>
+            </div>
+
+            <div class="members-list" id="members-list">
+                <div style="text-align:center; color: var(--text-muted); padding: 2rem;">加载中...</div>
+            </div>
+        </div>
     </div>
 
     <div class="toast" id="toast"></div>
 
     <script>
+        // ============== 服务端注入的环境标记 ==============
+        // prod=true 允许所有写入；prod=false (dev) 禁止上传/绑定/删除等写入
+        const ENV_IS_PROD = /*[[${isProd}]]*/ false;
+
         let currentCategory = 'images';
         let uploadQueue = [];
 
@@ -609,7 +770,36 @@
         window.addEventListener('load', async () => {
             await loadMe();
             loadStats();
+            applyDevEnvRestrictions();
         });
+
+        // dev 环境下禁用所有写操作的UI（上传框、删除按钮、确认导入按钮等）
+        function applyDevEnvRestrictions() {
+            if (ENV_IS_PROD) return;
+
+            // 上传框禁用（点击不响应，拖拽不响应）
+            const dz = document.getElementById('drop-zone');
+            if (dz) {
+                dz.style.pointerEvents = 'none';
+                dz.style.opacity = '0.5';
+                const icon = dz.querySelector('.drop-icon');
+                const text = dz.querySelector('.drop-text');
+                const hint = dz.querySelector('.drop-hint');
+                if (text) text.innerHTML = '🔒 本地环境已禁用素材上传';
+                if (hint) hint.innerHTML = '请前往正式网站后台上传素材，或设置 app.env=prod 后再试';
+            }
+            // 开始上传按钮禁用
+            const btn = document.getElementById('btn-start-upload');
+            if (btn) { btn.disabled = true; btn.style.opacity = '0.6'; }
+            // 清空队列按钮禁用
+            document.querySelectorAll('.btn-clear').forEach(b=>{ if (b.textContent.includes('清空队列')) { b.disabled = true; b.style.opacity='0.6'; }});
+            // 匹配中心确认按钮禁用
+            const confirmBtn = document.getElementById('btn-confirm-match');
+            if (confirmBtn) { confirmBtn.disabled = true; confirmBtn.style.opacity='0.6'; confirmBtn.textContent='🔒 本地环境禁止绑定'; }
+            // 匹配中心取消按钮禁用
+            document.querySelectorAll('.btn-confirm-group .btn-clear').forEach(b=>{ b.disabled = true; b.style.opacity='0.6'; });
+            // 文件列表删除按钮禁用（渲染后再处理）
+        }
 
         async function loadMe() {
             try {
@@ -618,6 +808,11 @@
                 if (j.success) {
                     document.getElementById('cur-user').textContent = j.data.name || j.data.username;
                     document.getElementById('cur-role').textContent = ' · ' + (j.data.role === 'ADMIN' ? '管理员' : '实践同学');
+                    // 仅管理员显示"管理成员"Tab
+                    if (j.data.role === 'ADMIN') {
+                        const tabMembers = document.getElementById('tab-members');
+                        if (tabMembers) tabMembers.style.display = '';
+                    }
                 } else {
                     document.getElementById('cur-user').textContent = '未登录';
                 }
@@ -637,6 +832,87 @@
             document.getElementById('panel-' + name).classList.add('active');
             if (name === 'match') {
                 loadMatchCenter();
+            } else if (name === 'members') {
+                loadMembers();
+            }
+        }
+
+        // ===== 成员管理 =====
+        async function loadMembers() {
+            const listEl = document.getElementById('members-list');
+            listEl.innerHTML = '<div style="text-align:center; color: var(--text-muted); padding: 2rem;">加载中...</div>';
+            try {
+                const r = await fetch('/admin/api/users');
+                const j = await r.json();
+                if (!j.success) {
+                    listEl.innerHTML = '<div style="text-align:center; color: #ef9a9a; padding: 2rem;">' + (j.message || '加载失败') + '</div>';
+                    return;
+                }
+                const users = j.data || [];
+                let active = 0, disabled = 0;
+                users.forEach(u => { if (u.enabled) active++; else disabled++; });
+                document.getElementById('m-total').textContent = users.length;
+                document.getElementById('m-active').textContent = active;
+                document.getElementById('m-disabled').textContent = disabled;
+
+                if (users.length === 0) {
+                    listEl.innerHTML = '<div style="text-align:center; color: var(--text-muted); padding: 2rem;">暂无成员账号</div>';
+                    return;
+                }
+
+                listEl.innerHTML = users.map(u => {
+                    const isAdmin = u.role === 'ADMIN';
+                    const initial = (u.name || u.username || '?').charAt(0);
+                    const roleBadge = isAdmin
+                        ? '<span class="member-role-badge role-admin">管理员</span>'
+                        : '<span class="member-role-badge role-volunteer">实践成员</span>';
+                    let statusTag, toggleHtml, rowClass = '';
+                    if (isAdmin) {
+                        statusTag = '<span class="member-status-tag status-locked">🔒 永久激活</span>';
+                        toggleHtml = '<div class="toggle-switch on disabled" title="管理员不可禁用"></div>';
+                        rowClass = 'is-admin';
+                    } else if (u.enabled) {
+                        statusTag = '<span class="member-status-tag status-active">✅ 已激活</span>';
+                        toggleHtml = '<div class="toggle-switch on" onclick="toggleMemberStatus(\'' + u.username + '\')" title="点击关闭权限"></div>';
+                    } else {
+                        statusTag = '<span class="member-status-tag status-disabled">⛔ 已禁用</span>';
+                        toggleHtml = '<div class="toggle-switch" onclick="toggleMemberStatus(\'' + u.username + '\')" title="点击启用权限"></div>';
+                        rowClass = 'is-disabled';
+                    }
+                    return '<div class="member-row ' + rowClass + '">' +
+                        '<div class="member-left">' +
+                            '<div class="member-avatar">' + initial + '</div>' +
+                            '<div class="member-info">' +
+                                '<div class="member-name">' + (u.name || u.username) + ' ' + roleBadge + '</div>' +
+                                '<div class="member-account">账号: ' + u.username + '</div>' +
+                                (u.description ? '<div class="member-desc">' + u.description + '</div>' : '') +
+                            '</div>' +
+                        '</div>' +
+                        '<div class="member-right">' +
+                            statusTag + toggleHtml +
+                        '</div>' +
+                    '</div>';
+                }).join('');
+            } catch(e) {
+                console.error('加载成员列表失败', e);
+                listEl.innerHTML = '<div style="text-align:center; color: #ef9a9a; padding: 2rem;">网络错误，请重试</div>';
+            }
+        }
+
+        async function toggleMemberStatus(username) {
+            if (!confirm('确认切换该成员的权限状态？')) return;
+            try {
+                const r = await fetch('/admin/api/users/toggle?username=' + encodeURIComponent(username), { method: 'POST' });
+                const j = await r.json();
+                if (j.success) {
+                    showToast(j.message || '操作成功');
+                    loadMembers();
+                } else {
+                    showToast(j.message || '操作失败');
+                }
+            } catch(e) {
+                console.error('切换成员状态失败', e);
+                showToast('网络错误，请重试');
             }
         }
 
@@ -712,6 +988,7 @@
 
         // 开始上传
         async function startUpload() {
+            if (!ENV_IS_PROD) { showToast('🔒 本地环境已禁用上传，请到正式网站后台操作'); return; }
             const btn = document.getElementById('btn-start-upload');
             btn.disabled = true;
             btn.textContent = '上传中...';
@@ -818,6 +1095,7 @@
 
         // 删除文件
         async function deleteFile(key) {
+            if (!ENV_IS_PROD) { showToast('🔒 本地环境已禁用删除，请到正式网站后台操作'); return; }
             if (!confirm('确定删除 ' + key + ' ?')) return;
 
             try {
@@ -964,6 +1242,7 @@
             const st = computeSlotStatus(target);
             const pendingKey = pendingMatches[target.slotId];
             const curVal = pendingKey || target.assignedFile || '（未填充）';
+            const isFilled = !pendingKey && target.filled;
             container.innerHTML = `
                 <div style="padding:0.5rem; border-radius:8px; background:rgba(212,175,55,0.08); margin-bottom:0.5rem;">
                     <div style="font-family:monospace; color:var(--warm-gold); font-size:0.9rem;">${target.slotId}</div>
@@ -982,6 +1261,11 @@
                     <div style="margin-top:0.75rem;">
                         <button class="btn-upload" style="width:100%; padding:0.5rem; font-size:0.8rem;" onclick="applySingleMatch('${target.slotId}')">仅确认此条导入</button>
                         <button class="btn-clear" style="width:100%; margin-top:0.3rem; padding:0.45rem; font-size:0.78rem;" onclick="clearPending('${target.slotId}')">取消此条分配</button>
+                    </div>` : ''}
+                ${isFilled ? `
+                    <div style="margin-top:0.75rem;">
+                        <button class="btn-clear" style="width:100%; padding:0.5rem; font-size:0.8rem; background:rgba(244,67,54,0.12); border-color:rgba(244,67,54,0.4); color:#ef9a9a;" onclick="unbindSlot('${target.slotId}')">🚫 取消当前绑定</button>
+                        <div style="color:var(--text-muted); font-size:0.68rem; margin-top:0.3rem; text-align:center;">解绑后可重新选择新素材绑定</div>
                     </div>` : ''}
             `;
         }
@@ -1113,6 +1397,7 @@
         }
 
         async function applySingleMatch(slotId) {
+            if (!ENV_IS_PROD) { showToast('🔒 本地环境已禁用绑定，请到正式网站后台操作'); return; }
             const cosKey = pendingMatches[slotId];
             if (!cosKey) return;
             const one = { [slotId]: cosKey };
@@ -1121,6 +1406,7 @@
         }
 
         async function confirmMatches() {
+            if (!ENV_IS_PROD) { showToast('🔒 本地环境已禁用绑定，请到正式网站后台操作'); return; }
             const n = Object.keys(pendingMatches).length;
             if (n === 0) return;
             const list = Object.entries(pendingMatches).map(([s,k]) => `  ${s} ← ${k}`).join('\n');
@@ -1137,11 +1423,32 @@
                 });
                 const j = await resp.json();
                 if (j.success) {
-                    showToast('✅ 导入成功！' + (j.message || '') + '（建议重启项目使所有字段生效）');
+                    showToast('✅ 导入成功！' + (j.message || ''));
                     pendingMatches = {};
                     await loadMatchCenter();
                 } else {
                     showToast('❌ 导入失败：' + j.message);
+                }
+            } catch (e) {
+                showToast('❌ 网络错误：' + e.message);
+            }
+        }
+
+        async function unbindSlot(slotId) {
+            if (!ENV_IS_PROD) { showToast('🔒 本地环境已禁用解绑，请到正式网站后台操作'); return; }
+            if (!confirm('确认取消该Slot的素材绑定？绑定将被清空，之后可重新选择素材绑定。')) return;
+            try {
+                const resp = await fetch('/admin/api/unmatch?slotId=' + encodeURIComponent(slotId), { method: 'POST' });
+                const j = await resp.json();
+                if (j.success) {
+                    showToast('✅ 已取消绑定：' + slotId);
+                    await loadMatchCenter();
+                    // 清空选中项并刷新状态面板
+                    selectedSlotId = null;
+                    renderSlots();
+                    renderStatusPanel();
+                } else {
+                    showToast('❌ 取消绑定失败：' + j.message);
                 }
             } catch (e) {
                 showToast('❌ 网络错误：' + e.message);

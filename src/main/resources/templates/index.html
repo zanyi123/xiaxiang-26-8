@@ -20,6 +20,7 @@
                 <a href="#building-story">建筑故事</a>
                 <a href="#achievement">项目成果</a>
                 <a href="/about">关于我们</a>
+                <a href="/admin">后台登录</a>
             </nav>
             <div class="header-right">
                 <div class="header-search">
@@ -113,7 +114,19 @@
             <div style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 2rem; align-items: stretch;" class="tour-layout">
                 <!-- 左侧：宝源坊3D全景入口 -->
                 <div style="position: relative; border-radius: 16px; overflow: hidden; border: 1px solid var(--glass-border); min-height: 380px; background: linear-gradient(135deg, rgba(26, 42, 74, 0.5), rgba(10, 10, 10, 0.8));">
-                    <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=baoyuanfang%20kaiping%20diaolou%20village%20panoramic%20aerial%20view%20three%20towers%20lingnan%20architecture%20golden%20hour%20cinematic%20wide%20angle&image_size=landscape_16_9" alt="宝源坊全景" style="width: 100%; height: 100%; object-fit: cover; opacity: 0.7;">
+                    <!-- 动态渲染全景封面图：对应 locations[0] 的封面，即 IMG-02-01 -->
+                    <img th:if="${locations != null and !#lists.isEmpty(locations) and locationImageUrls != null and locationImageUrls[locations[0].id] != null}"
+                         th:src="${locationImageUrls[locations[0].id]}"
+                         style="width: 100%; height: 100%; object-fit: cover; position: absolute; inset: 0;"
+                         th:alt="${locations[0].name}">
+                    <div th:unless="${locations != null and !#lists.isEmpty(locations) and locationImageUrls != null and locationImageUrls[locations[0].id] != null}"
+                         class="slot-placeholder"
+                         style="position: absolute; inset: 0; border-radius: 16px;"
+                         th:attr="data-slot-id=${locations != null and !#lists.isEmpty(locations)} ? ${'IMG-02-' + locations[0].id} : 'IMG-02-01'">
+                        <div class="slot-type-icon">🖼️</div>
+                        <div class="slot-badge" th:text="${locations != null and !#lists.isEmpty(locations)} ? ${'IMG-02-' + locations[0].id} : 'IMG-02-01'"></div>
+                        <div class="slot-desc">宝源坊全景图 · 待填充素材</div>
+                    </div>
                     <div style="position: absolute; top: 1rem; left: 1rem; display: flex; flex-direction: column; gap: 0.5rem;">
                         <span style="padding: 0.3rem 0.8rem; background: rgba(212, 175, 55, 0.9); color: #1a1a2e; border-radius: 6px; font-size: 0.8rem; font-weight: 600;">🏆 首个数字化试点</span>
                         <span style="padding: 0.2rem 0.8rem; background: rgba(0, 0, 0, 0.6); color: var(--text-primary); border-radius: 6px; font-size: 0.75rem;">📍 宝源坊 · 广东省古村落</span>
@@ -137,9 +150,17 @@
                              style="cursor: pointer; border-radius: 10px; overflow: hidden; border: 1px solid var(--glass-border-light); background: var(--glass-bg); transition: all 0.3s;"
                              onmouseover="this.style.borderColor='var(--warm-gold)'; this.style.transform='translateY(-3px)'"
                              onmouseout="this.style.borderColor='var(--glass-border-light)'; this.style.transform='translateY(0)'">
-                            <div style="position: relative; height: 90px; overflow: hidden;">
-                                <img th:src="${locationImageUrls != null and locationImageUrls[location.id] != null} ? ${locationImageUrls[location.id]} : |https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=kaiping%20${location.name}%20ancient%20architecture%20lingnan%20golden%20hour&image_size=square|" 
+                            <div style="position: relative; height: 90px; overflow: hidden;" th:classappend="${locationImageUrls != null and locationImageUrls[location.id] != null} ? 'slot-filled'">
+                                <img th:if="${locationImageUrls != null and locationImageUrls[location.id] != null}"
+                                     th:src="${locationImageUrls[location.id]}"
                                      th:alt="${location.name}" style="width: 100%; height: 100%; object-fit: cover;">
+                                <div th:unless="${locationImageUrls != null and locationImageUrls[location.id] != null}"
+                                     class="slot-placeholder slot-placeholder-small"
+                                     th:attr="data-slot-id=${'IMG-02-' + location.id}">
+                                    <div class="slot-type-icon">🖼️</div>
+                                    <div class="slot-badge" th:text="${'IMG-02-' + location.id}"></div>
+                                    <div class="slot-desc">待填充素材</div>
+                                </div>
                                 <div style="position: absolute; top: 0.3rem; left: 0.3rem; background: rgba(212, 175, 55, 0.9); color: #1a1a2e; width: 1.3rem; height: 1.3rem; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700;" th:text="${location.number}"></div>
                             </div>
                             <div style="padding: 0.5rem; text-align: center;">
@@ -296,8 +317,16 @@
                      onmouseover="this.style.borderColor='var(--warm-gold)'; this.style.transform='translateY(-6px)'"
                      onmouseout="this.style.borderColor='var(--glass-border)'; this.style.transform='translateY(0)'">
                     <div style="position: relative; height: 200px; overflow: hidden;">
-                        <img th:src="${locationImageUrls != null and locationImageUrls[location.id] != null} ? ${locationImageUrls[location.id]} : |https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=kaiping%20${location.name}%20ancient%20architecture%20lingnan%20cinematic%20golden%20hour&image_size=landscape_4_3|" 
+                        <img th:if="${locationImageUrls != null and locationImageUrls[location.id] != null}"
+                             th:src="${locationImageUrls[location.id]}"
                              th:alt="${location.name}" style="width: 100%; height: 100%; object-fit: cover;">
+                        <div th:unless="${locationImageUrls != null and locationImageUrls[location.id] != null}"
+                             class="slot-placeholder"
+                             th:attr="data-slot-id=${'IMG-02-' + location.id}">
+                            <div class="slot-type-icon">🖼️</div>
+                            <div class="slot-badge" th:text="${'IMG-02-' + location.id}"></div>
+                            <div class="slot-desc">待填充素材</div>
+                        </div>
                         <div style="position: absolute; bottom: 0; left: 0; right: 0; padding: 1rem; background: linear-gradient(transparent, rgba(0,0,0,0.9));">
                             <span style="color: var(--warm-gold); font-size: 0.8rem;" th:text="${location.number} + ' · 历史建筑'"></span>
                         </div>
@@ -364,25 +393,10 @@
                 <p class="section-subtitle">数字赋能文化遗产，校地合作共建共享 · <span style="color: var(--warm-gold);">📍 数据来自宝源坊实地采集</span></p>
             </div>
             <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem;" class="achievement-grid">
-                <div style="padding: 1.75rem 1.25rem; background: var(--glass-bg); border: 1px solid var(--glass-border-light); border-radius: 14px; text-align: center;">
-                    <div style="font-size: 2.5rem; margin-bottom: 0.75rem;">🚁</div>
-                    <h4 style="color: var(--warm-gold); font-size: 1rem; margin-bottom: 0.5rem;">航拍采集</h4>
-                    <p style="color: var(--text-secondary); font-size: 0.82rem; line-height: 1.6;">多角航拍，高清影像记录古村全貌</p>
-                </div>
-                <div style="padding: 1.75rem 1.25rem; background: var(--glass-bg); border: 1px solid var(--glass-border-light); border-radius: 14px; text-align: center;">
-                    <div style="font-size: 2.5rem; margin-bottom: 0.75rem;">📐</div>
-                    <h4 style="color: var(--warm-gold); font-size: 1rem; margin-bottom: 0.5rem;">三维建模</h4>
-                    <p style="color: var(--text-secondary); font-size: 0.82rem; line-height: 1.6;">高精度建模与贴图，还原建筑细节</p>
-                </div>
-                <div style="padding: 1.75rem 1.25rem; background: var(--glass-bg); border: 1px solid var(--glass-border-light); border-radius: 14px; text-align: center;">
-                    <div style="font-size: 2.5rem; margin-bottom: 0.75rem;">📋</div>
-                    <h4 style="color: var(--warm-gold); font-size: 1rem; margin-bottom: 0.5rem;">建筑记录</h4>
-                    <p style="color: var(--text-secondary); font-size: 0.82rem; line-height: 1.6;">系统整理建筑信息，留存文化数据</p>
-                </div>
-                <div style="padding: 1.75rem 1.25rem; background: var(--glass-bg); border: 1px solid var(--glass-border-light); border-radius: 14px; text-align: center;">
-                    <div style="font-size: 2.5rem; margin-bottom: 0.75rem;">🤝</div>
-                    <h4 style="color: var(--warm-gold); font-size: 1rem; margin-bottom: 0.5rem;">校地合作</h4>
-                    <p style="color: var(--text-secondary); font-size: 0.82rem; line-height: 1.6;">广东工业大学携手地方，助力乡村振兴</p>
+                <div th:each="item : ${achievements}" style="padding: 1.75rem 1.25rem; background: var(--glass-bg); border: 1px solid var(--glass-border-light); border-radius: 14px; text-align: center;">
+                    <div style="font-size: 2.5rem; margin-bottom: 0.75rem;" th:text="${item.icon}">🚁</div>
+                    <h4 style="color: var(--warm-gold); font-size: 1rem; margin-bottom: 0.5rem;" th:text="${item.title}">航拍采集</h4>
+                    <p style="color: var(--text-secondary); font-size: 0.82rem; line-height: 1.6;" th:text="${item.description}">多角航拍，高清影像记录古村全貌</p>
                 </div>
             </div>
 
@@ -498,6 +512,10 @@
             window.location.href = '/map';
         }
 
+        function exploreBuilding(locationId) {
+            window.location.href = '/location/' + locationId;
+        }
+
         function scrollToSection(id) {
             const el = document.getElementById(id);
             if (el) el.scrollIntoView({ behavior: 'smooth' });
@@ -596,15 +614,15 @@
 
         // 9种结局映射表（origin × choice1 × choice2 共27种组合 → 9种结局）
         const lifeEndings = [
-            { id: 1, title: '远赴南洋', icon: '🚢', desc: '你远渡重洋，在异国他乡艰苦打拼，成为一代华侨商人', building: '瑞石楼碉楼', tag: '开拓者' },
-            { id: 2, title: '归乡兴家', icon: '🏠', desc: '你带着海外积蓄回乡，建起碉楼，光耀门楣', building: '宝源门楼', tag: '归乡人' },
-            { id: 3, title: '重振家业', icon: '💪', desc: '你留守家乡，勤勉经营，让家族产业焕发新生', building: '宝源邓公祠', tag: '守业者' },
-            { id: 4, title: '一代商人', icon: '💰', desc: '你继承商贸之家传统，将生意做到南洋各地', building: '瑞石楼碉楼', tag: '商业奇才' },
-            { id: 5, title: '文化传承者', icon: '📚', desc: '你求学归来，致力于侨乡文化的记录与传承', building: '宝源邓公祠', tag: '文化使者' },
-            { id: 6, title: '乡村新主人', icon: '🌾', desc: '你扎根土地，用新知识改变家乡面貌', building: '古厝', tag: '乡村建设者' },
-            { id: 7, title: '侨领风范', icon: '🏛️', desc: '你成为华侨领袖，联络乡亲，造福桑梓', building: '宝源门楼', tag: '侨领' },
-            { id: 8, title: '匠心营造', icon: '🔨', desc: '你钻研建筑工艺，参与设计建造精美碉楼', building: '教堂', tag: '建筑师' },
-            { id: 9, title: '薪火相传', icon: '🔥', desc: '你守护侨乡记忆，让百年文化薪火相传', building: '风雨亭', tag: '薪火传承人' }
+            { id: 1, title: '远赴南洋', icon: '🚢', desc: '你远渡重洋，在异国他乡艰苦打拼，成为一代华侨商人', building: '瑞石楼碉楼', tag: '开拓者', locationId: 1 },
+            { id: 2, title: '归乡兴家', icon: '🏠', desc: '你带着海外积蓄回乡，建起碉楼，光耀门楣', building: '宝源门楼', tag: '归乡人', locationId: 1 },
+            { id: 3, title: '重振家业', icon: '💪', desc: '你留守家乡，勤勉经营，让家族产业焕发新生', building: '宝源邓公祠', tag: '守业者', locationId: 5 },
+            { id: 4, title: '一代商人', icon: '💰', desc: '你继承商贸之家传统，将生意做到南洋各地', building: '瑞石楼碉楼', tag: '商业奇才', locationId: 6 },
+            { id: 5, title: '文化传承者', icon: '📚', desc: '你求学归来，致力于侨乡文化的记录与传承', building: '宝源邓公祠', tag: '文化使者', locationId: 5 },
+            { id: 6, title: '乡村新主人', icon: '🌾', desc: '你扎根土地，用新知识改变家乡面貌', building: '古厝', tag: '乡村建设者', locationId: 2 },
+            { id: 7, title: '侨领风范', icon: '🏛️', desc: '你成为华侨领袖，联络乡亲，造福桑梓', building: '宝源门楼', tag: '侨领', locationId: 1 },
+            { id: 8, title: '匠心营造', icon: '🔨', desc: '你钻研建筑工艺，参与设计建造精美碉楼', building: '教堂', tag: '建筑师', locationId: 3 },
+            { id: 9, title: '薪火相传', icon: '🔥', desc: '你守护侨乡记忆，让百年文化薪火相传', building: '风雨亭', tag: '薪火传承人', locationId: 4 }
         ];
 
         function selectOrigin(n) {
@@ -652,7 +670,7 @@
                 </div>
                 <div style="margin-top: 1.5rem; display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap;">
                     <button class="hero-btn-primary" onclick="shareLife('${ending.title}', '${ending.tag}')" style="padding: 0.6rem 1.3rem; font-size: 0.9rem;">📤 分享我的人生</button>
-                    <button class="hero-btn-secondary" onclick="startTour()" style="padding: 0.6rem 1.3rem; font-size: 0.9rem;">🏛️ 探索对应建筑</button>
+                    <button class="hero-btn-secondary" onclick="exploreBuilding(${ending.locationId})" style="padding: 0.6rem 1.3rem; font-size: 0.9rem;">🏛️ 探索对应建筑</button>
                 </div>
             `;
             document.getElementById('life-restart-btn').style.display = 'inline-block';
@@ -759,5 +777,6 @@
             .life-step-line { width: 1rem !important; }
         }
     </style>
+    <script src="/js/slot-placeholder.js"></script>
 </body>
 </html>

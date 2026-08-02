@@ -1,5 +1,6 @@
 package org.example.xiaxiang.service;
 
+import com.qcloud.cos.COSClient;
 import lombok.extern.slf4j.Slf4j;
 import org.example.xiaxiang.exception.BusinessException;
 import org.example.xiaxiang.properties.AppProperties;
@@ -8,6 +9,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
+import java.io.File;
+import java.util.Collections;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * COS URL 生成服务
@@ -27,7 +32,13 @@ public class CosService {
     @Autowired
     private AppProperties appProperties;
 
+    @Autowired
+    private COSClient cosClient;
+
     private String cosBaseUrl;
+
+    /** 文件存在性缓存：避免每次页面请求都触发COS远程检查（SDK会对404打ERROR日志） */
+    private final Map<String, Boolean> existenceCache = new ConcurrentHashMap<>();
 
     /**
      * 初始化 COS 基础 URL
@@ -211,15 +222,59 @@ public class CosService {
     }
 
     /**
+     * 检查指定 key 的素材是否真实存在（本地mock或COS远程）
+     * 带缓存：同一个key只查一次COS，后续直接用缓存结果，避免SDK重复打ERROR日志
+     *
+     * @param key 素材 key，如 "images/diaolou.jpg"
+     * @return true = 真实存在；false = 不存在或无法验证
+     */
+    public boolean fileExists(String key) {
+        if (isBlank(key)) return false;
+
+        // 缓存命中直接返回
+        Boolean cached = existenceCache.get(key);
+        if (cached != null) {
+            return cached;
+        }
+
+        if (appProperties.isMockMode()) {
+            String localPath = "src/main/resources/static/mock/" + key;
+            File f = new File(localPath);
+            boolean exists = f.exists() && f.isFile();
+            existenceCache.put(key, exists);
+            return exists;
+        }
+
+        try {
+            boolean exists = cosClient.doesObjectExist(cosProperties.getBucketName(), key);
+            existenceCache.put(key, exists);
+            return exists;
+        } catch (Exception e) {
+            // COS返回404 → 文件不存在（这是预期行为，缓存为false避免重复请求）
+            existenceCache.put(key, false);
+            log.debug("[CosService] COS文件不存在或检查异常 {} => {}", key, e.getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * 清除文件存在性缓存（上传/删除素材后调用）
+     */
+    public void clearCache() {
+        existenceCache.clear();
+        log.info("[CosService] 文件存在性缓存已清除");
+    }
+
+    /**
      * 通用素材 URL Map 构造器
      * 遍历列表，将每个对象的素材 key 转换为 COS URL，按 id 索引返回
-     * key 为空或异常时该 id 不出现在 Map 中（模板可 fallback 到 AI 生成图）
+     * 关键修复：只有素材在COS中真实存在时才放入Map，不存在的key跳过
      *
      * @param list      数据列表
      * @param idGetter  id 提取函数
      * @param keyGetter 素材 key 提取函数
      * @param <T>       数据类型
-     * @return Map<id, COS URL>
+     * @return Map<id, COS URL>  只包含真实存在的素材
      */
     public <T> java.util.Map<Integer, String> buildUrlMap(java.util.List<T> list,
                                                           java.util.function.Function<T, Integer> idGetter,
@@ -233,7 +288,12 @@ public class CosService {
             String key = keyGetter.apply(item);
             String url = getUrlSafely(key);
             if (id != null && url != null) {
-                map.put(id, url);
+                // 关键修复：验证文件真实存在
+                if (fileExists(key)) {
+                    map.put(id, url);
+                } else {
+                    log.debug("[CosService] 跳过不存在的素材 key={} (id={})", key, id);
+                }
             }
         }
         return map;

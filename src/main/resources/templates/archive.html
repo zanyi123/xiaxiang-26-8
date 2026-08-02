@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="zh-CN">
 <head>
     <meta charset="UTF-8">
@@ -20,6 +20,7 @@
                 <a href="/#building-story">建筑故事</a>
                 <a href="/#achievement">项目成果</a>
                 <a href="/about">关于我们</a>
+                <a href="/admin">后台登录</a>
             </nav>
             <div class="header-right">
                 <button class="header-btn" onclick="window.location.href='/map'">开始云游</button>
@@ -43,10 +44,32 @@
                     <h2 class="section-title">田野调查数据</h2>
                     <p class="section-subtitle">三下乡实践团实地调研成果汇总</p>
                 </div>
-                <div class="archive-detail-grid" th:if="${archives != null and !archives.isEmpty()}">
+
+                <!-- 档案筛选搜索栏 -->
+                <div th:if="${archives != null and !archives.isEmpty()}" class="archive-filter-bar" style="margin-bottom: 2rem; padding: 1.5rem; background: var(--glass-bg); border: 1px solid var(--glass-border-light); border-radius: 14px; backdrop-filter: blur(10px);">
+                    <div style="display: flex; gap: 1rem; align-items: center; margin-bottom: 1.2rem; flex-wrap: wrap;">
+                        <div style="position: relative; flex: 1; min-width: 240px;">
+                            <input type="text" id="archive-search-input" placeholder="搜索档案名称、描述..."
+                                oninput="filterArchives()"
+                                style="width: 100%; padding: 0.75rem 1.2rem 0.75rem 2.6rem; background: rgba(0,0,0,0.4); border: 1px solid var(--glass-border-light); border-radius: 8px; color: var(--text-primary); font-size: 0.95rem; box-sizing: border-box;">
+                            <span style="position: absolute; left: 0.9rem; top: 50%; transform: translateY(-50%); font-size: 1rem; opacity: 0.7;">🔍</span>
+                        </div>
+                        <span id="archive-result-count" style="color: var(--text-muted); font-size: 0.85rem; white-space: nowrap;"></span>
+                    </div>
+                    <div class="filter-tabs" id="archive-category-tabs" style="margin-bottom: 0; justify-content: flex-start;">
+                        <button class="filter-tab active" data-category="all" onclick="filterByCategory('all')">全部</button>
+                        <button class="filter-tab" th:each="cat : ${categories}"
+                                th:attr="data-category=${cat}"
+                                th:text="${cat}"
+                                onclick="filterByCategory(this.dataset.category)"></button>
+                    </div>
+                </div>
+
+                <div class="archive-detail-grid" id="archive-grid" th:if="${archives != null and !archives.isEmpty()}">
                     <a th:each="item : ${archives}"
                        th:href="@{/archive/{id}(id=${item.id})}"
                        class="archive-detail-card"
+                       th:attr="data-category=${item.category}, data-title=${item.title}, data-desc=${item.description}"
                        style="text-decoration: none; color: inherit; cursor: pointer; display: block;">
                         <div class="archive-detail-icon" th:text="${item.icon}"></div>
                         <div class="archive-detail-title" th:text="${item.title}"></div>
@@ -54,6 +77,9 @@
                         <div class="archive-detail-unit" th:text="${item.unit}"></div>
                         <div style="margin-top: 0.5rem; font-size: 0.8rem; color: var(--warm-gold);">查看详情 →</div>
                     </a>
+                </div>
+                <div id="archive-empty-msg" th:if="${archives != null and !archives.isEmpty()}" style="display: none; text-align: center; padding: 3rem; color: var(--text-muted);">
+                    未找到匹配的档案，试试其他关键词或分类。
                 </div>
                 <div th:if="${archives == null or archives.isEmpty()}" style="text-align: center; padding: 3rem; color: var(--text-muted);">
                     档案数据整理中，敬请期待。
@@ -90,7 +116,11 @@
                 <div class="culture-grid">
                     <div class="culture-card">
                         <div class="culture-image">
-                            <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=kaiping%20diaolou%20historical%20photo%20archive%20black%20and%20white%20vintage&image_size=square" alt="碉楼全景">
+                            <div class="slot-placeholder" th:attr="data-slot-id='IMG-06-1'">
+                                <div class="slot-type-icon">🖼️</div>
+                                <div class="slot-badge">IMG-06-1</div>
+                                <div class="slot-desc">待填充素材</div>
+                            </div>
                             <div class="culture-overlay">
                                 <span class="culture-category">碉楼全景</span>
                             </div>
@@ -98,7 +128,11 @@
                     </div>
                     <div class="culture-card">
                         <div class="culture-image">
-                            <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=kaiping%20village%20old%20street%20field%20survey%20archive%20cinematic&image_size=square" alt="古村街巷">
+                            <div class="slot-placeholder" th:attr="data-slot-id='IMG-06-2'">
+                                <div class="slot-type-icon">🖼️</div>
+                                <div class="slot-badge">IMG-06-2</div>
+                                <div class="slot-desc">待填充素材</div>
+                            </div>
                             <div class="culture-overlay">
                                 <span class="culture-category">古村街巷</span>
                             </div>
@@ -106,7 +140,11 @@
                     </div>
                     <div class="culture-card">
                         <div class="culture-image">
-                            <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=traditional%20lingnan%20architecture%20detail%20archive%20carving%20warm%20light&image_size=square" alt="建筑细节">
+                            <div class="slot-placeholder" th:attr="data-slot-id='IMG-06-3'">
+                                <div class="slot-type-icon">🖼️</div>
+                                <div class="slot-badge">IMG-06-3</div>
+                                <div class="slot-desc">待填充素材</div>
+                            </div>
                             <div class="culture-overlay">
                                 <span class="culture-category">建筑细节</span>
                             </div>
@@ -114,7 +152,11 @@
                     </div>
                     <div class="culture-card">
                         <div class="culture-image">
-                            <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=baoyuanfang%20ancient%20stone%20well%20historical%20village%20archive&image_size=square" alt="百年古井">
+                            <div class="slot-placeholder" th:attr="data-slot-id='IMG-06-4'">
+                                <div class="slot-type-icon">🖼️</div>
+                                <div class="slot-badge">IMG-06-4</div>
+                                <div class="slot-desc">待填充素材</div>
+                            </div>
                             <div class="culture-overlay">
                                 <span class="culture-category">百年古井</span>
                             </div>
@@ -122,7 +164,11 @@
                     </div>
                     <div class="culture-card">
                         <div class="culture-image">
-                            <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=kaiping%20diaolou%20tower%20facade%20archive%20warm%20golden%20hour&image_size=square" alt="侨乡风貌">
+                            <div class="slot-placeholder" th:attr="data-slot-id='IMG-06-5'">
+                                <div class="slot-type-icon">🖼️</div>
+                                <div class="slot-badge">IMG-06-5</div>
+                                <div class="slot-desc">待填充素材</div>
+                            </div>
                             <div class="culture-overlay">
                                 <span class="culture-category">侨乡风貌</span>
                             </div>
@@ -130,7 +176,11 @@
                     </div>
                     <div class="culture-card">
                         <div class="culture-image">
-                            <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=lingnan%20village%20ancestral%20hall%20field%20research%20archive&image_size=square" alt="祠堂建筑">
+                            <div class="slot-placeholder" th:attr="data-slot-id='IMG-06-6'">
+                                <div class="slot-type-icon">🖼️</div>
+                                <div class="slot-badge">IMG-06-6</div>
+                                <div class="slot-desc">待填充素材</div>
+                            </div>
                             <div class="culture-overlay">
                                 <span class="culture-category">祠堂建筑</span>
                             </div>
@@ -171,7 +221,7 @@
         </div>
         <div class="footer-bottom">
             <p>技术支持：3D高斯泼溅技术(3DGS) · 腾讯云COS · AI语音合成</p>
-            <p style="margin-top: 0.5rem;">©\ 2024\ 侨韵薪火实践团\ 版权所有\ ·\ <a\ href="/admin/upload"\ style="color:\ var\(--text-muted\);\ font-size:\ 0\.78rem;\ text-decoration:\ none;">管理入口</a></p>
+            <p style="margin-top: 0.5rem;">© 2024 侨韵薪火实践团 版权所有 · <a href="/admin/upload" style="color: var(--text-muted); font-size: 0.78rem; text-decoration: none;">管理入口</a></p>
         </div>
     </footer>
 
@@ -206,6 +256,58 @@
             const text = "欢迎来到田野档案页面。这里是广东工业大学三下乡实践团的实地调研成果汇总，包含田野调查数据、百年历史时间线以及实地影像记录，让我们一起回顾宝源坊的历史印记。";
             speak(text);
         }
+
+        // ===== 档案筛选搜索 =====
+        let currentCategory = 'all';
+        let currentKeyword = '';
+
+        function filterByCategory(category) {
+            currentCategory = category;
+            document.querySelectorAll('#archive-category-tabs .filter-tab').forEach(function(t) {
+                t.classList.toggle('active', t.dataset.category === category);
+            });
+            renderArchives();
+        }
+
+        function filterArchives() {
+            var input = document.getElementById('archive-search-input');
+            currentKeyword = input ? input.value.trim().toLowerCase() : '';
+            renderArchives();
+        }
+
+        function renderArchives() {
+            var grid = document.getElementById('archive-grid');
+            if (!grid) return;
+            var cards = Array.prototype.slice.call(grid.querySelectorAll('.archive-detail-card'));
+            var visible = 0;
+            cards.forEach(function(card) {
+                var cat = card.getAttribute('data-category') || '';
+                var title = (card.getAttribute('data-title') || '').toLowerCase();
+                var desc = (card.getAttribute('data-desc') || '').toLowerCase();
+                var catMatch = currentCategory === 'all' || cat === currentCategory;
+                var kwMatch = !currentKeyword || title.indexOf(currentKeyword) >= 0 || desc.indexOf(currentKeyword) >= 0;
+                if (catMatch && kwMatch) {
+                    card.style.display = '';
+                    visible++;
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+            var countEl = document.getElementById('archive-result-count');
+            if (countEl) {
+                countEl.textContent = '共 ' + visible + ' 项档案';
+            }
+            var emptyMsg = document.getElementById('archive-empty-msg');
+            if (emptyMsg) {
+                emptyMsg.style.display = visible === 0 ? '' : 'none';
+            }
+        }
+
+        // 初始化计数
+        document.addEventListener('DOMContentLoaded', function() {
+            renderArchives();
+        });}
     </script>
+    <script src="/js/slot-placeholder.js"></script>
 </body>
 </html>

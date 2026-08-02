@@ -20,6 +20,7 @@
                 <a href="/#building-story">建筑故事</a>
                 <a href="/#achievement">项目成果</a>
                 <a href="/about">关于我们</a>
+                <a href="/admin">后台登录</a>
             </nav>
             <div class="header-right">
                 <a href="/" class="back-link">← 返回首页</a>
@@ -98,11 +99,12 @@
             点击地图上的地点标记，我可以为您讲解该地点的历史故事。
         </div>
         <div class="ai-guide-controls">
-            <button class="ai-control-btn" onclick="pauseGuide()">暂停</button>
-            <button class="ai-control-btn" onclick="resumeGuide()">继续</button>
+            <button class="ai-control-btn" onclick="pauseGuide()" id="btn-pause">暂停</button>
+            <button class="ai-control-btn" onclick="stopGuide()">停止</button>
         </div>
     </div>
 
+    <script src="/js/qiaoyun-tts.js"></script>
     <script th:inline="javascript">
         const locations = /*[[${locations}]]*/ [];
         let currentLocationId = null;
@@ -172,33 +174,37 @@
         }
 
         function pauseGuide() {
-            if ('speechSynthesis' in window) {
-                window.speechSynthesis.cancel();
-                document.getElementById('ai-guide-btn').classList.remove('playing');
-            }
+            if (!window.QiaoyunTTS) return;
+            QiaoyunTTS.pause();
+            var btn = document.getElementById('btn-pause');
+            if (btn) { btn.textContent = '继续播放'; btn.setAttribute('onclick', 'resumeGuide()'); }
         }
 
         function resumeGuide() {
-            playGuide();
+            if (!window.QiaoyunTTS) return;
+            QiaoyunTTS.resume();
+            resetPauseBtn();
+        }
+
+        function resetPauseBtn() {
+            var btn = document.getElementById('btn-pause');
+            if (btn) { btn.textContent = '暂停'; btn.setAttribute('onclick', 'pauseGuide()'); }
+        }
+
+        function stopGuide() {
+            if (!window.QiaoyunTTS) return;
+            QiaoyunTTS.stop();
+            document.getElementById('ai-guide-btn').classList.remove('playing');
+            resetPauseBtn();
         }
 
         function speak(text) {
-            if ('speechSynthesis' in window) {
-                window.speechSynthesis.cancel();
-                const utterance = new SpeechSynthesisUtterance(text);
-                utterance.lang = 'zh-CN';
-                utterance.rate = 0.9;
-                utterance.pitch = 1;
-                window.speechSynthesis.speak(utterance);
-                
-                const btn = document.getElementById('ai-guide-btn');
-                btn.classList.add('playing');
-                utterance.onend = () => {
-                    btn.classList.remove('playing');
-                };
-            } else {
-                alert('您的浏览器不支持语音合成功能');
-            }
+            if (!window.QiaoyunTTS) { alert('语音功能加载失败'); return; }
+            QiaoyunTTS.speakGuide(text, function() {
+                document.getElementById('ai-guide-btn').classList.remove('playing');
+                resetPauseBtn();
+            });
+            document.getElementById('ai-guide-btn').classList.add('playing');
         }
 
         updateProgress();

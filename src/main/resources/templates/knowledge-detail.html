@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="zh-CN">
 <head>
     <meta charset="UTF-8">
@@ -20,6 +20,7 @@
                 <a href="/#building-story">建筑故事</a>
                 <a href="/#achievement">项目成果</a>
                 <a href="/about">关于我们</a>
+                <a href="/admin">后台登录</a>
             </nav>
             <div class="header-right">
                 <button class="header-btn" onclick="window.location.href='/map'">开始云游</button>
@@ -32,7 +33,14 @@
             <a href="/knowledge" class="detail-back">← 返回知识库</a>
 
             <div class="detail-hero-image">
-                <img th:src="${coverUrl != null} ? ${coverUrl} : |https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=${knowledge.title}%20kaiping%20architecture%20cinematic%20warm%20golden%20hour&image_size=square|" th:alt="${knowledge.title}">
+                <img th:if="${coverUrl != null and #strings.length(coverUrl) > 0}" th:src="${coverUrl}" th:alt="${knowledge.title}">
+                <div th:unless="${coverUrl != null and #strings.length(coverUrl) > 0}"
+                     class="slot-placeholder"
+                     th:attr="data-slot-id=${'IMG-06-' + knowledge.id}">
+                    <div class="slot-type-icon">🖼️</div>
+                    <div class="slot-badge" th:text="${'IMG-06-' + knowledge.id}"></div>
+                    <div class="slot-desc" th:text="${knowledge.title} + ' · 封面图待填充'"></div>
+                </div>
                 <span class="detail-category-tag" th:text="${knowledge.category}"></span>
                 <span class="knowledge-difficulty"
                       style="position: absolute; top: 1.5rem; right: 1.5rem; z-index: 2; padding: 0.4rem 1rem; font-size: 0.8rem;"
@@ -62,7 +70,14 @@
                        th:href="|/knowledge/${item.id}|"
                        class="knowledge-detail-card">
                         <div class="knowledge-detail-image">
-                            <img th:src="${coverUrls != null and coverUrls[item.id] != null} ? ${coverUrls[item.id]} : |https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=${item.title}%20kaiping%20architecture%20knowledge%20cinematic&image_size=square|" th:alt="${item.title}">
+                            <img th:if="${coverUrls != null and coverUrls[item.id] != null}" th:src="${coverUrls[item.id]}" th:alt="${item.title}" loading="lazy">
+                            <div th:unless="${coverUrls != null and coverUrls[item.id] != null}"
+                                 class="slot-placeholder slot-placeholder-small"
+                                 th:attr="data-slot-id=${'IMG-06-' + item.id}">
+                                <div class="slot-type-icon">🖼️</div>
+                                <div class="slot-badge" th:text="${'IMG-06-' + item.id}"></div>
+                                <div class="slot-desc">待填充素材</div>
+                            </div>
                         </div>
                         <div class="knowledge-detail-content">
                             <div class="knowledge-detail-header">
@@ -140,5 +155,6 @@
             speak(text);
         }
     </script>
+    <script src="/js/slot-placeholder.js"></script>
 </body>
 </html>

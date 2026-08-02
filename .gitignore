@@ -24,9 +24,10 @@ logs/
 
 # Environment variables
 .env
+# 本地开发配置（含密钥，严禁提交）
 application-local.yml
-application-prod.yml
-application.yml
+application-dev.yml
+# application.yml 提交到 Git，包含全部业务数据（密钥通过环境变量 / application-local.yml 注入）
 
 # Sensitive files
 secret.properties
@@ -41,3 +42,6 @@ tmp/
 
 # 3D reconstruction workspace (large binary data, not source code)
 colmap-workspace/
+
+# Runtime data (用户反馈等运行时生成数据)
+data/

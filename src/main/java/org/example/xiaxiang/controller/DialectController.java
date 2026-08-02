@@ -3,6 +3,7 @@ package org.example.xiaxiang.controller;
 import lombok.extern.slf4j.Slf4j;
 import org.example.xiaxiang.common.Result;
 import org.example.xiaxiang.properties.AppProperties;
+import org.example.xiaxiang.service.CosService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -22,6 +23,9 @@ public class DialectController {
 
     @Autowired
     private AppProperties appProperties;
+
+    @Autowired
+    private CosService cosService;
 
     @GetMapping("/dialect")
     public String dialectPage(@RequestParam(required = false) String category, Model model) {
@@ -48,6 +52,8 @@ public class DialectController {
         model.addAttribute("dialects", filtered);
         model.addAttribute("categories", categories);
         model.addAttribute("currentCategory", category != null ? category : "all");
+        // 构建方言音频 URL Map（id -> COS URL），供前端优先播放真实录音
+        model.addAttribute("audioUrls", cosService.buildUrlMap(filtered, AppProperties.DialectItem::getId, AppProperties.DialectItem::getAudioKey));
         return "dialect";
     }
 

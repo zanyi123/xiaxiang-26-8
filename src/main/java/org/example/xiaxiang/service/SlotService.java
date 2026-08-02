@@ -29,6 +29,9 @@ public class SlotService {
     @Autowired
     private AppProperties appProperties;
 
+    @Autowired
+    private CosService cosService;
+
     /** 素材类型前缀 */
     public static final String T_IMG = "IMG";
     public static final String T_AUD = "AUD";
@@ -61,8 +64,17 @@ public class SlotService {
         list.forEach(s -> {
             String file = readAssigned(s);
             if (file != null && !file.trim().isEmpty()) {
-                s.setFilled(true);
-                s.setAssignedFile(file);
+                // 关键修复：不仅检查YAML字段有值，还要验证文件在COS桶里真实存在
+                boolean exists = cosService.fileExists(file);
+                if (exists) {
+                    s.setFilled(true);
+                    s.setAssignedFile(file);
+                } else {
+                    // YAML有值但COS文件不存在 → 标记为"空缺"并记录assignedFile供参考
+                    s.setFilled(false);
+                    s.setAssignedFile(file + " (未上传)");
+                    log.warn("[SlotService] Slot {} 的YAML字段指向 {}，但COS中文件不存在", s.getSlotId(), file);
+                }
             }
         });
         return list;
@@ -107,11 +119,58 @@ public class SlotService {
             yamlWritten = YamlUpdater.patchYaml(yamlWrites);
         }
 
+        // 素材匹配完成后清除文件存在性缓存，确保下次请求能获取最新状态
+        cosService.clearCache();
+
         MatchResult r = new MatchResult();
         r.setSuccess(success);
         r.setFail(fail);
         r.setYamlWrittenCount(yamlWritten);
         return r;
+    }
+
+    /**
+     * 取消单个Slot的绑定（把字段值置空）
+     * @return true=成功，false=失败
+     */
+    public MatchResult unbindSlot(String slotId) {
+        List<String> success = new ArrayList<>();
+        List<String> fail = new ArrayList<>();
+
+        SlotInfo def = buildSlotList().stream()
+                .filter(s -> s.getSlotId().equals(slotId))
+                .findFirst().orElse(null);
+        if (def == null) {
+            fail.add(slotId + ": Slot不存在");
+            MatchResult r = new MatchResult();
+            r.setSuccess(success);
+            r.setFail(fail);
+            r.setYamlWrittenCount(0);
+            return r;
+        }
+
+        try {
+            writeToField(def, null);
+            Map<String, String> yamlWrites = new HashMap<>();
+            yamlWrites.put(def.getYamlPath(), null);
+            int yamlWritten = YamlUpdater.patchYaml(yamlWrites);
+            cosService.clearCache();
+            success.add(slotId);
+            log.info("[取消绑定] slotId={} yamlPath={}", slotId, def.getYamlPath());
+            MatchResult r = new MatchResult();
+            r.setSuccess(success);
+            r.setFail(fail);
+            r.setYamlWrittenCount(yamlWritten);
+            return r;
+        } catch (Exception ex) {
+            fail.add(slotId + ": " + ex.getMessage());
+            log.error("[取消绑定失败] slotId={}", slotId, ex);
+            MatchResult r = new MatchResult();
+            r.setSuccess(success);
+            r.setFail(fail);
+            r.setYamlWrittenCount(0);
+            return r;
+        }
     }
 
     @Data

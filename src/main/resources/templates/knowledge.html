@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="zh-CN">
 <head>
     <meta charset="UTF-8">
@@ -20,6 +20,7 @@
                 <a href="/#building-story">建筑故事</a>
                 <a href="/#achievement">项目成果</a>
                 <a href="/about">关于我们</a>
+                <a href="/admin">后台登录</a>
             </nav>
             <div class="header-right">
                 <button class="header-btn" onclick="window.location.href='/map'">开始云游</button>
@@ -60,7 +61,14 @@
                        class="knowledge-detail-card"
                        th:data-category="${item.category}">
                         <div class="knowledge-detail-image">
-                            <img th:src="${coverUrls != null and coverUrls[item.id] != null} ? ${coverUrls[item.id]} : |https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=${item.title}%20kaiping%20architecture%20knowledge%20cinematic&image_size=square|" th:alt="${item.title}">
+                            <img th:if="${coverUrls != null and coverUrls[item.id] != null}" th:src="${coverUrls[item.id]}" th:alt="${item.title}" loading="lazy">
+                            <div th:unless="${coverUrls != null and coverUrls[item.id] != null}"
+                                 class="slot-placeholder slot-placeholder-small"
+                                 th:attr="data-slot-id=${'IMG-06-' + item.id}">
+                                <div class="slot-type-icon">🖼️</div>
+                                <div class="slot-badge" th:text="${'IMG-06-' + item.id}"></div>
+                                <div class="slot-desc">待填充素材</div>
+                            </div>
                         </div>
                         <div class="knowledge-detail-content">
                             <div class="knowledge-detail-header">
@@ -88,7 +96,14 @@
                 <div class="culture-grid" th:if="${cultures != null and !cultures.isEmpty()}">
                     <div class="culture-card" th:each="culture : ${cultures}">
                         <div class="culture-image">
-                            <img th:src="${cultureCoverUrls != null and cultureCoverUrls[culture.id] != null} ? ${cultureCoverUrls[culture.id]} : |https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=${culture.name}%20traditional%20culture%20kaiping%20lingnan&image_size=square|" th:alt="${culture.name}">
+                            <img th:if="${cultureCoverUrls != null and cultureCoverUrls[culture.id] != null}" th:src="${cultureCoverUrls[culture.id]}" th:alt="${culture.name}" loading="lazy">
+                            <div th:unless="${cultureCoverUrls != null and cultureCoverUrls[culture.id] != null}"
+                                 class="slot-placeholder slot-placeholder-small"
+                                 th:attr="data-slot-id=${'IMG-07-' + culture.id}">
+                                <div class="slot-type-icon">🖼️</div>
+                                <div class="slot-badge" th:text="${'IMG-07-' + culture.id}"></div>
+                                <div class="slot-desc">待填充素材</div>
+                            </div>
                             <div class="culture-overlay">
                                 <span class="culture-category" th:text="${culture.category}"></span>
                             </div>
@@ -187,5 +202,6 @@
             });
         }
     </script>
+    <script src="/js/slot-placeholder.js"></script>
 </body>
 </html>

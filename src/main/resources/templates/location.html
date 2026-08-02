@@ -63,6 +63,7 @@
                 <a href="/#building-story">建筑故事</a>
                 <a href="/#achievement">项目成果</a>
                 <a href="/about">关于我们</a>
+                <a href="/admin">后台登录</a>
             </nav>
             <div class="header-right">
                 <a href="/map" class="back-link">← 返回地图</a>
@@ -80,11 +81,41 @@
                 </div>
             </div>
 
+            <!-- 封面大横幅（对应 IMG-02-{id}） -->
+            <div class="location-cover-banner" style="position: relative; height: 260px; border-radius: 14px; overflow: hidden; margin-bottom: 1.5rem; border: 1px solid var(--glass-border); background: linear-gradient(135deg, rgba(26, 42, 74, 0.5), rgba(10, 10, 10, 0.8));">
+                <img th:if="${imageUrl != null and #strings.length(imageUrl) > 0}"
+                     th:src="${imageUrl}"
+                     th:alt="${location.name}"
+                     style="width: 100%; height: 100%; object-fit: cover; position: absolute; inset: 0;">
+                <div th:unless="${imageUrl != null and #strings.length(imageUrl) > 0}"
+                     class="slot-placeholder"
+                     style="position: absolute; inset: 0;"
+                     th:attr="data-slot-id=${'IMG-02-' + location.id}">
+                    <div class="slot-type-icon">🖼️</div>
+                    <div class="slot-badge" th:text="${'IMG-02-' + location.id}"></div>
+                    <div class="slot-desc" th:text="${location.name} + ' · 封面图待填充'"></div>
+                </div>
+                <div style="position: absolute; bottom: 0; left: 0; right: 0; padding: 1.25rem; background: linear-gradient(transparent, rgba(0,0,0,0.85));">
+                    <h2 style="color: var(--warm-gold); font-size: 1.3rem; margin-bottom: 0.35rem; letter-spacing: 1px;" th:text="${location.name}"></h2>
+                    <p style="color: var(--text-secondary); font-size: 0.85rem; margin: 0;" th:text="${location.description}"></p>
+                </div>
+            </div>
+
             <div class="location-content">
                 <div class="content-left">
-                    <div id="canvas-container">
+                    <div id="canvas-container" style="position: relative;">
                         <div class="model-info">3D高斯泼溅模型 · 支持鼠标旋转缩放</div>
                         <canvas id="3d-canvas"></canvas>
+                        <!-- 3D 模型未加载时的占位符（MDL-02-{id}） -->
+                        <div id="model-placeholder"
+                             class="slot-placeholder"
+                             style="position: absolute; inset: 0; border-radius: 12px; display: none;"
+                             th:attr="data-slot-id=${'MDL-02-' + location.id}">
+                            <div class="slot-type-icon">🧊</div>
+                            <div class="slot-badge" th:text="${'MDL-02-' + location.id}"></div>
+                            <div class="slot-desc" th:text="${location.name} + ' · 3D模型待填充'"></div>
+                            <div class="slot-status">3D 模型加载中或尚未上传</div>
+                        </div>
                         <div class="model-controls">
                             <button class="model-btn" onclick="resetCamera()">重置视角</button>
                             <button class="model-btn" onclick="autoRotate()">自动旋转</button>
@@ -145,40 +176,59 @@
     </div>
 
     <script src="/js/building-3d.js"></script>
+    <script src="/js/qiaoyun-tts.js"></script>
     <script th:inline="javascript">
         const audioText = /*[[${location.audioText}]]*/ '';
 
         function playGuide() {
-            if ('speechSynthesis' in window) {
-                window.speechSynthesis.cancel();
-                const utterance = new SpeechSynthesisUtterance(audioText);
-                utterance.lang = 'zh-CN';
-                utterance.rate = 0.9;
-                utterance.pitch = 1;
-                window.speechSynthesis.speak(utterance);
-                
-                const btn = document.getElementById('ai-guide-btn');
-                btn.classList.add('playing');
-                utterance.onend = () => {
-                    btn.classList.remove('playing');
-                };
-            } else {
-                alert('您的浏览器不支持语音合成功能');
+            if (!window.QiaoyunTTS) { alert('语音功能加载失败'); return; }
+            // 如果正在暂停，继续播放而不是重新开始
+            if (QiaoyunTTS.isPlaying && !QiaoyunTTS.isPlaying()) {
+                resumeGuide();
+                return;
             }
+            QiaoyunTTS.speakGuide(audioText, function() {
+                // 播放完毕，恢复按钮状态
+                document.getElementById('ai-guide-btn').classList.remove('playing');
+                resetPauseBtn();
+            });
+            document.getElementById('ai-guide-btn').classList.add('playing');
         }
 
         function pauseGuide() {
-            if ('speechSynthesis' in window) {
-                window.speechSynthesis.pause();
-                document.getElementById('ai-guide-btn').classList.remove('playing');
-            }
+            if (!window.QiaoyunTTS) return;
+            QiaoyunTTS.pause();
+            // 暂停按钮变为"继续播放"
+            var btns = document.querySelectorAll('.guide-btn, .ai-control-btn');
+            btns.forEach(function(b) {
+                if (b.textContent.indexOf('暂停') >= 0) {
+                    b.textContent = '▶️ 继续播放';
+                    b.setAttribute('onclick', 'resumeGuide()');
+                }
+            });
+        }
+
+        function resumeGuide() {
+            if (!window.QiaoyunTTS) return;
+            QiaoyunTTS.resume();
+            resetPauseBtn();
+        }
+
+        function resetPauseBtn() {
+            var btns = document.querySelectorAll('.guide-btn, .ai-control-btn');
+            btns.forEach(function(b) {
+                if (b.textContent.indexOf('继续播放') >= 0) {
+                    b.textContent = '⏸️ 暂停';
+                    b.setAttribute('onclick', 'pauseGuide()');
+                }
+            });
         }
 
         function stopGuide() {
-            if ('speechSynthesis' in window) {
-                window.speechSynthesis.cancel();
-                document.getElementById('ai-guide-btn').classList.remove('playing');
-            }
+            if (!window.QiaoyunTTS) return;
+            QiaoyunTTS.stop();
+            document.getElementById('ai-guide-btn').classList.remove('playing');
+            resetPauseBtn();
         }
 
         function toggleAiGuide() {
@@ -207,5 +257,6 @@
     <footer class="footer" style="text-align: center; padding: 1.5rem; border-top: 1px solid var(--border-color, #3a3a3a); margin-top: 2rem;">
         <p style="margin-top: 0.5rem;">© 2024 侨韵薪火实践团 版权所有 · <a href="/admin/upload" style="color: var(--text-muted); font-size: 0.78rem; text-decoration: none;">管理入口</a></p>
     </footer>
+    <script src="/js/slot-placeholder.js"></script>
 </body>
 </html>

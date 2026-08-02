@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="zh-CN">
 <head>
     <meta charset="UTF-8">
@@ -8,8 +8,14 @@
     <style>
         .anatomy-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-top: 2rem; }
         .anatomy-preview { position: sticky; top: 100px; }
-        .anatomy-preview-box { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 16px; padding: 2rem; text-align: center; backdrop-filter: blur(15px); }
+        .anatomy-preview-box { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 16px; padding: 2rem; text-align: center; backdrop-filter: blur(15px); position: relative; }
         .anatomy-preview-img { width: 100%; max-width: 360px; border-radius: 12px; margin: 0 auto 1rem; display: block; }
+        .anatomy-canvas-wrapper { position: relative; width: 100%; height: 420px; background: rgba(0,0,0,0.5); border-radius: 12px; overflow: hidden; margin: 0 auto 1rem; }
+        .anatomy-canvas-wrapper canvas { display: block; width: 100% !important; height: 100% !important; }
+        .anatomy-loading { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; color: var(--warm-gold); }
+        .anatomy-loading .spinner { width: 36px; height: 36px; border: 3px solid rgba(212,175,55,0.2); border-top-color: var(--warm-gold); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 0.75rem; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .anatomy-tip { position: absolute; bottom: 1rem; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.7); color: var(--warm-gold); padding: 0.5rem 1rem; border-radius: 8px; font-size: 0.82rem; z-index: 10; pointer-events: none; max-width: 90%; text-align: center; }
         .anatomy-parts-list { display: flex; flex-direction: column; gap: 1rem; }
         .anatomy-part-card { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 12px; padding: 1.5rem; cursor: pointer; transition: all 0.3s; backdrop-filter: blur(15px); }
         .anatomy-part-card:hover { border-color: var(--warm-gold); transform: translateX(4px); }
@@ -38,6 +44,7 @@
                 <a href="/#building-story">建筑故事</a>
                 <a href="/#achievement">项目成果</a>
                 <a href="/about">关于我们</a>
+                <a href="/admin">后台登录</a>
             </nav>
             <div class="header-right"><button class="header-btn" onclick="window.location.href='/map'">开始云游</button></div>
         </div>
@@ -71,11 +78,24 @@
                 <div class="anatomy-layout">
                     <div class="anatomy-preview">
                         <div class="anatomy-preview-box">
-                            <img class="anatomy-preview-img"
-                                 th:src="|https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=kaiping%20diaolou%20architecture%20cross%20section%20anatomy%20illustration%20golden%20hour&image_size=portrait_4_3|"
-                                 alt="建筑解剖图">
-                            <h3 style="color: var(--warm-gold); margin-bottom: 0.5rem;">碉楼构造示意图</h3>
-                            <p style="color: var(--text-muted); font-size: 0.9rem;">本图为示意图，3D模型素材就绪后将替换为可交互模型</p>
+                            <div class="anatomy-canvas-wrapper">
+                                <div id="anatomy-loading" class="anatomy-loading">
+                                    <div class="spinner"></div>
+                                    <p style="font-size: 0.85rem; margin: 0;">3D 模型加载中...</p>
+                                </div>
+                                <canvas id="anatomy-3d-canvas"></canvas>
+                                <!-- 无素材时显示的 Slot 占位符（MDL-05 / IMG-05） -->
+                                <div id="anatomy-slot-placeholder"
+                                     class="slot-placeholder"
+                                     style="display: none; position: absolute; inset: 0; border-radius: 12px; z-index: 5;">
+                                    <div class="slot-type-icon" id="anatomy-slot-icon">🧊</div>
+                                    <div class="slot-badge" id="anatomy-slot-badge">MDL-05</div>
+                                    <div class="slot-desc" id="anatomy-slot-desc">部位素材待填充</div>
+                                    <div class="slot-status" id="anatomy-slot-status">请在后台上传对应 Slot 的素材</div>
+                                </div>
+                            </div>
+                            <h3 style="color: var(--warm-gold); margin-bottom: 0.5rem;" id="anatomy-preview-title">碉楼部位3D展示</h3>
+                            <p style="color: var(--text-muted); font-size: 0.9rem;" id="anatomy-preview-hint">点击右侧部位卡片，查看该部位的3D模型</p>
                             <div id="anatomy-detail-box" style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--glass-border); display: none;">
                                 <h4 id="detail-name" style="color: var(--warm-gold);"></h4>
                                 <p id="detail-desc" style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 0.5rem;"></p>
@@ -84,11 +104,14 @@
                     </div>
 
                     <div class="anatomy-parts-list" th:if="${parts != null and !parts.isEmpty()}">
-                        <div th:each="part : ${parts}"
+                        <div th:each="part, iterStat : ${parts}"
                              class="anatomy-part-card"
                              th:data-id="${part.id}"
                              th:data-name="${part.partName}"
                              th:data-desc="${part.description}"
+                             th:data-part-index="${iterStat.count}"
+                             th:data-model-url="${modelUrls != null ? modelUrls[part.id] : null}"
+                             th:data-image-url="${imageUrls != null ? imageUrls[part.id] : null}"
                              onclick="selectPart(this)">
                             <div class="anatomy-part-header">
                                 <div>
@@ -138,7 +161,7 @@
         </div>
         <div class="footer-bottom">
             <p>技术支持：3D高斯泼溅技术(3DGS) · 腾讯云COS · AI语音合成</p>
-            <p style="margin-top: 0.5rem;">©\ 2024\ 侨韵薪火实践团\ 版权所有\ ·\ <a\ href="/admin/upload"\ style="color:\ var\(--text-muted\);\ font-size:\ 0\.78rem;\ text-decoration:\ none;">管理入口</a></p>
+            <p style="margin-top: 0.5rem;">© 2024 侨韵薪火实践团 版权所有 · <a href="/admin/upload" style="color: var(--text-muted); font-size: 0.78rem; text-decoration: none;">管理入口</a></p>
         </div>
     </footer>
 
@@ -148,10 +171,24 @@
         <div class="ai-guide-text">点击右侧建筑部位，AI将为您详细解读其功能与历史。</div>
         <div class="ai-guide-controls">
             <button class="ai-control-btn primary" onclick="playPageIntro()">播放介绍</button>
+            <button class="ai-control-btn" onclick="stopGuide()">停止讲解</button>
         </div>
     </div>
 
+    <!-- 引入 Three.js 和 OrbitControls（统一 r128 版本，与 building.html 保持一致） -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <!-- 统一 TTS 语音讲解工具（智能选声线 + 分段播放） -->
+    <script src="/js/qiaoyun-tts.js"></script>
+    <script src="/js/anatomy-3d.js"></script>
     <script>
+        /**
+         * 点击部位卡片：
+         * 1. 高亮卡片 + 更新详情区
+         * 2. 切换左侧 3D 模型
+         * 3. 调用后端 /api/ai/guide?type=anatomy&id={partId} 获取讲解文本
+         * 4. 用 QiaoyunTTS 播放（自动选最佳中文女声、分段播放、讲解预设语速）
+         */
         function selectPart(card) {
             document.querySelectorAll('.anatomy-part-card').forEach(c => c.classList.remove('active'));
             card.classList.add('active');
@@ -159,22 +196,61 @@
             document.getElementById('detail-name').textContent = card.dataset.name;
             document.getElementById('detail-desc').textContent = card.dataset.desc;
             box.style.display = 'block';
-            if (window.speechSynthesis) {
-                window.speechSynthesis.cancel();
-                const u = new SpeechSynthesisUtterance(card.dataset.name + '。' + card.dataset.desc);
-                u.lang = 'zh-CN'; u.rate = 0.95;
-                window.speechSynthesis.speak(u);
+            // 触发 3D 模型切换
+            if (window.loadAnatomyPart) {
+                var partIndex = parseInt(card.dataset.partIndex, 10) || 1;
+                window.loadAnatomyPart(card.dataset.modelUrl, card.dataset.imageUrl, card.dataset.name, partIndex);
+            }
+            // 同步更新标题与提示
+            var titleEl = document.getElementById('anatomy-preview-title');
+            var hintEl = document.getElementById('anatomy-preview-hint');
+            if (titleEl) titleEl.textContent = card.dataset.name + ' · 3D展示';
+            if (hintEl) hintEl.textContent = '可拖拽旋转查看，滚轮缩放';
+
+            // 调用后端 AI 讲解 API 获取结构化讲解文本，再用 TTS 播放
+            var partId = card.dataset.id;
+            if (partId && window.QiaoyunTTS) {
+                // 立即停止当前讲解
+                QiaoyunTTS.stop();
+                fetch('/api/ai/guide?type=anatomy&id=' + encodeURIComponent(partId))
+                    .then(function (r) { return r.json(); })
+                    .then(function (res) {
+                        if (res && res.data && res.data.audioText) {
+                            console.log('[Anatomy] AI讲解文本：', res.data.audioText);
+                            QiaoyunTTS.speakGuide(res.data.audioText);
+                        } else {
+                            // 接口失败，回退到本地拼装
+                            QiaoyunTTS.speakGuide(card.dataset.name + '。' + card.dataset.desc);
+                        }
+                    })
+                    .catch(function (err) {
+                        console.warn('[Anatomy] AI讲解接口异常，回退本地:', err);
+                        if (window.QiaoyunTTS) {
+                            QiaoyunTTS.speakGuide(card.dataset.name + '。' + card.dataset.desc);
+                        }
+                    });
             }
         }
-        function toggleAiGuide() { document.getElementById('ai-guide-panel').classList.toggle('active'); }
+        function toggleAiGuide() {
+            document.getElementById('ai-guide-panel').classList.toggle('active');
+            // 打开面板时，显示当前 TTS 声线信息
+            var textEl = document.querySelector('#ai-guide-panel .ai-guide-text');
+            if (textEl && window.QiaoyunTTS) {
+                var info = QiaoyunTTS.getVoiceInfo();
+                textEl.textContent = '当前讲解声线：' + info + '。点击右侧建筑部位，AI 将为您详细解读其功能与历史。';
+            }
+        }
         function playPageIntro() {
-            if (window.speechSynthesis) {
-                window.speechSynthesis.cancel();
-                const u = new SpeechSynthesisUtterance('欢迎来到建筑解剖互动模块。在这里，我们将百年碉楼拆解为屋顶、八角窗、燕子窝、青砖墙体、灰塑装饰等部位，逐一解读其功能、材料与建造年代。点击右侧任意部位卡片，即可聆听详细讲解。');
-                u.lang = 'zh-CN'; u.rate = 0.95;
-                window.speechSynthesis.speak(u);
+            if (window.QiaoyunTTS) {
+                QiaoyunTTS.speakGuide('欢迎来到建筑解剖互动模块。在这里，我们将百年碉楼拆解为屋顶、八角窗、燕子窝、青砖墙体、灰塑装饰等部位，逐一解读其功能、材料与建造年代。点击右侧任意部位卡片，即可查看3D模型并聆听详细讲解。');
+            }
+        }
+        function stopGuide() {
+            if (window.QiaoyunTTS) {
+                QiaoyunTTS.stop();
             }
         }
     </script>
+    <script src="/js/slot-placeholder.js"></script>
 </body>
 </html>

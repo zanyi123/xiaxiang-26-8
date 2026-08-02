@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="zh-CN">
 <head>
     <meta charset="UTF-8">
@@ -30,6 +30,7 @@
                 <a href="/#building-story">建筑故事</a>
                 <a href="/#achievement">项目成果</a>
                 <a href="/about">关于我们</a>
+                <a href="/admin">后台登录</a>
             </nav>
             <div class="header-right"><button class="header-btn" onclick="window.location.href='/map'">开始云游</button></div>
         </div>
@@ -64,9 +65,17 @@
                 <div class="qiaopi-grid" th:if="${qiaopiList != null and !qiaopiList.isEmpty()}">
                     <div class="qiaopi-card" th:each="item : ${qiaopiList}"
                          th:data-id="${item.id}" onclick="openQiaopi(this.dataset.id)">
-                        <img class="qiaopi-img"
-                             th:src="|https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=${item.title}%20qiaopi%20letter%20vintage%20chinese%20calligraphy%20sepia&image_size=landscape_4_3|"
+                        <img th:if="${qiaopiImageUrls != null and qiaopiImageUrls[item.id] != null}"
+                             class="qiaopi-img"
+                             th:src="${qiaopiImageUrls[item.id]}"
                              th:alt="${item.title}">
+                            <div th:unless="${qiaopiImageUrls != null and qiaopiImageUrls[item.id] != null}"
+                                 class="slot-placeholder slot-placeholder-small"
+                                 th:attr="data-slot-id=${'IMG-12-' + item.id}">
+                                <div class="slot-type-icon">🖼️</div>
+                                <div class="slot-badge" th:text="${'IMG-12-' + item.id}">IMG-12</div>
+                                <div class="slot-desc">待填充素材</div>
+                            </div>
                         <div class="qiaopi-body">
                             <h3 class="qiaopi-title" th:text="${item.title}">标题</h3>
                             <div class="qiaopi-meta">
@@ -129,5 +138,6 @@
             }
         }
     </script>
+    <script src="/js/slot-placeholder.js"></script>
 </body>
 </html>

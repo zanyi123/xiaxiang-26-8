@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="zh-CN">
 <head>
     <meta charset="UTF-8">
@@ -180,6 +180,7 @@
                 <a href="/#building-story">建筑故事</a>
                 <a href="/#achievement">项目成果</a>
                 <a href="/about">关于我们</a>
+                <a href="/admin">后台登录</a>
             </nav>
             <div class="header-right">
                 <button class="header-btn" onclick="window.location.href='/map'">开始云游</button>
@@ -213,8 +214,16 @@
 
                 <!-- 侨批图片 -->
                 <div class="qiaopi-detail-hero">
-                    <img th:src="|https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=${qiaopi.title}%20qiaopi%20letter%20vintage%20chinese%20calligraphy%20sepia&image_size=landscape_4_3|"
+                    <img th:if="${imageUrl != null and #strings.length(imageUrl) > 0}"
+                         th:src="${imageUrl}"
                          th:alt="${qiaopi.title}">
+                    <div th:unless="${imageUrl != null and #strings.length(imageUrl) > 0}"
+                         class="slot-placeholder"
+                         th:attr="data-slot-id=${'IMG-12-' + qiaopi.id}">
+                        <div class="slot-type-icon">🖼️</div>
+                        <div class="slot-badge" th:text="${'IMG-12-' + qiaopi.id}"></div>
+                        <div class="slot-desc" th:text="${qiaopi.title} + ' · 侨批扫描件待上传'"></div>
+                    </div>
                 </div>
 
                 <!-- 元信息 -->
@@ -279,8 +288,17 @@
                         <a th:each="other : ${otherQiaopi}"
                            class="related-card"
                            th:href="@{/qiaopi/{id}(id=${other.id})}">
-                            <img th:src="|https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=${other.title}%20qiaopi%20letter%20vintage%20chinese%20calligraphy%20sepia&image_size=landscape_4_3|"
+                            <img th:if="${imageUrls != null and imageUrls[other.id] != null}"
+                                 th:src="${imageUrls[other.id]}"
                                  th:alt="${other.title}" loading="lazy">
+                            <div th:unless="${imageUrls != null and imageUrls[other.id] != null}"
+                                 class="slot-placeholder slot-placeholder-small"
+                                 th:attr="data-slot-id=${'IMG-12-' + other.id}"
+                                 style="width: 100%; aspect-ratio: 4/3;">
+                                <div class="slot-type-icon">🖼️</div>
+                                <div class="slot-badge" th:text="${'IMG-12-' + other.id}"></div>
+                                <div class="slot-desc">待填充素材</div>
+                            </div>
                             <div class="related-body">
                                 <h3 class="related-title" th:text="${other.title}">相关侨批标题</h3>
                             </div>
@@ -352,5 +370,6 @@
             window.speechSynthesis.speak(utterance);
         }
     </script>
+    <script src="/js/slot-placeholder.js"></script>
 </body>
 </html>

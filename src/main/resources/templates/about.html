@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="zh-CN">
 <head>
     <meta charset="UTF-8">
@@ -21,6 +21,7 @@
                 <a href="/#building-story">建筑故事</a>
                 <a href="/#achievement">项目成果</a>
                 <a href="/about">关于我们</a>
+                <a href="/admin">后台登录</a>
             </nav>
             <div class="header-right">
                 <button class="header-btn" onclick="window.location.href='/map'">开始云游</button>
@@ -101,7 +102,17 @@
                 <div class="team-grid">
                     <div class="team-card" th:each="member : ${team}" th:if="${team != null and #lists.size(team) > 0}">
                         <div class="team-avatar">
-                            <div class="avatar-placeholder" th:text="${member.name != null ? member.name.charAt(0) : '?'}"></div>
+                            <img th:if="${teamAvatarUrls != null and teamAvatarUrls[member.id] != null}"
+                                 th:src="${teamAvatarUrls[member.id]}"
+                                 th:alt="${member.name}"
+                                 style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 3px solid var(--warm-gold);">
+                            <div th:unless="${teamAvatarUrls != null and teamAvatarUrls[member.id] != null}"
+                                 class="slot-placeholder slot-placeholder-small"
+                                 th:attr="data-slot-id=${'IMG-10-' + member.id}"
+                                 style="width: 100%; height: 100%; border-radius: 50%; padding: 0;">
+                                <div class="slot-type-icon" style="font-size: 1.2rem;">👤</div>
+                                <div class="slot-badge" th:text="${'IMG-10-' + member.id}" style="font-size: 0.55rem; margin-top: 2px;"></div>
+                            </div>
                         </div>
                         <div class="team-name" th:text="${member.name}"></div>
                         <div class="team-role" th:text="${member.role}"></div>
@@ -126,7 +137,12 @@
                          onclick="window.location.href='/blog/' + this.dataset.postId"
                          style="cursor: pointer;">
                         <div class="blog-image">
-                            <img th:src="${blogCoverUrls != null and blogCoverUrls[post.id] != null} ? ${blogCoverUrls[post.id]} : |https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=${post.title}%20qiaoxiang%20village%20summer%20practice%20team%20documentary%20warm%20golden%20hour&image_size=square|" alt="实践日志">
+                            <img th:if="${blogCoverUrls != null and blogCoverUrls[post.id] != null}" th:src="${blogCoverUrls[post.id]}" alt="实践日志">
+                            <div th:unless="${blogCoverUrls != null and blogCoverUrls[post.id] != null}" class="slot-placeholder" th:attr="data-slot-id=${'IMG-08-' + post.id}">
+                                <div class="slot-type-icon">🖼️</div>
+                                <div class="slot-badge" th:text="${'IMG-08-' + post.id}">IMG-08</div>
+                                <div class="slot-desc">待填充素材</div>
+                            </div>
                             <div class="blog-category" th:text="${post.category}"></div>
                         </div>
                         <div class="blog-content">
@@ -155,7 +171,12 @@
                 <div class="video-grid">
                     <div class="video-card" th:each="video : ${videos}" th:if="${videos != null and #lists.size(videos) > 0}" th:data-video-id="${video.id}" onclick="window.location.href='/video/' + this.dataset.videoId" style="cursor: pointer;">
                         <div class="video-thumbnail">
-                            <img th:src="${videoCoverUrls != null and videoCoverUrls[video.id] != null} ? ${videoCoverUrls[video.id]} : |https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=${video.title}%20kaiping%20qiaoxiang%20village%20cinematic%20documentary%20golden%20hour&image_size=square|" alt="视频封面">
+                            <img th:if="${videoCoverUrls != null and videoCoverUrls[video.id] != null}" th:src="${videoCoverUrls[video.id]}" alt="视频封面">
+                            <div th:unless="${videoCoverUrls != null and videoCoverUrls[video.id] != null}" class="slot-placeholder" th:attr="data-slot-id=${'IMG-09-' + video.id}">
+                                <div class="slot-type-icon">🖼️</div>
+                                <div class="slot-badge" th:text="${'IMG-09-' + video.id}">IMG-09</div>
+                                <div class="slot-desc">待填充素材</div>
+                            </div>
                             <div class="video-play-btn">▶</div>
                             <div class="video-duration" th:text="${video.duration}"></div>
                         </div>
@@ -312,5 +333,6 @@
             });
         }
     </script>
+    <script src="/js/slot-placeholder.js"></script>
 </body>
 </html>

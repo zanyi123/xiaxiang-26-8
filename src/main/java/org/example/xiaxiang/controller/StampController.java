@@ -3,6 +3,7 @@ package org.example.xiaxiang.controller;
 import lombok.extern.slf4j.Slf4j;
 import org.example.xiaxiang.common.Result;
 import org.example.xiaxiang.properties.AppProperties;
+import org.example.xiaxiang.service.CosService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -23,10 +24,16 @@ public class StampController {
     @Autowired
     private AppProperties appProperties;
 
+    @Autowired
+    private CosService cosService;
+
     @GetMapping("/stamps")
     public String stampsPage(Model model) {
         log.info("[StampController] 访问虚拟盖章页");
-        model.addAttribute("stamps", appProperties.getStamps());
+        List<AppProperties.StampItem> stamps = appProperties.getStamps();
+        model.addAttribute("stamps", stamps);
+        // 构建印章图标 URL Map（IMG-15）
+        model.addAttribute("imageUrls", cosService.buildUrlMap(stamps, AppProperties.StampItem::getId, AppProperties.StampItem::getImageKey));
         return "stamps";
     }
 

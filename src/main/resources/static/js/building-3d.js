@@ -45,52 +45,100 @@ function init3D() {
 }
 
 async function loadSplatModel() {
-    if (!window.modelUrl || modelUrl === '') {
-        console.warn('[3D] modelUrl 为空，显示示例场景');
-        showDemoScene();
+    var url = (typeof window.modelUrl !== 'undefined') ? window.modelUrl : '';
+    if (!url || url === '' || url === 'null') {
+        console.warn('[3D] modelUrl 为空，显示Slot占位符');
+        showSlotPlaceholder();
         return;
     }
 
-    console.log('[3D] 开始加载模型:', modelUrl);
+    console.log('[3D] 开始加载模型:', url);
+
+    // 先用 fetch 探测文件是否存在，避免 loader 直接报错
+    try {
+        var headResp = await fetch(url, { method: 'HEAD' });
+        if (!headResp.ok) {
+            console.warn('[3D] 模型文件不存在或不可访问:', headResp.status, url);
+            showSlotPlaceholder();
+            return;
+        }
+    } catch (e) {
+        console.warn('[3D] 探测模型文件失败:', e);
+        showSlotPlaceholder();
+        return;
+    }
+
+    // 尝试使用可用的 gsplat 加载器
+    var LoaderCtor = window.GSplatLoader || (THREE && THREE.GSplatLoader);
+    if (!LoaderCtor) {
+        console.warn('[3D] 未找到 GSplatLoader，无法解析 .splat 文件，显示Slot占位符');
+        showSlotPlaceholder();
+        return;
+    }
 
     try {
-        const loader = new THREE.GSplatLoader();
-
+        var loader = new LoaderCtor();
         loader.load(
-            modelUrl,
+            url,
             function (splat) {
                 console.log('[3D] 模型加载成功');
                 splatMesh = splat;
                 scene.add(splatMesh);
 
-                const box = new THREE.Box3().setFromObject(splatMesh);
-                const center = box.getCenter(new THREE.Vector3());
-                const size = box.getSize(new THREE.Vector3());
+                var box = new THREE.Box3().setFromObject(splatMesh);
+                var center = box.getCenter(new THREE.Vector3());
+                var size = box.getSize(new THREE.Vector3());
 
                 controls.target.copy(center);
 
-                const maxDim = Math.max(size.x, size.y, size.z);
+                var maxDim = Math.max(size.x, size.y, size.z);
                 camera.position.copy(center);
                 camera.position.z += maxDim * 2;
 
+                hideLoading();
                 animate();
             },
             function (xhr) {
-                const percent = Math.round((xhr.loaded / xhr.total) * 100);
-                console.log(`[3D] 模型加载进度: ${percent}%`);
+                var total = xhr.total || 0;
+                var percent = total > 0 ? Math.round((xhr.loaded / total) * 100) : 0;
+                console.log('[3D] 模型加载进度: ' + percent + '%');
             },
             function (err) {
                 console.error('[3D] 模型加载失败:', err);
-                showDemoScene();
+                showSlotPlaceholder();
             }
         );
     } catch (error) {
         console.error('[3D] 加载模型异常:', error);
-        showDemoScene();
+        showSlotPlaceholder();
     }
 }
 
-function showDemoScene() {
+/**
+ * 优先显示页面模板预置的 slot 占位符（带 MDL-xx-xx 编号徽章），
+ * 这样用户明确知道该绑哪个Slot到COS桶，不显示误导性的"示例场景立方体"。
+ * 若无占位符再降级显示示例场景。
+ */
+function showSlotPlaceholder() {
+    hideLoading();
+    var ph = document.getElementById('model-placeholder');
+    if (ph) {
+        ph.style.display = 'flex';
+        // 隐藏画布避免黑色背景覆盖占位符
+        var canvas = document.getElementById('3d-canvas');
+        if (canvas) canvas.style.visibility = 'hidden';
+    } else {
+        showDemoScene('暂无3D模型数据');
+    }
+}
+
+function hideLoading() {
+    var loading = document.getElementById('loading');
+    if (loading) loading.style.display = 'none';
+}
+
+function showDemoScene(msg) {
+    hideLoading();
     const geometry = new THREE.BoxGeometry(2, 2, 2);
     const material = new THREE.MeshPhongMaterial({
         color: 0xd4af37,
@@ -108,6 +156,17 @@ function showDemoScene() {
 
     controls.target.set(0, 0, 0);
     animate();
+
+    // 显示提示信息
+    if (msg) {
+        var canvasWrap = document.querySelector('.canvas-wrapper');
+        if (canvasWrap) {
+            var tip = document.createElement('div');
+            tip.style.cssText = 'position:absolute;bottom:1rem;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.7);color:#d4af37;padding:0.6rem 1.2rem;border-radius:8px;font-size:0.85rem;z-index:10;pointer-events:none;';
+            tip.textContent = msg;
+            canvasWrap.appendChild(tip);
+        }
+    }
 }
 
 function onWindowResize() {

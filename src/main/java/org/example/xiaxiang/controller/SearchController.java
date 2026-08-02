@@ -110,6 +110,23 @@ public class SearchController {
                     });
         }
 
+        if (appProperties.getArchives() != null) {
+            appProperties.getArchives().stream()
+                    .filter(a -> (a.getTitle() != null && a.getTitle().toLowerCase().contains(kw))
+                            || (a.getDescription() != null && a.getDescription().toLowerCase().contains(kw))
+                            || (a.getCategory() != null && a.getCategory().toLowerCase().contains(kw)))
+                    .forEach(a -> {
+                        Map<String, Object> item = new HashMap<>();
+                        item.put("type", "archive");
+                        item.put("id", a.getId());
+                        item.put("title", a.getTitle());
+                        item.put("description", a.getDescription());
+                        item.put("url", "/archive/" + a.getId());
+                        item.put("category", a.getCategory());
+                        items.add(item);
+                    });
+        }
+
         Map<String, Object> result = new HashMap<>();
         result.put("total", items.size());
         result.put("keyword", keyword);

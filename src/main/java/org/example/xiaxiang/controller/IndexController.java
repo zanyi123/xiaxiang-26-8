@@ -46,6 +46,7 @@ public class IndexController {
         model.addAttribute("blogPosts", appProperties.getBlogPosts());
         model.addAttribute("videos", appProperties.getVideos());
         model.addAttribute("team", appProperties.getTeam());
+        model.addAttribute("achievements", appProperties.getAchievements());
 
         // 素材 URL Map：key=对象 id, value=COS URL（mock 模式下为 /mock/xxx，真实模式为完整 COS URL）
         // 模板中可通过 ${coverUrls[id]} 访问，为 null 时回退到 AI 生成图

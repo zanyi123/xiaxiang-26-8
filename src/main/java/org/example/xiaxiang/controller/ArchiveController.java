@@ -25,6 +25,15 @@ public class ArchiveController {
         model.addAttribute("archives", appProperties.getArchives());
         model.addAttribute("timeline", appProperties.getTimeline());
         model.addAttribute("locations", appProperties.getLocations());
+        // 提取所有分类（去重），供前端筛选标签使用
+        List<String> categories = appProperties.getArchives() == null
+                ? Collections.emptyList()
+                : appProperties.getArchives().stream()
+                .map(AppProperties.ArchiveItem::getCategory)
+                .filter(c -> c != null && !c.isEmpty())
+                .distinct()
+                .collect(Collectors.toList());
+        model.addAttribute("categories", categories);
         return "archive";
     }
 

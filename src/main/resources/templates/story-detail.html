@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="zh-CN">
 <head>
     <meta charset="UTF-8">
@@ -20,6 +20,7 @@
                 <a href="/#building-story">建筑故事</a>
                 <a href="/#achievement">项目成果</a>
                 <a href="/about">关于我们</a>
+                <a href="/admin">后台登录</a>
             </nav>
             <div class="header-right">
                 <button class="header-btn" onclick="window.location.href='/map'">开始云游</button>
@@ -33,8 +34,19 @@
             <a href="/stories" class="detail-back back-link">← 返回侨乡故事</a>
 
             <!-- 封面大图 -->
-            <div class="detail-hero-image">
-                <img th:src="${coverUrl != null} ? ${coverUrl} : |https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=${story.title}%20traditional%20lingnan%20village%20story%20cinematic&image_size=square|" th:alt="${story.title}">
+            <div class="detail-hero-image" style="position: relative; overflow: hidden; border-radius: 16px; min-height: 320px; background: linear-gradient(135deg, rgba(26, 42, 74, 0.5), rgba(10, 10, 10, 0.8));">
+                <img th:if="${coverUrl != null and #strings.length(coverUrl) > 0}"
+                     th:src="${coverUrl}"
+                     th:alt="${story.title}"
+                     style="width: 100%; height: 100%; object-fit: cover; position: absolute; inset: 0;">
+                <div th:unless="${coverUrl != null and #strings.length(coverUrl) > 0}"
+                     class="slot-placeholder"
+                     style="position: absolute; inset: 0; border-radius: 16px;"
+                     th:attr="data-slot-id=${'IMG-04-' + story.id}">
+                    <div class="slot-type-icon">🖼️</div>
+                    <div class="slot-badge" th:text="${'IMG-04-' + story.id}"></div>
+                    <div class="slot-desc" th:text="${story.title} + ' · 封面图待填充'"></div>
+                </div>
                 <span class="detail-category-tag" th:text="${story.category}"></span>
             </div>
 
@@ -46,12 +58,21 @@
                 <span>👁️ <span th:text="${story.views}"></span> 次阅读</span>
             </div>
 
-            <!-- 音频播放按钮 -->
+            <!-- 音频播放按钮 + Slot状态（AUD-04-{id}） -->
             <div style="margin: 1.5rem 0;">
-                <button class="hero-btn-primary" id="play-audio-btn" onclick="playStoryAudio()">
-                    <span class="play-icon">▶</span>
-                    <span id="audio-btn-text">播放音频</span>
-                </button>
+                <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; margin-bottom: 0.5rem;">
+                    <button class="hero-btn-primary" id="play-audio-btn" onclick="playStoryAudio()" th:attr="data-audio-url=${audioUrl}">
+                        <span class="play-icon">▶</span>
+                        <span id="audio-btn-text">播放音频</span>
+                    </button>
+                    <span id="audio-source-tip" style="color: var(--text-muted); font-size: 0.82rem;"></span>
+                </div>
+                <!-- 音频未绑定的占位提示（与后台 AUD-04-{id} 对应） -->
+                <div th:if="${audioUrl == null or #strings.length(audioUrl) == 0}"
+                     style="display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.35rem 0.7rem; background: rgba(255, 193, 7, 0.15); border: 1px dashed rgba(255, 193, 7, 0.5); border-radius: 8px; color: #ffc107; font-size: 0.75rem;"
+                     th:attr="data-slot-id=${'AUD-04-' + story.id}">
+                    🎵 朗读音频 Slot: <strong th:text="${'AUD-04-' + story.id}"></strong> 待上传（当前使用浏览器AI语音合成）
+                </div>
             </div>
 
             <!-- 故事正文 -->
@@ -119,7 +140,7 @@
         </div>
         <div class="footer-bottom">
             <p>技术支持：3D高斯泼溅技术(3DGS) · 腾讯云COS · AI语音合成</p>
-            <p style="margin-top: 0.5rem;">©\ 2024\ 侨韵薪火实践团\ 版权所有\ ·\ <a\ href="/admin/upload"\ style="color:\ var\(--text-muted\);\ font-size:\ 0\.78rem;\ text-decoration:\ none;">管理入口</a></p>
+            <p style="margin-top: 0.5rem;">© 2024 侨韵薪火实践团 版权所有 · <a href="/admin/upload" style="color: var(--text-muted); font-size: 0.78rem; text-decoration: none;">管理入口</a></p>
         </div>
     </footer>
 
@@ -155,17 +176,81 @@
             speak(text);
         }
         let isPlaying = false;
-        function playStoryAudio() {
+        let currentAudio = null; // 真实音频 Audio 对象
+        function resetPlayButton() {
+            isPlaying = false;
             const btn = document.getElementById('play-audio-btn');
             const btnText = document.getElementById('audio-btn-text');
-            const playIcon = btn.querySelector('.play-icon');
-            if (isPlaying) {
+            const playIcon = btn ? btn.querySelector('.play-icon') : null;
+            if (btnText) btnText.textContent = '播放音频';
+            if (playIcon) playIcon.textContent = '▶';
+            const guideBtn = document.getElementById('ai-guide-btn');
+            if (guideBtn) guideBtn.classList.remove('playing');
+        }
+        function setPlayingState() {
+            isPlaying = true;
+            const btn = document.getElementById('play-audio-btn');
+            const btnText = document.getElementById('audio-btn-text');
+            const playIcon = btn ? btn.querySelector('.play-icon') : null;
+            if (btnText) btnText.textContent = '停止播放';
+            if (playIcon) playIcon.textContent = '■';
+            const guideBtn = document.getElementById('ai-guide-btn');
+            if (guideBtn) guideBtn.classList.add('playing');
+        }
+        function stopAllPlayback() {
+            if (currentAudio) {
+                currentAudio.pause();
+                currentAudio.currentTime = 0;
+                currentAudio = null;
+            }
+            if ('speechSynthesis' in window) {
                 window.speechSynthesis.cancel();
-                isPlaying = false;
-                if (btnText) btnText.textContent = '播放音频';
-                if (playIcon) playIcon.textContent = '▶';
+            }
+        }
+        function playStoryAudio() {
+            const btn = document.getElementById('play-audio-btn');
+            if (!btn) return;
+            // 正在播放则停止
+            if (isPlaying) {
+                stopAllPlayback();
+                resetPlayButton();
                 return;
             }
+            // 优先播放真实音频
+            var audioUrl = btn.getAttribute('data-audio-url');
+            if (audioUrl && audioUrl !== 'null' && audioUrl.trim() !== '') {
+                var tip = document.getElementById('audio-source-tip');
+                if (tip) tip.textContent = '🔊 正在播放真实录音';
+                stopAllPlayback();
+                currentAudio = new Audio(audioUrl);
+                setPlayingState();
+                currentAudio.onended = function() {
+                    currentAudio = null;
+                    resetPlayButton();
+                };
+                currentAudio.onerror = function() {
+                    currentAudio = null;
+                    resetPlayButton();
+                    var t = document.getElementById('audio-source-tip');
+                    if (t) t.textContent = '音频加载失败，已切换为语音合成';
+                    // 加载失败回退到 TTS
+                    playByTTS();
+                };
+                currentAudio.play().catch(function() {
+                    currentAudio = null;
+                    resetPlayButton();
+                    var t = document.getElementById('audio-source-tip');
+                    if (t) t.textContent = '音频播放失败，已切换为语音合成';
+                    playByTTS();
+                });
+                return;
+            }
+            // 没有真实音频，使用 TTS
+            var tip2 = document.getElementById('audio-source-tip');
+            if (tip2) tip2.textContent = '🗣️ 正在使用语音合成朗读';
+            playByTTS();
+        }
+        function playByTTS() {
             const contentEl = document.getElementById('story-content');
             if (!contentEl) return;
             const titleEl = document.querySelector('.detail-title');
@@ -177,27 +262,13 @@
                 alert('您的浏览器不支持语音合成功能');
                 return;
             }
-            window.speechSynthesis.cancel();
+            stopAllPlayback();
             const utterance = new SpeechSynthesisUtterance(text);
             utterance.lang = 'zh-CN';
             utterance.rate = 0.9;
-            isPlaying = true;
-            if (btnText) btnText.textContent = '停止播放';
-            if (playIcon) playIcon.textContent = '■';
-            const guideBtn = document.getElementById('ai-guide-btn');
-            guideBtn.classList.add('playing');
-            utterance.onend = () => {
-                isPlaying = false;
-                if (btnText) btnText.textContent = '播放音频';
-                if (playIcon) playIcon.textContent = '▶';
-                guideBtn.classList.remove('playing');
-            };
-            utterance.onerror = () => {
-                isPlaying = false;
-                if (btnText) btnText.textContent = '播放音频';
-                if (playIcon) playIcon.textContent = '▶';
-                guideBtn.classList.remove('playing');
-            };
+            setPlayingState();
+            utterance.onend = function() { resetPlayButton(); };
+            utterance.onerror = function() { resetPlayButton(); };
             window.speechSynthesis.speak(utterance);
         }
     </script>

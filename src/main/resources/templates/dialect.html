@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="zh-CN">
 <head>
     <meta charset="UTF-8">
@@ -31,6 +31,7 @@
                 <a href="/#building-story">建筑故事</a>
                 <a href="/#achievement">项目成果</a>
                 <a href="/about">关于我们</a>
+                <a href="/admin">后台登录</a>
             </nav>
             <div class="header-right"><button class="header-btn" onclick="window.location.href='/map'">开始云游</button></div>
         </div>
@@ -64,7 +65,21 @@
 
                 <div class="dialect-grid" th:if="${dialects != null and !dialects.isEmpty()}">
                     <div class="dialect-card" th:each="d : ${dialects}">
-                        <button class="dialect-play" th:data-example="${d.example}" th:data-dialect="${d.dialect}" onclick="playDialect(this)">🔊</button>
+                        <button class="dialect-play"
+                                th:data-example="${d.example}"
+                                th:data-dialect="${d.dialect}"
+                                th:data-audio-url="${audioUrls != null ? audioUrls[d.id] : null}"
+                                th:data-slot-id="${'AUD-13-' + d.id}"
+                                onclick="playDialect(this)">🔊</button>
+                        <!-- 未绑定真实录音时，显示 AUD-13 Slot 占位提示 -->
+                        <div th:if="${audioUrls == null or audioUrls[d.id] == null}"
+                             class="slot-placeholder slot-placeholder-small"
+                             th:attr="data-slot-id=${'AUD-13-' + d.id}"
+                             style="margin-bottom: 0.75rem; height: 56px; padding: 0.4rem 0.6rem;">
+                            <div class="slot-type-icon" style="font-size: 1rem;">🎵</div>
+                            <div class="slot-badge" th:text="${'AUD-13-' + d.id}" style="font-size: 0.65rem;"></div>
+                            <div class="slot-status" style="font-size: 0.62rem;">方言录音待上传（当前播放TTS合成）</div>
+                        </div>
                         <div class="dialect-chinese" th:text="${d.chinese}">中文</div>
                         <div class="dialect-word" th:text="${d.dialect}">方言</div>
                         <div class="dialect-pinyin" th:text="${d.pinyin}">拼音</div>
@@ -96,7 +111,7 @@
         </div>
         <div class="footer-bottom">
             <p>技术支持：3D高斯泼溅技术(3DGS) · 腾讯云COS · AI语音合成</p>
-            <p style="margin-top: 0.5rem;">©\ 2024\ 侨韵薪火实践团\ 版权所有\ ·\ <a\ href="/admin/upload"\ style="color:\ var\(--text-muted\);\ font-size:\ 0\.78rem;\ text-decoration:\ none;">管理入口</a></p>
+            <p style="margin-top: 0.5rem;">© 2024 侨韵薪火实践团 版权所有 · <a href="/admin/upload" style="color: var(--text-muted); font-size: 0.78rem; text-decoration: none;">管理入口</a></p>
         </div>
     </footer>
 
@@ -110,14 +125,54 @@
     </div>
 
     <script>
+        var dialectAudio = null; // 当前播放的真实音频
+        function stopDialectAudio() {
+            if (dialectAudio) {
+                dialectAudio.pause();
+                dialectAudio.currentTime = 0;
+                dialectAudio = null;
+            }
+            if (window.speechSynthesis) {
+                window.speechSynthesis.cancel();
+            }
+        }
         function playDialect(btn) {
+            // 优先播放真实录音
+            var audioUrl = btn.getAttribute('data-audio-url');
+            if (audioUrl && audioUrl !== 'null' && audioUrl.trim() !== '') {
+                stopDialectAudio();
+                dialectAudio = new Audio(audioUrl);
+                var originalIcon = btn.textContent;
+                btn.textContent = '⏸';
+                dialectAudio.onended = function() {
+                    dialectAudio = null;
+                    btn.textContent = originalIcon;
+                };
+                dialectAudio.onerror = function() {
+                    dialectAudio = null;
+                    btn.textContent = originalIcon;
+                    // 加载失败回退到 TTS
+                    playDialectByTTS(btn);
+                };
+                dialectAudio.play().catch(function() {
+                    dialectAudio = null;
+                    btn.textContent = originalIcon;
+                    playDialectByTTS(btn);
+                });
+                return;
+            }
+            // 无真实音频，使用 TTS
+            playDialectByTTS(btn);
+        }
+        function playDialectByTTS(btn) {
             if (!window.speechSynthesis) return;
-            window.speechSynthesis.cancel();
-            const text = btn.dataset.example;
-            const u = new SpeechSynthesisUtterance(text);
+            stopDialectAudio();
+            var text = btn.dataset.example || btn.dataset.dialect || '';
+            if (!text) return;
+            var u = new SpeechSynthesisUtterance(text);
             u.lang = 'yue-CN'; u.rate = 0.85;
-            const voices = window.speechSynthesis.getVoices();
-            const yue = voices.find(v => v.lang && v.lang.toLowerCase().includes('yue'));
+            var voices = window.speechSynthesis.getVoices();
+            var yue = voices.find(function(v) { return v.lang && v.lang.toLowerCase().indexOf('yue') >= 0; });
             if (yue) u.voice = yue;
             window.speechSynthesis.speak(u);
         }
@@ -125,11 +180,12 @@
         function playPageIntro() {
             if (window.speechSynthesis) {
                 window.speechSynthesis.cancel();
-                const u = new SpeechSynthesisUtterance('欢迎来到方言学习角。侨乡方言承载着浓厚的地域文化，开平话属粤语四邑片，独具特色。在这里，你可以学习返屋企、食饭、金山客、寄银等侨乡特有词汇。点击播放按钮，跟读学习。');
+                var u = new SpeechSynthesisUtterance('欢迎来到方言学习角。侨乡方言承载着浓厚的地域文化，开平话属粤语四邑片，独具特色。在这里，你可以学习返屋企、食饭、金山客、寄银等侨乡特有词汇。点击播放按钮，跟读学习。');
                 u.lang = 'zh-CN'; u.rate = 0.95;
                 window.speechSynthesis.speak(u);
             }
         }
     </script>
+    <script src="/js/slot-placeholder.js"></script>
 </body>
 </html>

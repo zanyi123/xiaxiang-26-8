@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="zh-CN">
 <head>
     <meta charset="UTF-8">
@@ -20,6 +20,7 @@
                 <a href="/#building-story">建筑故事</a>
                 <a href="/#achievement">项目成果</a>
                 <a href="/about">关于我们</a>
+                <a href="/admin">后台登录</a>
             </nav>
             <div class="header-right">
                 <button class="header-btn" onclick="window.location.href='/map'">开始云游</button>
@@ -37,20 +38,51 @@
 
                 <!-- 左栏：视频播放区与详情 -->
                 <div>
-                    <!-- 16:9 视频播放容器（占位：封面图 + 播放按钮 + 时长徽章） -->
+                    <!-- 16:9 视频播放容器 -->
                     <div class="video-player-wrapper" style="position: relative; width: 100%; padding-bottom: 56.25%; border-radius: 16px; overflow: hidden; background: #000; border: 1px solid var(--glass-border-light); box-shadow: 0 20px 60px rgba(0,0,0,0.5);">
-                        <!-- 真实视频文件存在时显示 video 元素，否则显示封面图占位 -->
-                        <video th:if="${videoUrl != null}" id="real-video-player" controls preload="metadata" th:poster="${coverUrl != null} ? ${coverUrl} : ''" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; background: #000;">
+                        <!-- 真实视频文件存在时显示 video 元素 -->
+                        <video th:if="${videoUrl != null and #strings.length(videoUrl) > 0}"
+                               id="real-video-player" controls preload="metadata"
+                               th:poster="${coverUrl != null and #strings.length(coverUrl) > 0} ? ${coverUrl} : ''"
+                               style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; background: #000;">
                             <source th:src="${videoUrl}" type="video/mp4">
                             您的浏览器不支持视频播放
                         </video>
-                        <img th:if="${videoUrl == null}" th:src="${coverUrl != null} ? ${coverUrl} : |https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=${video.title}%20kaiping%20qiaoxiang%20village%20cinematic%20documentary%20golden%20hour&image_size=square|" th:alt="${video.title}" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0.85;">
+
+                        <!-- 无真实视频：显示 VID-09 占位符（无封面则 IMG-09 封面在下面另行渲染） -->
+                        <div th:if="${videoUrl == null or #strings.length(videoUrl) == 0}"
+                             class="slot-placeholder"
+                             style="position: absolute; inset: 0; border-radius: 16px;"
+                             th:attr="data-slot-id=${'VID-09-' + video.id}">
+                            <div class="slot-type-icon">🎬</div>
+                            <div class="slot-badge" th:text="${'VID-09-' + video.id}"></div>
+                            <div class="slot-desc" th:text="${video.title} + ' · 视频文件待上传'"></div>
+                        </div>
 
                         <!-- 播放按钮覆盖层（仅当无真实视频时显示） -->
-                        <button th:if="${videoUrl == null}" class="video-play-btn" onclick="playVideo()" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 88px; height: 88px; border-radius: 50%; background: rgba(212, 175, 55, 0.9); border: none; color: #1a1a2e; font-size: 2rem; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 30px rgba(212, 175, 55, 0.5); transition: transform 0.3s ease, background 0.3s ease;">▶</button>
+                        <button th:if="${videoUrl == null or #strings.length(videoUrl) == 0}"
+                                class="video-play-btn" onclick="playVideo()"
+                                style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 88px; height: 88px; border-radius: 50%; background: rgba(212, 175, 55, 0.9); border: none; color: #1a1a2e; font-size: 2rem; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 30px rgba(212, 175, 55, 0.5); transition: transform 0.3s ease, background 0.3s ease;">▶</button>
 
                         <!-- 时长徽章 -->
                         <span class="video-duration" th:text="${video.duration}" style="position: absolute; bottom: 1rem; right: 1rem; padding: 0.35rem 0.85rem; background: rgba(0, 0, 0, 0.75); color: var(--warm-gold); font-size: 0.9rem; border-radius: 6px; backdrop-filter: blur(4px); z-index: 2;">00:00</span>
+                    </div>
+
+                    <!-- 视频封面（IMG-09-{id}）：单独一屏显示，确保和视频slot分离可见 -->
+                    <div style="margin-top: 1.5rem; position: relative; height: 220px; border-radius: 14px; overflow: hidden; border: 1px solid var(--glass-border); background: linear-gradient(135deg, rgba(26, 42, 74, 0.5), rgba(10, 10, 10, 0.8));">
+                        <img th:if="${coverUrl != null and #strings.length(coverUrl) > 0}"
+                             th:src="${coverUrl}"
+                             th:alt="${video.title}"
+                             style="width: 100%; height: 100%; object-fit: cover; position: absolute; inset: 0;">
+                        <div th:unless="${coverUrl != null and #strings.length(coverUrl) > 0}"
+                             class="slot-placeholder"
+                             style="position: absolute; inset: 0; border-radius: 14px;"
+                             th:attr="data-slot-id=${'IMG-09-' + video.id}">
+                            <div class="slot-type-icon">🖼️</div>
+                            <div class="slot-badge" th:text="${'IMG-09-' + video.id}"></div>
+                            <div class="slot-desc" th:text="${video.title} + ' · 封面图待填充'"></div>
+                        </div>
+                        <div style="position: absolute; bottom: 0; left: 0; right: 0; padding: 1rem; background: linear-gradient(transparent, rgba(0,0,0,0.85)); color: #fff; font-size: 0.85rem;">🖼️ 视频缩略封面（Slot: <span th:text="${'IMG-09-' + video.id}"></span>）</div>
                     </div>
 
                     <!-- 视频标题 -->
@@ -95,7 +127,14 @@
                     <div th:if="${otherVideos != null and #lists.size(otherVideos) > 0}" style="display: flex; flex-direction: column; gap: 1rem;">
                         <a th:each="other : ${otherVideos}" th:href="@{/video/{id}(id=${other.id})}" class="video-card" style="text-decoration: none; color: inherit; display: flex; gap: 0.85rem; padding: 0.75rem; background: var(--glass-bg); border: 1px solid var(--glass-border-light); border-radius: 12px; transition: transform 0.25s ease, border-color 0.25s ease;">
                             <div class="video-thumbnail" style="position: relative; flex: 0 0 130px; width: 130px; height: 80px; border-radius: 8px; overflow: hidden;">
-                                <img th:src="${coverUrls != null and coverUrls[other.id] != null} ? ${coverUrls[other.id]} : |https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=${other.title}%20kaiping%20qiaoxiang%20village%20cinematic%20documentary%20golden%20hour&image_size=square|" th:alt="${other.title}" loading="lazy" style="width: 100%; height: 100%; object-fit: cover;">
+                                <img th:if="${coverUrls != null and coverUrls[other.id] != null}" th:src="${coverUrls[other.id]}" th:alt="${other.title}" loading="lazy" style="width: 100%; height: 100%; object-fit: cover;">
+                                <div th:unless="${coverUrls != null and coverUrls[other.id] != null}"
+                                     class="slot-placeholder slot-placeholder-small"
+                                     th:attr="data-slot-id=${'IMG-09-' + other.id}"
+                                     style="width: 100%; height: 100%;">
+                                    <div class="slot-type-icon" style="font-size: 1rem;">🖼️</div>
+                                    <div class="slot-badge" th:text="${'IMG-09-' + other.id}" style="font-size: 0.6rem;"></div>
+                                </div>
                                 <span class="video-duration" th:text="${other.duration}" style="position: absolute; bottom: 4px; right: 4px; padding: 2px 6px; background: rgba(0,0,0,0.8); color: var(--warm-gold); font-size: 0.72rem; border-radius: 4px;">00:00</span>
                             </div>
                             <div class="video-info" style="flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: center;">
