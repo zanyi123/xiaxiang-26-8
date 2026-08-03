@@ -77,13 +77,11 @@ public class UploadController {
     }
 
     /**
-     * 写操作环境校验：dev 环境禁止所有对 COS / YAML 的写入，防止污染正式环境
+     * 写操作环境校验：所有环境（dev/prod）均允许写入 COS 和 YAML
+     * 本地开发和正式部署共用同一 COS 桶，绑定关系写入各自 application.yml
+     * 素材实时更新通过 YamlUpdater + Thymeleaf 重渲染实现
      */
     private Result<?> ensureProdForWrites() {
-        if (!appProperties.isProdEnv()) {
-            return Result.fail("当前为本地开发环境（app.env=dev），所有上传/绑定/删除等写入操作已禁用。"
-                    + "请在正式网站后台（prod环境）进行素材管理操作，或在本地 application.yml 中设置 app.env=prod（仅限临时调试）");
-        }
         return null;
     }
 

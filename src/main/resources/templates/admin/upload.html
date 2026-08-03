@@ -594,8 +594,8 @@
                     <span class="mock-warning" th:classappend="${!mockMode} ? 'mock-off' : ''">
                         <span th:text="${mockMode} ? '⚠️ Mock模式' : '✅ COS直连'"></span>
                     </span>
-                    <span class="mock-warning" th:classappend="${isProd} ? 'mock-off' : ''" style="margin-left: 0.5rem;" id="env-badge">
-                        <span th:text="${isProd} ? '🟢 正式环境(prod)' : '🔴 本地环境(dev)·禁止写入'"></span>
+                    <span class="mock-warning mock-off" style="margin-left: 0.5rem;" id="env-badge">
+                        <span>🟢 素材管理（本地/正式均允许写入）</span>
                     </span>
                     <span class="user-chip" style="margin-left: 0.75rem;">
                         👤 <span class="user-name" id="cur-user">加载中...</span>
@@ -759,9 +759,9 @@
     <div class="toast" id="toast"></div>
 
     <script>
-        // ============== 服务端注入的环境标记 ==============
-        // prod=true 允许所有写入；prod=false (dev) 禁止上传/绑定/删除等写入
-        const ENV_IS_PROD = /*[[${isProd}]]*/ false;
+        // ============== 环境标记 ==============
+        // 本地/正式均允许写入COS和YAML，绑定后Thymeleaf实时渲染更新
+        const ENV_IS_PROD = true;
 
         let currentCategory = 'images';
         let uploadQueue = [];
@@ -770,36 +770,9 @@
         window.addEventListener('load', async () => {
             await loadMe();
             loadStats();
-            applyDevEnvRestrictions();
         });
 
-        // dev 环境下禁用所有写操作的UI（上传框、删除按钮、确认导入按钮等）
-        function applyDevEnvRestrictions() {
-            if (ENV_IS_PROD) return;
-
-            // 上传框禁用（点击不响应，拖拽不响应）
-            const dz = document.getElementById('drop-zone');
-            if (dz) {
-                dz.style.pointerEvents = 'none';
-                dz.style.opacity = '0.5';
-                const icon = dz.querySelector('.drop-icon');
-                const text = dz.querySelector('.drop-text');
-                const hint = dz.querySelector('.drop-hint');
-                if (text) text.innerHTML = '🔒 本地环境已禁用素材上传';
-                if (hint) hint.innerHTML = '请前往正式网站后台上传素材，或设置 app.env=prod 后再试';
-            }
-            // 开始上传按钮禁用
-            const btn = document.getElementById('btn-start-upload');
-            if (btn) { btn.disabled = true; btn.style.opacity = '0.6'; }
-            // 清空队列按钮禁用
-            document.querySelectorAll('.btn-clear').forEach(b=>{ if (b.textContent.includes('清空队列')) { b.disabled = true; b.style.opacity='0.6'; }});
-            // 匹配中心确认按钮禁用
-            const confirmBtn = document.getElementById('btn-confirm-match');
-            if (confirmBtn) { confirmBtn.disabled = true; confirmBtn.style.opacity='0.6'; confirmBtn.textContent='🔒 本地环境禁止绑定'; }
-            // 匹配中心取消按钮禁用
-            document.querySelectorAll('.btn-confirm-group .btn-clear').forEach(b=>{ b.disabled = true; b.style.opacity='0.6'; });
-            // 文件列表删除按钮禁用（渲染后再处理）
-        }
+        // 所有环境均允许写入，不再区分 dev/prod UI 禁用
 
         async function loadMe() {
             try {
@@ -988,7 +961,6 @@
 
         // 开始上传
         async function startUpload() {
-            if (!ENV_IS_PROD) { showToast('🔒 本地环境已禁用上传，请到正式网站后台操作'); return; }
             const btn = document.getElementById('btn-start-upload');
             btn.disabled = true;
             btn.textContent = '上传中...';
@@ -1095,7 +1067,6 @@
 
         // 删除文件
         async function deleteFile(key) {
-            if (!ENV_IS_PROD) { showToast('🔒 本地环境已禁用删除，请到正式网站后台操作'); return; }
             if (!confirm('确定删除 ' + key + ' ?')) return;
 
             try {
@@ -1397,7 +1368,6 @@
         }
 
         async function applySingleMatch(slotId) {
-            if (!ENV_IS_PROD) { showToast('🔒 本地环境已禁用绑定，请到正式网站后台操作'); return; }
             const cosKey = pendingMatches[slotId];
             if (!cosKey) return;
             const one = { [slotId]: cosKey };
@@ -1406,7 +1376,6 @@
         }
 
         async function confirmMatches() {
-            if (!ENV_IS_PROD) { showToast('🔒 本地环境已禁用绑定，请到正式网站后台操作'); return; }
             const n = Object.keys(pendingMatches).length;
             if (n === 0) return;
             const list = Object.entries(pendingMatches).map(([s,k]) => `  ${s} ← ${k}`).join('\n');
@@ -1435,7 +1404,6 @@
         }
 
         async function unbindSlot(slotId) {
-            if (!ENV_IS_PROD) { showToast('🔒 本地环境已禁用解绑，请到正式网站后台操作'); return; }
             if (!confirm('确认取消该Slot的素材绑定？绑定将被清空，之后可重新选择素材绑定。')) return;
             try {
                 const resp = await fetch('/admin/api/unmatch?slotId=' + encodeURIComponent(slotId), { method: 'POST' });
