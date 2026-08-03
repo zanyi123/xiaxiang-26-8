@@ -34,6 +34,26 @@ cos:
   region: ap-guangzhou
   bucket-name: qiaoyun-2026-gdut-100050675333-1453696876
 
+# ========== 后台账号系统 ==========
+admin:
+  session-timeout-minutes: 480
+  users:
+    - username: "huangkunshui001"
+      password: "Sanxiaxiang1"
+      role: "ADMIN"
+      name: "黄坤水"
+      description: "项目负责人"
+    - username: "zanyi123"
+      password: "Xiaxiang2026"
+      role: "ADMIN"
+      name: "管理员"
+      description: "系统管理员"
+    - username: "volunteer01"
+      password: "volunteer123"
+      role: "VOLUNTEER"
+      name: "实践同学A"
+      description: "暑期实践志愿者"
+
 # ========== 应用配置 ==========
 # 默认 prod（安全），本地 dev 通过 profile 覆盖
 app:
