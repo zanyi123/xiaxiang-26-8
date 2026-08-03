@@ -362,3 +362,57 @@ java -jar target/xiaxiang-building-tour.jar
 1. 3D模型加载三级fallback改为：3D模型→部位图片→**DOM Slot占位符**（不再用示例立方体）
 2. 所有列表页/详情页禁止使用AI生成图作为fallback
 3. 服务器部署通过环境变量注入密钥，不再依赖手动上传配置文件
+
+---
+
+## 十二、环境隔离缺陷修复 + 服务器部署排障（2026-08-03）
+
+### 12.1 问题：服务器后台显示"本地环境"导致无法绑定素材
+
+**根因**：`application-local.yml` 原本放在 `src/main/resources/` 目录，Maven 打包时被压缩进 jar 内部。Spring Boot 加载顺序为 classpath > file，jar 内的 `application-local.yml`（env: dev）覆盖了 `application.yml`（env: prod），导致服务器上始终识别为 dev 环境。
+
+**修复链路**：
+1. 从 `src/main/resources/` 删除 `application-local.yml`，移到项目根目录（jar 外部）
+2. `application.yml` 的 `spring.config.import` 改为 `optional:file:./application-local.yml`（仅从 jar 外部加载）
+3. `app.env` 改为 `${APP_ENV:prod}`，支持环境变量和启动参数覆盖
+4. COS 密钥改为 `${COS_SECRET_ID:${cos-secret-id:}}` 嵌套占位符，支持环境变量和 application-local.yml 双通道注入
+
+**涉及文件**：
+- [application.yml](file:///d:/JAVA/xiaxiang/src/main/resources/application.yml) — env 改为 `${APP_ENV:prod}`，密钥改为嵌套占位符
+- [application-local.yml](file:///d:/JAVA/xiaxiang/application-local.yml) — 从 resources 移到项目根目录
+- [.gitignore](file:///d:/JAVA/xiaxiang/.gitignore) — 忽略根目录的 application-local.yml
+
+### 12.2 环境判断优先级设计（理论验证）
+
+| 优先级 | 来源 | 本地开发 | 服务器 |
+|--------|------|---------|--------|
+| 1 | `--app.env=prod` 启动参数 | 不传 | 可选兜底 |
+| 2 | `APP_ENV` 环境变量 | 不设 | 不设 |
+| 3 | `application-local.yml` | dev | prod |
+| 4 | `application.yml` 默认值 | `${APP_ENV:prod}` | `${APP_ENV:prod}` |
+| 5 | AppProperties.java 兜底 | dev | dev |
+
+- 本地 IDEA 运行：加载根目录 `application-local.yml`（dev）→ 禁止写入 ✅
+- 服务器 `cd /opt/xiaxiang && java -jar xxx.jar`：加载 jar 同级 `application-local.yml`（prod）→ 允许写入 ✅
+- 服务器任意目录 `--app.env=prod`：启动参数强制 prod ✅
+- 配置缺失时 CosConfig FAIL FAST，不会静默运行 ✅
+
+### 12.3 服务器 Nginx 反向代理修复
+
+**问题**：域名 `xinhuoqiaoyun.online`（80端口）访问后台报连接超时，但 `IP:8080` 能打开。
+
+**根因**：宝塔面板的 Nginx 站点配置（`/www/server/panel/vhost/nginx/xinhuoqiaoyun.online.conf`）只有静态文件 root 指向，没有 `proxy_pass` 到 8080。
+
+**修复**：重写站点配置，将 `location /` 改为 `proxy_pass http://127.0.0.1:8080`，保留 SSL 验证目录和宝塔扩展配置。Nginx 进程挂掉后用 `/www/server/nginx/sbin/nginx` 直接启动（绕过 systemctl）。
+
+### 12.4 服务器启动命令规范
+
+```bash
+# 标准启动（在项目目录下执行，application-local.yml 自动加载）
+cd /opt/xiaxiang
+nohup java -jar xiaxiang-building-tour-1.0-SNAPSHOT.jar > app.log 2>&1 &
+echo $! > app.pid
+
+# 兜底启动（任意目录，用启动参数强制 prod）
+nohup java -jar /opt/xiaxiang/xiaxiang-building-tour-1.0-SNAPSHOT.jar --app.env=prod > /opt/xiaxiang/app.log 2>&1 &
+```
