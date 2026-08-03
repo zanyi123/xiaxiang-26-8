@@ -119,7 +119,7 @@ public class CosService {
         if (building == null) {
             throw new BusinessException("建筑不存在：ID=" + buildingId);
         }
-        return getFileUrl(building.getModelKey());
+        return getUrlSafely(building.getModelKey());
     }
 
     /**
@@ -130,7 +130,7 @@ public class CosService {
         if (building == null) {
             throw new BusinessException("建筑不存在：ID=" + buildingId);
         }
-        return getFileUrl(building.getVideoKey());
+        return getUrlSafely(building.getVideoKey());
     }
 
     /**
@@ -141,7 +141,7 @@ public class CosService {
         if (building == null) {
             throw new BusinessException("建筑不存在：ID=" + buildingId);
         }
-        return getFileUrl(building.getCoverImage());
+        return getUrlSafely(building.getCoverImage());
     }
 
     /**
@@ -190,7 +190,7 @@ public class CosService {
         if (location == null) {
             throw new BusinessException("地点不存在：ID=" + locationId);
         }
-        return getFileUrl(location.getModelKey());
+        return getUrlSafely(location.getModelKey());
     }
 
     /**
@@ -201,7 +201,7 @@ public class CosService {
         if (location == null) {
             throw new BusinessException("地点不存在：ID=" + locationId);
         }
-        return getFileUrl(location.getImageKey());
+        return getUrlSafely(location.getImageKey());
     }
 
     /**
