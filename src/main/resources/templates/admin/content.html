@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>内容管理 - 薪火侨乡</title>
+    <link rel="stylesheet" href="/css/qiaoyun.css">
+    <style>
+        * { box-sizing: border-box; }
+        body { background: var(--bg-dark); color: var(--text-primary); min-height: 100vh; }
+
+        .admin-container { max-width: 1200px; margin: 0 auto; padding: 5rem 1.5rem 2rem; }
+
+        /* 顶部 */
+        .admin-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 1.25rem; padding-bottom: 1rem;
+            border-bottom: 1px solid var(--glass-border);
+        }
+        .admin-header h1 { color: var(--warm-gold); font-size: 1.4rem; letter-spacing: 2px; margin: 0; }
+        .admin-header .nav-links { display: flex; gap: 0.5rem; align-items: center; }
+        .admin-header .nav-links a {
+            padding: 0.35rem 0.75rem; font-size: 0.8rem;
+            color: var(--text-secondary); text-decoration: none;
+            border: 1px solid var(--glass-border); border-radius: 8px;
+            transition: all 0.2s;
+        }
+        .admin-header .nav-links a:hover { color: var(--warm-gold); border-color: var(--warm-gold); }
+        .admin-header .nav-links a.active { background: rgba(212,175,55,0.15); color: var(--warm-gold); }
+        .user-chip {
+            display: inline-flex; align-items: center; gap: 0.5rem;
+            padding: 0.35rem 0.65rem;
+            background: var(--glass-bg); border: 1px solid var(--glass-border);
+            border-radius: 20px; font-size: 0.78rem; color: var(--text-secondary);
+        }
+        .user-chip .user-name { color: var(--warm-gold); font-weight: 600; }
+
+        /* 模块选择栏 */
+        .module-bar {
+            display: flex; flex-wrap: wrap; gap: 0.4rem;
+            margin-bottom: 1rem;
+        }
+        .module-btn {
+            padding: 0.5rem 0.9rem;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 10px;
+            color: var(--text-secondary);
+            cursor: pointer; font-size: 0.82rem;
+            transition: all 0.2s;
+            display: flex; align-items: center; gap: 0.35rem;
+        }
+        .module-btn:hover { color: var(--text-primary); border-color: rgba(212,175,55,0.4); }
+        .module-btn.active {
+            background: rgba(212,175,55,0.15);
+            border-color: var(--warm-gold);
+            color: var(--warm-gold); font-weight: 600;
+        }
+        .module-btn .count-badge {
+            padding: 0.1rem 0.35rem;
+            background: rgba(212,175,55,0.12);
+            border-radius: 5px; font-size: 0.68rem;
+            color: var(--warm-gold);
+        }
+
+        /* 内容区 */
+        .content-area {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 14px;
+            padding: 1.25rem;
+            min-height: 500px;
+        }
+
+        /* 单元列表 */
+        .item-list { display: flex; flex-direction: column; gap: 0.5rem; }
+        .item-card {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0.75rem 1rem;
+            background: rgba(0,0,0,0.2);
+            border: 1px solid var(--glass-border);
+            border-radius: 10px;
+            transition: all 0.2s;
+        }
+        .item-card:hover { border-color: rgba(212,175,55,0.35); }
+        .item-card .item-info { flex: 1; min-width: 0; }
+        .item-card .item-id {
+            font-family: monospace; font-size: 0.72rem;
+            color: var(--text-muted); margin-right: 0.5rem;
+        }
+        .item-card .item-title {
+            font-size: 0.9rem; color: var(--text-primary);
+            font-weight: 500;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .item-card .item-meta {
+            font-size: 0.72rem; color: var(--text-muted); margin-top: 0.2rem;
+        }
+        .item-card .item-actions { display: flex; gap: 0.35rem; margin-left: 0.75rem; }
+        .btn-action {
+            padding: 0.3rem 0.6rem; font-size: 0.75rem;
+            border: 1px solid var(--glass-border); border-radius: 8px;
+            background: transparent; color: var(--text-secondary);
+            cursor: pointer; transition: all 0.2s;
+        }
+        .btn-action:hover { color: var(--warm-gold); border-color: var(--warm-gold); }
+        .btn-action.btn-danger:hover { color: #ef9a9a; border-color: #ef9a9a; }
+
+        /* 新增按钮 */
+        .btn-add {
+            padding: 0.6rem 1.2rem;
+            background: rgba(212,175,55,0.15);
+            border: 1px solid var(--warm-gold);
+            border-radius: 10px;
+            color: var(--warm-gold); font-weight: 600;
+            font-size: 0.85rem; cursor: pointer;
+            transition: all 0.2s;
+            margin-bottom: 0.75rem;
+        }
+        .btn-add:hover { background: rgba(212,175,55,0.25); }
+
+        /* 弹窗 */
+        .modal-overlay {
+            display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.6); z-index: 1000;
+            justify-content: center; align-items: flex-start;
+            padding-top: 5vh;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal {
+            background: #1a1a2e; border: 1px solid var(--glass-border);
+            border-radius: 14px; padding: 1.5rem;
+            width: 90%; max-width: 600px; max-height: 85vh; overflow-y: auto;
+        }
+        .modal h2 { color: var(--warm-gold); font-size: 1.1rem; margin: 0 0 1rem; }
+        .modal .form-group { margin-bottom: 0.85rem; }
+        .modal .form-group label {
+            display: block; font-size: 0.78rem; color: var(--text-secondary);
+            margin-bottom: 0.3rem;
+        }
+        .modal .form-group label .required { color: #ef9a9a; }
+        .modal input[type="text"], .modal textarea, .modal select {
+            width: 100%; padding: 0.5rem 0.7rem;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid var(--glass-border);
+            border-radius: 8px;
+            color: var(--text-primary); font-size: 0.85rem;
+            font-family: inherit;
+        }
+        .modal input:focus, .modal textarea:focus, .modal select:focus {
+            outline: none; border-color: var(--warm-gold);
+        }
+        .modal textarea { min-height: 80px; resize: vertical; }
+        .modal .modal-actions {
+            display: flex; gap: 0.5rem; justify-content: flex-end;
+            margin-top: 1.25rem; padding-top: 1rem;
+            border-top: 1px solid var(--glass-border);
+        }
+        .modal .btn-cancel {
+            padding: 0.5rem 1rem; font-size: 0.82rem;
+            border: 1px solid var(--glass-border); border-radius: 8px;
+            background: transparent; color: var(--text-secondary);
+            cursor: pointer;
+        }
+        .modal .btn-cancel:hover { color: var(--text-primary); }
+        .modal .btn-save {
+            padding: 0.5rem 1.2rem; font-size: 0.82rem;
+            border: 1px solid var(--warm-gold); border-radius: 8px;
+            background: rgba(212,175,55,0.15); color: var(--warm-gold);
+            font-weight: 600; cursor: pointer;
+        }
+        .modal .btn-save:hover { background: rgba(212,175,55,0.25); }
+
+        /* 提示信息 */
+        .toast {
+            position: fixed; top: 20px; right: 20px; z-index: 2000;
+            padding: 0.75rem 1.25rem;
+            border-radius: 10px; font-size: 0.85rem;
+            opacity: 0; transform: translateX(100px);
+            transition: all 0.3s;
+        }
+        .toast.show { opacity: 1; transform: translateX(0); }
+        .toast.success { background: rgba(76,175,80,0.2); border: 1px solid #4CAF50; color: #81C784; }
+        .toast.error { background: rgba(244,67,54,0.2); border: 1px solid #f44336; color: #ef9a9a; }
+
+        /* 空状态 */
+        .empty-state {
+            text-align: center; padding: 3rem 1rem;
+            color: var(--text-muted); font-size: 0.85rem;
+        }
+
+        /* Slot 编号展示 */
+        .slot-info {
+            padding: 0.5rem 0.75rem;
+            background: rgba(212,175,55,0.08);
+            border: 1px dashed rgba(212,175,55,0.3);
+            border-radius: 8px;
+            margin-top: 0.5rem;
+            font-size: 0.72rem; color: var(--warm-gold);
+            font-family: monospace;
+        }
+        .slot-badge {
+            display: inline-block;
+            padding: 0.15rem 0.4rem;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 0.68rem;
+            margin-right: 0.25rem;
+        }
+        .slot-badge.filled {
+            background: rgba(76,175,80,0.15);
+            border: 1px solid rgba(76,175,80,0.4);
+            color: #81C784;
+        }
+        .slot-badge.empty {
+            background: rgba(244,67,54,0.1);
+            border: 1px solid rgba(244,67,54,0.25);
+            color: #ef9a9a;
+        }
+        .slot-badge.empty::after { content: " (空)"; }
+        .verify-panel {
+            display: none;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid var(--glass-border);
+            border-radius: 10px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+        .verify-panel.active { display: block; }
+        .verify-summary {
+            display: flex; gap: 1rem; margin-bottom: 0.75rem;
+            font-size: 0.82rem;
+        }
+        .verify-summary .stat {
+            padding: 0.4rem 0.8rem;
+            border-radius: 8px;
+            background: rgba(0,0,0,0.25);
+        }
+        .verify-summary .stat-filled { color: #81C784; }
+        .verify-summary .stat-empty { color: #ef9a9a; }
+        .verify-table {
+            width: 100%; font-size: 0.78rem;
+            border-collapse: collapse;
+        }
+        .verify-table th, .verify-table td {
+            padding: 0.35rem 0.5rem;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            text-align: left;
+        }
+        .verify-table th { color: var(--text-muted); font-weight: 600; }
+        .verify-table .slot-id-cell { font-family: monospace; color: var(--warm-gold); }
+        .verify-table .status-yes { color: #81C784; }
+        .verify-table .status-no { color: #ef9a9a; }
+        .delete-warning {
+            padding: 0.6rem 0.8rem;
+            background: rgba(244,67,54,0.1);
+            border: 1px solid rgba(244,67,54,0.3);
+            border-radius: 8px;
+            font-size: 0.8rem;
+            color: #ef9a9a;
+            margin: 0.5rem 0;
+        }
+        .delete-warning .bound-file {
+            font-family: monospace; font-size: 0.72rem;
+            color: var(--warm-gold); margin-left: 0.3rem;
+        }
+    </style>
+</head>
+<body>
+<div class="admin-container">
+    <!-- 顶部 -->
+    <div class="admin-header">
+        <h1>内容管理</h1>
+        <div class="nav-links">
+            <a href="/admin/upload">素材上传</a>
+            <a href="/admin/content" class="active">内容管理</a>
+            <a href="/sitemap">网站导览</a>
+            <span class="user-chip">
+                <span th:text="${user.name}">用户</span>
+                <a href="/admin/login" style="padding:0.2rem 0.5rem;font-size:0.72rem;color:#ef9a9a;">退出</a>
+            </span>
+        </div>
+    </div>
+
+    <!-- 模块选择栏 -->
+    <div class="module-bar" id="moduleBar">
+        <!-- JS 动态生成 -->
+    </div>
+
+    <!-- 内容区 -->
+    <div class="content-area">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem;">
+            <h2 id="currentModuleName" style="color:var(--warm-gold);font-size:1rem;margin:0;">请选择专栏</h2>
+            <div style="display:flex;gap:0.5rem;">
+                <button class="btn-add" id="btnVerify" style="display:none;background:rgba(100,149,237,0.15);border-color:#6495ED;color:#6495EF;" onclick="toggleVerify()">素材编号校对</button>
+                <button class="btn-add" id="btnAdd" style="display:none;" onclick="openCreateModal()">+ 新增单元</button>
+            </div>
+        </div>
+
+        <!-- 校对面板 -->
+        <div class="verify-panel" id="verifyPanel">
+            <div class="verify-summary" id="verifySummary"></div>
+            <table class="verify-table" id="verifyTable"></table>
+        </div>
+
+        <div class="item-list" id="itemList">
+            <div class="empty-state">选择上方专栏模块开始管理内容</div>
+        </div>
+    </div>
+</div>
+
+<!-- 新增/编辑弹窗 -->
+<div class="modal-overlay" id="modalOverlay">
+    <div class="modal">
+        <h2 id="modalTitle">新增单元</h2>
+        <form id="contentForm" onsubmit="return false;">
+            <div id="formFields"></div>
+            <div id="slotPreview" style="display:none;" class="slot-info"></div>
+            <div class="modal-actions">
+                <button class="btn-cancel" onclick="closeModal()">取消</button>
+                <button class="btn-save" id="btnSave" onclick="saveItem()">保存</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- 提示 -->
+<div class="toast" id="toast"></div>
+
+<script>
+    let modules = [];
+    let currentModule = null;
+    let editingId = null;
+
+    // ================ 初始化 ================
+    async function init() {
+        const resp = await fetch('/admin/api/content/modules');
+        const data = await resp.json();
+        modules = data.data || [];
+        renderModuleBar();
+    }
+
+    function renderModuleBar() {
+        const bar = document.getElementById('moduleBar');
+        bar.innerHTML = modules.map(m => `
+            <div class="module-btn" onclick="selectModule('${m.key}')">
+                <span>${m.name}</span>
+            </div>
+        `).join('');
+    }
+
+    // ================ 选择模块 ================
+    async function selectModule(key) {
+        currentModule = modules.find(m => m.key === key);
+        if (!currentModule) return;
+
+        // 更新按钮状态
+        document.querySelectorAll('.module-btn').forEach((btn, i) => {
+            btn.classList.toggle('active', modules[i].key === key);
+        });
+
+        document.getElementById('currentModuleName').textContent = currentModule.name;
+        document.getElementById('btnAdd').style.display = 'inline-block';
+        document.getElementById('btnVerify').style.display = 'inline-block';
+        document.getElementById('verifyPanel').classList.remove('active');
+
+        await loadItems(key);
+    }
+
+    async function loadItems(key) {
+        const resp = await fetch(`/admin/api/content/${key}/items`);
+        const data = await resp.json();
+        const items = data.data || [];
+        renderItems(items);
+    }
+
+    function renderItems(items) {
+        const list = document.getElementById('itemList');
+        if (items.length === 0) {
+            list.innerHTML = '<div class="empty-state">暂无内容，点击"新增单元"创建</div>';
+            return;
+        }
+        list.innerHTML = items.map(item => {
+            const title = item.title || item.name || item.partName || item.chinese || ('单元 #' + item.id);
+            const meta = Object.entries(item)
+                .filter(([k]) => !['id','content','translation','bio','description','summary','slotIds','slotDetails','hasMaterials'].includes(k))
+                .filter(([k,v]) => v && v !== '' && v !== 0)
+                .slice(0, 3)
+                .map(([k,v]) => `${k}: ${v}`)
+                .join(' · ');
+
+            // 仅当 hasMaterials 不为 false 时渲染 Slot 编号
+            const hasMaterials = item.hasMaterials !== false && item.hasMaterials !== 'false';
+            const slotBadges = hasMaterials ? (item.slotDetails || []).map(sd => {
+                const cls = sd.filled ? 'filled' : 'empty';
+                return `<span class="slot-badge ${cls}" title="${sd.assignedFile || '未绑定'}">${sd.slotId}</span>`;
+            }).join('') : '';
+
+            // 预览按钮
+            const previewUrl = getPreviewUrl(item);
+            const previewBtn = previewUrl
+                ? `<button class="btn-action" onclick="window.open('${previewUrl}', '_blank')">预览</button>`
+                : '';
+
+            return `
+                <div class="item-card">
+                    <div class="item-info">
+                        <span class="item-id">#${item.id}</span>
+                        <span class="item-title">${escapeHtml(title)}</span>
+                        <div class="item-meta">${escapeHtml(meta)}</div>
+                        ${slotBadges ? `<div style="margin-top:0.3rem;">${slotBadges}</div>` : ''}
+                        ${!hasMaterials ? '<div style="margin-top:0.2rem;font-size:0.68rem;color:var(--text-muted);">(纯文本单元，无素材模板)</div>' : ''}
+                    </div>
+                    <div class="item-actions">
+                        ${previewBtn}
+                        <button class="btn-action" onclick="openEditModal(${item.id})">编辑</button>
+                        <button class="btn-action btn-danger" onclick="checkDelete(${item.id})">删除</button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    // 根据模块和单元生成前端预览URL
+    function getPreviewUrl(item) {
+        if (!currentModule) return null;
+        const key = currentModule.key;
+        const id = item.id;
+        switch (key) {
+            case 'stories': return `/story/${id}`;
+            case 'qiaopi': return `/qiaopi/${id}`;
+            case 'knowledge': return `/knowledge/${id}`;
+            case 'cultures': return '/sitemap'; // 列表页
+            case 'blogPosts': return '/blog/' + id;
+            case 'videos': return '/video/' + id;
+            case 'anatomies': return '/anatomy';
+            case 'photoCompares': return '/photo-compare';
+            case 'team': return '/about';
+            case 'dialects': return '/dialect';
+            case 'archives': return '/archive';
+            default: return null;
+        }
+    }
+
+    // ================ 素材编号校对 ================
+    let verifyPanelOpen = false;
+
+    async function toggleVerify() {
+        verifyPanelOpen = !verifyPanelOpen;
+        const panel = document.getElementById('verifyPanel');
+        if (verifyPanelOpen) {
+            panel.classList.add('active');
+            await loadVerifyData(currentModule.key);
+        } else {
+            panel.classList.remove('active');
+        }
+    }
+
+    async function loadVerifyData(key) {
+        const resp = await fetch(`/admin/api/content/${key}/verify`);
+        const data = await resp.json();
+        if (!data.success) { showToast(data.message || '校对失败', 'error'); return; }
+        const v = data.data;
+
+        // 汇总
+        document.getElementById('verifySummary').innerHTML = `
+            <div class="stat">模块: <strong style="color:var(--warm-gold);">${v.module}</strong></div>
+            <div class="stat">单元数: <strong>${v.unitCount}</strong></div>
+            <div class="stat">素材位: <strong>${v.slotCount}</strong></div>
+            <div class="stat stat-filled">已填充: <strong>${v.filledCount}</strong></div>
+            <div class="stat stat-empty">空缺: <strong>${v.emptyCount}</strong></div>
+        `;
+
+        // 表格
+        const slots = v.slots || [];
+        if (slots.length === 0) {
+            document.getElementById('verifyTable').innerHTML = '<tr><td style="color:var(--text-muted);">该模块无素材位</td></tr>';
+            return;
+        }
+        document.getElementById('verifyTable').innerHTML = `
+            <thead><tr>
+                <th>素材编号</th><th>描述</th><th>页面</th><th>状态</th><th>绑定文件</th><th>YAML路径</th>
+            </tr></thead>
+            <tbody>
+                ${slots.map(s => `
+                    <tr>
+                        <td class="slot-id-cell">${s.slotId}</td>
+                        <td>${escapeHtml(s.description || '')}</td>
+                        <td>${escapeHtml(s.page || '')}</td>
+                        <td class="${s.filled ? 'status-yes' : 'status-no'}">${s.filled ? '已填充' : '空缺'}</td>
+                        <td style="font-family:monospace;font-size:0.72rem;">${escapeHtml(s.assignedFile || '—')}</td>
+                        <td style="font-family:monospace;font-size:0.72rem;color:var(--text-muted);">${escapeHtml(s.yamlPath || '')}</td>
+                    </tr>
+                `).join('')}
+            </tbody>
+        `;
+    }
+
+    // ================ 删除前校验 ================
+    async function checkDelete(id) {
+        if (!currentModule) return;
+        try {
+            const resp = await fetch(`/admin/api/content/${currentModule.key}/${id}/check-delete`);
+            const data = await resp.json();
+            if (!data.success) { showToast(data.message, 'error'); return; }
+            const check = data.data;
+
+            let msg = `确定删除 #${id} 吗？\n\n`;
+            msg += check.warning + '\n';
+
+            if (check.hasBoundMaterials) {
+                msg += '\n已绑定素材：\n';
+                (check.boundSlots || []).forEach(s => {
+                    msg += `  ${s.slotId} → ${s.assignedFile}\n`;
+                });
+                msg += '\n建议：先在素材匹配中心解绑这些素材，再删除单元。';
+            }
+
+            if (check.willShiftIndex && !check.hasBoundMaterials) {
+                msg += '\n注意：删除后后续单元的素材编号将前移，已绑定的素材可能错位。';
+            }
+
+            if (!confirm(msg)) return;
+
+            // 执行删除
+            const delResp = await fetch(`/admin/api/content/${currentModule.key}/${id}`, { method: 'DELETE' });
+            const delData = await delResp.json();
+            if (delData.success) {
+                showToast('删除成功', 'success');
+                await loadItems(currentModule.key);
+                // 如果校对面板打开，刷新
+                if (verifyPanelOpen) await loadVerifyData(currentModule.key);
+            } else {
+                showToast(delData.message || '删除失败', 'error');
+            }
+        } catch (e) {
+            showToast('请求失败: ' + e.message, 'error');
+        }
+    }
+
+    // ================ 新增 ================
+    function openCreateModal() {
+        if (!currentModule) return;
+        editingId = null;
+        document.getElementById('modalTitle').textContent = '新增' + currentModule.name + '单元';
+        renderForm(currentModule.fields, null);
+        document.getElementById('modalOverlay').classList.add('active');
+    }
+
+    function renderForm(fields, item) {
+        const container = document.getElementById('formFields');
+        const isEdit = !!item;
+        const hasMaterials = isEdit ? (item.hasMaterials !== false) : true;
+
+        // 生成表单HTML
+        let formHtml = '';
+
+        // 添加"需要素材"选项（仅新增时显示，编辑时只读）
+        if (!isEdit) {
+            formHtml += `<div class="form-group">
+                <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;">
+                    <input type="checkbox" id="hasMaterialsCheck" checked onchange="toggleSlotPreview()">
+                    <span>需要素材模板（创建后将自动分配素材编号，用于图片/音频/视频上传）</span>
+                </label>
+            </div>`;
+        }
+
+        formHtml += fields.map(f => {
+            const val = item ? (item[f.name] || '') : '';
+            const req = f.required ? '<span class="required">*</span>' : '';
+            if (f.type === 'textarea') {
+                return `<div class="form-group">
+                    <label>${f.label} ${req}</label>
+                    <textarea name="${f.name}" placeholder="请输入${f.label}">${escapeHtml(val)}</textarea>
+                </div>`;
+            } else if (f.type === 'select') {
+                const opts = (f.options || []).map(o =>
+                    `<option value="${o}" ${val === o ? 'selected' : ''}>${o}</option>`
+                ).join('');
+                return `<div class="form-group">
+                    <label>${f.label} ${req}</label>
+                    <select name="${f.name}">
+                        <option value="">请选择</option>
+                        ${opts}
+                    </select>
+                </div>`;
+            } else {
+                return `<div class="form-group">
+                    <label>${f.label} ${req}</label>
+                    <input type="text" name="${f.name}" value="${escapeHtml(val)}" placeholder="请输入${f.label}">
+                </div>`;
+            }
+        }).join('');
+
+        container.innerHTML = formHtml;
+
+        // 显示 Slot 预览
+        const slotPreview = document.getElementById('slotPreview');
+        if (!isEdit) {
+            slotPreview.textContent = '创建后将分配素材编号: ' + generateSlotPreview(currentModule).join(', ');
+            slotPreview.style.display = hasMaterials ? 'block' : 'none';
+        } else {
+            slotPreview.style.display = 'none';
+        }
+    }
+
+    function toggleSlotPreview() {
+        const checked = document.getElementById('hasMaterialsCheck').checked;
+        const slotPreview = document.getElementById('slotPreview');
+        slotPreview.style.display = checked ? 'block' : 'none';
+    }
+
+    function generateSlotPreview(module) {
+        const prefix = module.slotPrefix;
+        const idx = module.moduleIndex;
+        const pos = 99; // 占位
+        const mm = String(idx).padStart(2,'0');
+        const pp = String(pos).padStart(2,'0');
+        switch (module.key) {
+            case 'stories':
+                return [`${prefix}-${mm}-${pp}`, `AUD-${mm}-${pp}`];
+            case 'videos':
+                return [`${prefix}-${mm}-${pp}`, `VID-${mm}-${pp}`];
+            case 'anatomies':
+                return [`${prefix}-${mm}-${pp}`, `MDL-${mm}-${pp}`];
+            default:
+                return [`${prefix}-${mm}-${pp}`];
+        }
+    }
+
+    // ================ 编辑 ================
+    async function openEditModal(id) {
+        if (!currentModule) return;
+        editingId = id;
+
+        // 获取最新数据
+        const resp = await fetch(`/admin/api/content/${currentModule.key}/items`);
+        const data = await resp.json();
+        const items = data.data || [];
+        const item = items.find(i => i.id === id);
+        if (!item) {
+            showToast('单元不存在', 'error');
+            return;
+        }
+
+        document.getElementById('modalTitle').textContent = '编辑' + currentModule.name + ' #' + id;
+        renderForm(currentModule.fields, item);
+        document.getElementById('modalOverlay').classList.add('active');
+    }
+
+    // ================ 保存 ================
+    async function saveItem() {
+        if (!currentModule) return;
+
+        const formData = {};
+        currentModule.fields.forEach(f => {
+            const el = document.querySelector(`#contentForm [name="${f.name}"]`);
+            if (el) formData[f.name] = el.value.trim();
+        });
+
+        // 新增时检查"需要素材"选项
+        if (!editingId) {
+            const check = document.getElementById('hasMaterialsCheck');
+            formData.hasMaterials = check && check.checked ? 'true' : 'false';
+        }
+
+        try {
+            if (editingId) {
+                // 编辑
+                const resp = await fetch(`/admin/api/content/${currentModule.key}/${editingId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+                const data = await resp.json();
+                if (data.success) {
+                    showToast('更新成功', 'success');
+                    closeModal();
+                    await loadItems(currentModule.key);
+                } else {
+                    showToast(data.message || '更新失败', 'error');
+                }
+            } else {
+                // 新增
+                const resp = await fetch(`/admin/api/content/${currentModule.key}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+                const data = await resp.json();
+                if (data.success) {
+                    const slots = data.data && data.data.slotIds && data.data.slotIds.length > 0
+                        ? '，素材编号: ' + data.data.slotIds.join(', ')
+                        : '';
+                    showToast('新增成功' + slots, 'success');
+                    closeModal();
+                    await loadItems(currentModule.key);
+                } else {
+                    showToast(data.message || '新增失败', 'error');
+                }
+            }
+        } catch (e) {
+            showToast('请求失败: ' + e.message, 'error');
+        }
+    }
+
+    // ================ 工具 ================
+    function closeModal() {
+        document.getElementById('modalOverlay').classList.remove('active');
+        editingId = null;
+    }
+
+    function showToast(msg, type) {
+        const t = document.getElementById('toast');
+        t.textContent = msg;
+        t.className = 'toast ' + type + ' show';
+        setTimeout(() => t.classList.remove('show'), 3000);
+    }
+
+    function escapeHtml(s) {
+        if (s == null) return '';
+        return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    // 点击遮罩关闭
+    document.getElementById('modalOverlay').addEventListener('click', function(e) {
+        if (e.target === this) closeModal();
+    });
+
+    // 启动
+    init();
+</script>
+</body>
+</html>

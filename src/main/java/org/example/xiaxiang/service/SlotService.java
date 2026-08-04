@@ -190,6 +190,7 @@ public class SlotService {
         n = safeSize(appProperties.getBuildings());
         for (int i = 0; i < n; i++) {
             final int idx = i;
+            if (!hasMaterials(appProperties.getBuildings().get(idx))) continue;
             String bname = nameOf(() -> appProperties.getBuildings().get(idx).getName(), "建筑" + (idx+1));
             list.add(slot(T_IMG, 1, i+1, "buildings[" + i + "].coverImage", "项目成果/云游侨乡", bname + " · 封面图"));
             list.add(slot(T_MDL, 1, i+1, "buildings[" + i + "].modelKey", "项目成果/云游侨乡", bname + " · 3D模型"));
@@ -200,6 +201,7 @@ public class SlotService {
         n = safeSize(appProperties.getLocations());
         for (int i = 0; i < n; i++) {
             final int idx = i;
+            if (!hasMaterials(appProperties.getLocations().get(idx))) continue;
             String lname = nameOf(() -> appProperties.getLocations().get(idx).getName(), "地点" + (idx+1));
             list.add(slot(T_IMG, 2, i+1, "locations[" + i + "].imageKey", P_CLOUD, lname + " · 封面图"));
             list.add(slot(T_MDL, 2, i+1, "locations[" + i + "].modelKey", P_CLOUD, lname + " · 3D模型"));
@@ -212,6 +214,7 @@ public class SlotService {
         n = safeSize(appProperties.getStories());
         for (int i = 0; i < n; i++) {
             final int idx = i;
+            if (!hasMaterials(appProperties.getStories().get(idx))) continue;
             String t = nameOf(() -> appProperties.getStories().get(idx).getTitle(), "故事" + (idx+1));
             list.add(slot(T_IMG, 4, i+1, "stories[" + i + "].coverImage", P_STORY, t + " · 封面图"));
             list.add(slot(T_AUD, 4, i+1, "stories[" + i + "].audioKey", P_STORY, t + " · 朗读音频"));
@@ -221,6 +224,7 @@ public class SlotService {
         n = safeSize(appProperties.getKnowledge());
         for (int i = 0; i < n; i++) {
             final int idx = i;
+            if (!hasMaterials(appProperties.getKnowledge().get(idx))) continue;
             String t = nameOf(() -> appProperties.getKnowledge().get(idx).getTitle(), "知识" + (idx+1));
             list.add(slot(T_IMG, 6, i+1, "knowledge[" + i + "].coverImage", P_KNOWLEDGE, t + " · 封面图"));
         }
@@ -229,6 +233,7 @@ public class SlotService {
         n = safeSize(appProperties.getCultures());
         for (int i = 0; i < n; i++) {
             final int idx = i;
+            if (!hasMaterials(appProperties.getCultures().get(idx))) continue;
             String t = nameOf(() -> appProperties.getCultures().get(idx).getName(), "民俗" + (idx+1));
             list.add(slot(T_IMG, 7, i+1, "cultures[" + i + "].coverImage", P_CULTURE, t + " · 封面图"));
         }
@@ -237,6 +242,7 @@ public class SlotService {
         n = safeSize(appProperties.getBlogPosts());
         for (int i = 0; i < n; i++) {
             final int idx = i;
+            if (!hasMaterials(appProperties.getBlogPosts().get(idx))) continue;
             String t = nameOf(() -> appProperties.getBlogPosts().get(idx).getTitle(), "日志" + (idx+1));
             list.add(slot(T_IMG, 8, i+1, "blogPosts[" + i + "].coverImage", P_BLOG, t + " · 封面图"));
         }
@@ -245,6 +251,7 @@ public class SlotService {
         n = safeSize(appProperties.getVideos());
         for (int i = 0; i < n; i++) {
             final int idx = i;
+            if (!hasMaterials(appProperties.getVideos().get(idx))) continue;
             String t = nameOf(() -> appProperties.getVideos().get(idx).getTitle(), "视频" + (idx+1));
             list.add(slot(T_IMG, 9, i+1, "videos[" + i + "].coverImage", P_VIDEO, t + " · 封面图"));
             list.add(slot(T_VID, 9, i+1, "videos[" + i + "].videoKey", P_VIDEO, t + " · 视频文件"));
@@ -254,6 +261,7 @@ public class SlotService {
         n = safeSize(appProperties.getTeam());
         for (int i = 0; i < n; i++) {
             final int idx = i;
+            if (!hasMaterials(appProperties.getTeam().get(idx))) continue;
             String t = nameOf(() -> appProperties.getTeam().get(idx).getName(), "成员" + (idx+1));
             list.add(slot(T_IMG, 10, i+1, "team[" + i + "].avatar", P_TEAM, t + " · 头像"));
         }
@@ -262,6 +270,7 @@ public class SlotService {
         n = safeSize(appProperties.getAnatomies());
         for (int i = 0; i < n; i++) {
             final int idx = i;
+            if (!hasMaterials(appProperties.getAnatomies().get(idx))) continue;
             String t = nameOf(() -> appProperties.getAnatomies().get(idx).getPartName(), "部位" + (idx+1));
             list.add(slot(T_IMG, 5, i+1, "anatomies[" + i + "].imageKey", P_ANATOMY, t + " · 图片"));
             list.add(slot(T_MDL, 5, i+1, "anatomies[" + i + "].modelKey", P_ANATOMY, t + " · 分体模型"));
@@ -271,6 +280,7 @@ public class SlotService {
         n = safeSize(appProperties.getPhotoCompares());
         for (int i = 0; i < n; i++) {
             final int idx = i;
+            if (!hasMaterials(appProperties.getPhotoCompares().get(idx))) continue;
             list.add(slot(T_IMG, 11, (i*2+1), "photoCompares[" + i + "].oldImageKey", P_PHOTO, "对比组" + (idx+1) + " · 老照片"));
             list.add(slot(T_IMG, 11, (i*2+2), "photoCompares[" + i + "].newImageKey", P_PHOTO, "对比组" + (idx+1) + " · 新照片"));
         }
@@ -279,6 +289,7 @@ public class SlotService {
         n = safeSize(appProperties.getQiaopi());
         for (int i = 0; i < n; i++) {
             final int idx = i;
+            if (!hasMaterials(appProperties.getQiaopi().get(idx))) continue;
             list.add(slot(T_IMG, 12, i+1, "qiaopi[" + i + "].imageKey", P_QIAOPI, "侨批" + (idx+1) + " · 扫描件"));
         }
 
@@ -286,6 +297,7 @@ public class SlotService {
         n = safeSize(appProperties.getDialects());
         for (int i = 0; i < n; i++) {
             final int idx = i;
+            if (!hasMaterials(appProperties.getDialects().get(idx))) continue;
             String t = nameOf(() -> appProperties.getDialects().get(idx).getChinese(), "方言" + (idx+1));
             list.add(slot(T_AUD, 13, i+1, "dialects[" + i + "].audioKey", P_DIALECT, t + " · 录音"));
         }
@@ -294,11 +306,30 @@ public class SlotService {
         n = safeSize(appProperties.getStamps());
         for (int i = 0; i < n; i++) {
             final int idx = i;
+            if (!hasMaterials(appProperties.getStamps().get(idx))) continue;
             String t = nameOf(() -> appProperties.getStamps().get(idx).getName(), "印章" + (idx+1));
             list.add(slot(T_IMG, 15, i+1, "stamps[" + i + "].imageKey", P_STAMP, t + " · 图标"));
         }
 
         return list;
+    }
+
+    /**
+     * 检查单元是否需要素材（反射读取 hasMaterials 字段，默认为 true）
+     */
+    private boolean hasMaterials(Object item) {
+        if (item == null) return true;
+        try {
+            java.lang.reflect.Method getter = item.getClass().getMethod("getHasMaterials");
+            Object val = getter.invoke(item);
+            if (val instanceof Boolean) return (Boolean) val;
+            if (val instanceof String) return !"false".equalsIgnoreCase((String) val);
+            return true; // 字段存在但非 boolean/string → 默认需要素材
+        } catch (NoSuchMethodException e) {
+            return true; // 无此字段 → 旧数据默认需要素材
+        } catch (Exception e) {
+            return true; // 异常 → 默认需要素材（向后兼容）
+        }
     }
 
     private SlotInfo slot(String typePrefix, int moduleIndex, int posIndex, String yamlPath, String page, String description) {

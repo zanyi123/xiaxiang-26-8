@@ -139,107 +139,112 @@ app:
       name: "宝源坊"
       number: "01"
       description: "碉楼建筑展示区，集中展示侨乡特色碉楼建筑群"
-      history: "宝源坊始建于清末民初，是开平华侨回乡建造碉楼的聚集地，现存碉楼林立，中西合璧的建筑风格见证了华侨文化交融的历史印记。"
+      history: ""
       xCoordinate: 18.0
       yCoordinate: 32.0
       image-key: ""
       model-key: ""
       video-key: ""
-      audioText: "欢迎来到宝源坊。这里是开平碉楼最集中的区域之一，每一座碉楼都承载着华侨家族的兴衰故事..."
+      audioText: ""
     - id: 2
       name: "方形古井"
       number: "02"
       description: "古代饮水文化遗迹，见证侨乡村落的生活印记"
-      history: "方形古井开凿于清代嘉庆年间，井水清澈甘甜，滋养了宝源坊几代人。古井旁边的大榕树曾是村民聚集议事的场所。"
+      history: ""
       xCoordinate: 38.0
       yCoordinate: 48.0
       image-key: "images/e68ee5dac230abde3213b39c1f13ad2a.jpg"
       model-key: ""
       video-key: ""
-      audioText: "现在您看到的是方形古井，这座方形古井建于嘉庆年间，数百年来一直是村民饮水之源..."
+      audioText: ""
     - id: 3
       name: "青石板街"
       number: "03"
       description: "古镇传统街道，踏石而行感受百年岁月"
-      history: "青石板街始建于清道光年间，街道全长约300米，由一块块青石板铺就而成，历经百年风雨仍保存完好，两侧店铺林立。"
+      history: ""
       xCoordinate: 52.0
       yCoordinate: 28.0
       image-key: ""
       model-key: ""
       video-key: ""
-      audioText: "脚下的是青石板街，每一块石板都承载着历史的痕迹。走在这条街上，仿佛能听到百年前商贩的叫卖声..."
+      audioText: ""
     - id: 4
       name: "古榕树广场"
       number: "04"
       description: "村民聚会场所，百年古榕见证侨乡变迁"
-      history: "古榕树广场因一棵超过两百年的古榕树而得名，树根深叶茂，树荫如伞，是村民茶余饭后、节庆活动聚集之地。"
+      history: ""
       xCoordinate: 68.0
       yCoordinate: 55.0
       image-key: ""
       model-key: ""
       video-key: ""
-      audioText: "您现在来到古榕树广场，这棵两百多年的古榕树，见证了侨乡几代人的生活变迁..."
+      audioText: ""
     - id: 5
       name: "陈氏宗祠"
       number: "05"
       description: "家族文化传承地，宗族制度与华侨精神的载体"
-      history: "陈氏宗祠始建于清光绪年间，是宝源坊陈氏家族集资兴建，供奉祖先牌位，举行宗族祭祀仪式，也是宗族议事重要场所。"
+      history: ""
       xCoordinate: 78.0
       yCoordinate: 35.0
       image-key: ""
       model-key: ""
       video-key: ""
-      audioText: "这是陈氏宗祠。传统宗祠建筑，雕梁画栋，具有浓郁的岭南建筑特色..."
+      audioText: ""
     - id: 6
       name: "侨批展览馆"
       number: "06"
       description: "华侨书信文化展，银信封藏家国情怀"
-      history: "侨批展览馆原为村里华侨银信局旧址，现改造为展览馆，收藏展示了大量清末至民国时期华侨寄回的侨批（银信）实物与故事。"
+      history: ""
       xCoordinate: 82.0
       yCoordinate: 70.0
       image-key: ""
       model-key: ""
       video-key: ""
-      audioText: "欢迎来到侨批展览馆。'侨批'即华侨通过民间渠道寄回的家书与汇款..."
+      audioText: ""
 
   stories:
     - id: 1
       title: "南楼的故事"
       category: "建筑故事"
       summary: "赤坎南楼，七户人家合建的保护楼"
-      content: "1912年，赤坎镇南屏村七户人家为抵御匪患，联合集资建造了南楼。楼高七层，是当时赤坎最高的建筑..."
+      content: ""
       author: "开平文化馆"
-      date: "2024-01-15"
+      date: ""
       coverImage: "cover-nanlou.jpg"
       audioKey: ""
-      views: 1256
+      views: 0
 
   timeline:
     - id: 1
-      year: "1368"
-      title: "开平设县"
-      description: "明朝洪武三年，开平置县"
-      type: "历史"
+      year: "1644"
+      title: "瑞云楼建成"
+      description: "明末崇祯十七年，关子瑞在井头里村兴建瑞云楼，为开平第一座有据可查的碉楼"
+      type: "建筑"
     - id: 2
+      year: "1649"
+      title: "开平立县"
+      description: "清顺治六年，析恩平、新兴、新会三县地置开平县，隶属肇庆府"
+      type: "历史"
+    - id: 3
       year: "1840"
       title: "鸦片战争"
       description: "近代开平华侨出洋的历史背景"
       type: "历史"
-    - id: 3
-      year: "1868"
-      title: "第一座碉楼建成"
-      description: "开平碉楼大规模兴建开始"
-      type: "建筑"
     - id: 4
-      year: "1920"
+      year: "1920s"
       title: "碉楼建造鼎盛期"
-      description: "开平碉楼进入建造高峰期"
+      description: "20世纪二三十年代，开平碉楼大量兴建，最多时达3000余座"
       type: "建筑"
     - id: 5
       year: "2007"
       title: "列入世界文化遗产"
-      description: "开平碉楼正式列入世界文化遗产名录"
+      description: "6月28日于新西兰基督城列入《世界遗产名录》，为广东省首处世界文化遗产"
       type: "荣誉"
+    - id: 6
+      year: "2026"
+      title: "薪火侨乡实践项目"
+      description: "侨乡建筑数字化云游平台上线"
+      type: "实践"
 
   archives:
     - id: 1
@@ -247,7 +252,7 @@ app:
       category: "文献档案"
       description: "清代至民国时期的土地契约、卖身契等文书"
       icon: "📜"
-      count: 328
+      count: 0
       unit: "份"
       detailUrl: "/archives/contracts"
     - id: 2
@@ -255,7 +260,7 @@ app:
       category: "影像档案"
       description: "清末民初开平地区的珍贵老照片"
       icon: "📷"
-      count: 156
+      count: 0
       unit: "张"
       detailUrl: "/archives/photos"
     - id: 3
@@ -263,7 +268,7 @@ app:
       category: "家族档案"
       description: "开平各主要姓氏的族谱资料"
       icon: "📚"
-      count: 45
+      count: 0
       unit: "部"
       detailUrl: "/archives/genealogy"
 
@@ -272,19 +277,19 @@ app:
       title: "什么是开平碉楼？"
       category: "建筑知识"
       summary: "开平碉楼是中国乡土建筑的一个特殊类型..."
-      content: "开平碉楼是中国乡土建筑的一个特殊类型，是集防卫、居住和中西建筑艺术于一体的多层塔楼式建筑..."
+      content: ""
       difficulty: "入门"
     - id: 2
       title: "碉楼的建筑结构"
       category: "建筑技术"
       summary: "了解碉楼的墙体结构、楼层布局等"
-      content: "碉楼通常采用砖石结构，墙体厚重..."
+      content: ""
       difficulty: "进阶"
     - id: 3
       title: "开平华侨史"
       category: "历史文化"
       summary: "了解开平华侨的发展史"
-      content: "开平是中国著名的华侨之乡..."
+      content: ""
       difficulty: "入门"
 
   cultures:
@@ -306,13 +311,13 @@ app:
       title: "第一次田野调查记录"
       summary: "走进赤坎古镇，记录碉楼保护现状"
       author: "实践队"
-      date: "2025-07-15"
+      date: ""
       category: "田野调查"
     - id: 2
       title: "数字化保护的挑战与机遇"
       summary: "3D扫描技术在碉楼保护中的应用"
       author: "技术组"
-      date: "2025-07-20"
+      date: ""
       category: "技术研究"
 
   videos:
@@ -320,24 +325,19 @@ app:
       title: "航拍开平碉楼"
       description: "无人机视角下的开平碉楼群"
       duration: "05:30"
-      views: 3256
+      views: 0
     - id: 2
       title: "碉楼建造技艺"
       description: "传统建造工艺纪录片"
       duration: "12:00"
-      views: 1890
+      views: 0
 
   team:
     - id: 1
       name: "黄坤水"
       role: "项目负责人"
       major: "建筑学"
-      bio: "负责项目总体设计与协调"
-    - id: 2
-      name: "张伟"
-      role: "技术负责人"
-      major: "计算机科学"
-      bio: "负责3D建模与前端开发"
+      bio: ""
 
   anatomies:
     - id: 1
@@ -364,7 +364,7 @@ app:
       yearOld: "1920"
       yearNew: "2024"
       description: "百年间赤坎古镇的变迁对比"
-      story: "碉楼与古镇的百年对话"
+      story: ""
 
   qiaopi:
     - id: 1
@@ -372,22 +372,28 @@ app:
       sender: "陈阿公"
       recipient: "陈阿婆"
       sendFrom: "纽约"
-      year: 1925
+      year: ""
       amount: "50美元"
-      content: "亲爱的阿婆，见字如面..."
-      translation: "Dear wife..."
+      content: ""
+      translation: ""
       category: "亲情类"
     - id: 2
       title: "生意家书"
       sender: "梁老板"
       recipient: "梁掌柜"
       sendFrom: "旧金山"
-      year: 1930
+      year: ""
       amount: "200美元"
-      content: "三叔台鉴..."
-      translation: "Dear Uncle..."
+      content: ""
+      translation: ""
       category: "商务类"
 
+    - id: 3
+      title: "侨乡人民的故事"
+      sender: "村民甲"
+      recipient: "党委书记"
+      year: "2020-04-03"
+      content: "侨乡人们跟随党"
   dialects:
     - id: 1
       chinese: "你好"
@@ -431,8 +437,8 @@ app:
     - id: 1
       icon: "🏛️"
       title: "世界文化遗产"
-      description: "2007年列入世界文化遗产名录"
+      description: "2007年6月28日列入《世界遗产名录》，广东省首处世界文化遗产"
     - id: 2
       icon: "📜"
       title: "国家重点文物保护单位"
-      description: "2001年公布为国家重点文物保护单位"
+      description: "2001年6月25日公布为第五批全国重点文物保护单位"

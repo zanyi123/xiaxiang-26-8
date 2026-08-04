@@ -9,7 +9,7 @@
         * { box-sizing: border-box; }
         body { background: var(--bg-dark); color: var(--text-primary); min-height: 100vh; }
 
-        .admin-container { max-width: 1100px; margin: 0 auto; padding: 2rem 1.5rem; }
+        .admin-container { max-width: 1100px; margin: 0 auto; padding: 5rem 1.5rem 2rem; }
 
         /* 顶部信息栏 */
         .admin-header {
@@ -591,6 +591,7 @@
                     <div class="bucket-info" th:text="'存储桶: ' + ${bucketName} + ' · 区域: ' + ${region}"></div>
                 </div>
                 <div style="display: flex; align-items: center;">
+                    <a href="/admin/content" style="padding:0.35rem 0.75rem;font-size:0.8rem;color:var(--text-secondary);text-decoration:none;border:1px solid var(--glass-border);border-radius:8px;margin-right:0.5rem;">内容管理</a>
                     <span class="mock-warning" th:classappend="${!mockMode} ? 'mock-off' : ''">
                         <span th:text="${mockMode} ? '⚠️ Mock模式' : '✅ COS直连'"></span>
                     </span>

@@ -1,6 +1,6 @@
 # 薪火侨乡项目开发日志
 
-> 记录时间：2026-08-01（初次） / 2026-08-03（更新）  
+> 记录时间：2026-08-01（初次） / 2026-08-03（更新） / 2026-08-04（更新）
 > 项目路径：`d:\JAVA\xiaxiang`  
 > 技术栈：Spring Boot + Thymeleaf + 腾讯云COS + 3D高斯泼溅(3DGS) + Three.js
 
@@ -509,3 +509,155 @@ Thymeleaf 模板已有 `th:if="${imageUrl != null}"` 判断，key 为空时自�
 3. `CosService` 所有 getXxxUrl 方法必须用 `getUrlSafely()`，禁止用 `getFileUrl()`（避免空 key 抛异常白屏）
 4. 图片展示支持点击放大查看（Lightbox 模态框）
 5. 景区导航页 `/map` 必须包含：地图底图 + 6个可点击点 + 右侧详情刷新 + 游览进度持久化
+
+---
+
+## 十五、虚构数据治理 + 时间线验证（2026-08-04）
+
+### 15.1 虚构文本清除（保留单元框架）
+
+**问题**：网站为快速出设计包含大量虚构内容（书信、历史描述、成员简介等），需基于实践真实性纠正。
+
+**处置**：删除无考察资料支撑的虚构文本，保留单元框架作为实践同学参考。
+
+| 模块 | 清除内容 | 保留框架 |
+|------|----------|----------|
+| `stories[0]` | content/date/views → 空/0 | title/category/summary/author |
+| `locations[0-5]` | 6段history + 6段audioText → 空 | name/number/description/坐标 |
+| `qiaopi[0-1]` | content/translation/year → 空 | title/sender/recipient/sendFrom/category |
+| `knowledge[0-2]` | content → 空 | title/category/summary/difficulty |
+| `team` | 删除张伟(id:2)，bio清空 | 黄坤水(id:1) |
+| `photoCompares[0]` | story → 空 | title/location/yearOld/yearNew |
+
+**涉及文件**：[application.yml](file:///d:/JAVA/xiaxiang/src/main/resources/application.yml)
+
+### 15.2 时间线联网验证修正
+
+**问题**：timeline 中的历史年份需联网验证准确性，虚假日期全部删除。
+
+| 修正项 | 原值 | 新值 | 验证来源 |
+|--------|------|------|----------|
+| 开平设县 | 1368 明朝洪武三年 | 1649 清顺治六年 | 开平市政府网 |
+| 第一座碉楼 | 1868 | 1644 明末崇祯十七年瑞云楼 | 开平碉楼旅游网 |
+| 鼎盛期描述 | "进入建造高峰期" | "20世纪二三十年代，最多时达3000余座" | 多源交叉验证 |
+| 世遗描述 | "正式列入世界文化遗产名录" | "6月28日于新西兰基督城列入，广东省首处世界文化遗产" | 广东省政府网 |
+| 实践项目 | 无 | 新增 2026 薪火侨乡实践项目 | 用户指定 |
+
+### 15.3 计数器归零 + 虚假日期清空
+
+- `stories[0].views`: 1256 → 0
+- `videos[0-1].views`: 3256/1890 → 0/0
+- `archives[0-2].count`: 328/156/45 → 0/0/0
+- `stories[0].date`: "2024-01-15" → ""
+- `blogPosts[0-1].date`: "2025-07-15"/"2025-07-20" → ""
+
+### 15.4 前端修正
+
+- [index.html](file:///d:/JAVA/xiaxiang/src/main/resources/templates/index.html) Hero 区："首选村落"→"研究村落"，"6栋特色建筑"→"6个特色地点"，删除"100+年侨乡记忆"
+- 全站 23 个模板文件版权年份 "© 2024" → "© 2026"
+
+### 15.5 方案文档
+
+- [内容治理与动态工作流方案.md](file:///d:/JAVA/xiaxiang/docs/内容治理与动态工作流方案.md) — 完整的虚构数据治理清单 + 16个二级专栏工作流分析
+
+---
+
+## 十六、后台动态内容管理框架（2026-08-04）
+
+### 16.1 架构设计
+
+基于网站导览的 16 个二级专栏，建立统一的后台内容管理框架，支持：
+- 新增/编辑/删除单元（CRUD）
+- 素材编号自动规划与校对
+- 素材模板可选化（纯文本单元不生成 Slot）
+- 单元预览（新标签打开前端页面）
+
+### 16.2 新增文件
+
+| 文件 | 作用 |
+|------|------|
+| [ContentManageService.java](file:///d:/JAVA/xiaxiang/src/main/java/org/example/xiaxiang/service/ContentManageService.java) | 核心服务：11个专栏模块字段定义 + CRUD + 素材编号规划 + Slot校对 |
+| [YamlInserter.java](file:///d:/JAVA/xiaxiang/src/main/java/org/example/xiaxiang/service/YamlInserter.java) | YAML列表项增删工具：在application.yml中追加/删除整条单元 |
+| [ContentManageController.java](file:///d:/JAVA/xiaxiang/src/main/java/org/example/xiaxiang/controller/ContentManageController.java) | REST API + 页面路由 |
+| [content.html](file:///d:/JAVA/xiaxiang/src/main/resources/templates/admin/content.html) | 后台内容管理页面 |
+
+### 16.3 API 接口
+
+| 接口 | 方法 | 功能 |
+|------|------|------|
+| `/admin/content` | GET | 内容管理页面 |
+| `/admin/api/content/modules` | GET | 获取所有模块定义 |
+| `/admin/api/content/{module}/items` | GET | 单元列表（含Slot编号和填充状态） |
+| `/admin/api/content/{module}` | POST | 新增单元 |
+| `/admin/api/content/{module}/{id}` | PUT | 编辑单元 |
+| `/admin/api/content/{module}/{id}` | DELETE | 删除单元 |
+| `/admin/api/content/{module}/verify` | GET | 单模块素材编号校对 |
+| `/admin/api/content/verify-all` | GET | 全模块素材编号校对 |
+| `/admin/api/content/{module}/{id}/check-delete` | GET | 删除前检查绑定状态 |
+
+### 16.4 素材编号自动规划
+
+新增单元时系统自动生成 Slot ID：
+- 侨批文化 → `IMG-12-{序号}`
+- 侨乡故事 → `IMG-04-{序号}` + `AUD-04-{序号}`
+- 建筑解剖 → `IMG-05-{序号}` + `MDL-05-{序号}`
+- 老照片对比 → `IMG-11-{序号*2-1}`（老）+ `IMG-11-{序号*2}`（新）
+
+### 16.5 素材模板可选化
+
+**问题**：不是所有单元都需要素材，强制生成空缺 Slot 造成困扰。
+
+**解决**：
+- 创建单元时弹出「需要素材模板」勾选框（默认勾选）
+- 不勾选时：不分配 Slot 编号，列表显示「纯文本单元，无素材模板」
+- [SlotService.java](file:///d:/JAVA/xiaxiang/src/main/java/org/example/xiaxiang/service/SlotService.java) `buildSlotList()` 增加 `hasMaterials()` 反射检查，跳过不需要素材的单元
+- 旧数据兼容：无 `hasMaterials` 字段的旧单元默认有素材
+
+### 16.6 素材编号校对面板
+
+点击「素材编号校对」按钮展开面板：
+- 汇总统计：单元数 / 素材位 / 已填充 / 空缺
+- 详细表格：Slot编号、描述、页面、填充状态、绑定文件、YAML路径
+
+### 16.7 删除前自动校验
+
+点击「删除」时先调用 check-delete API：
+- 检查是否已绑定素材文件 → 列出 Slot ID 和文件名，建议先解绑
+- 检查删除后是否导致后续单元编号错位 → 提示注意
+
+### 16.8 导航栏遮挡修复
+
+**问题**：全局 `.header` 为 `position: fixed`，后台页面内容区被遮挡。
+
+**修复**：两个后台页面 `.admin-container` 的 padding-top 从 `2rem` 改为 `5rem`。
+
+**涉及文件**：
+- [content.html](file:///d:/JAVA/xiaxiang/src/main/resources/templates/admin/content.html#L12)
+- [upload.html](file:///d:/JAVA/xiaxiang/src/main/resources/templates/admin/upload.html#L12)
+
+---
+
+## 十七、YAML 解析异常修复（2026-08-04）
+
+**问题**：应用启动失败，报 `ScannerException: while scanning a simple key ... could not find expected ':'` 在 line 446。
+
+**根因**：之前修改 `achievements` 描述时，文件末尾残留了一个 `null` 字符串，YAML 解析器无法识别。
+
+**修复**：删除 [application.yml](file:///d:/JAVA/xiaxiang/src/main/resources/application.yml) 末尾的 `null` 字符串。
+
+---
+
+## 十八、项目约束更新（2026-08-04 第二批）
+
+### 硬约束（新增）
+1. 网站所有日期必须真实：历史日期需联网验证，虚假日期删除，实践项目日期为 2026-08
+2. 计数器（views/count）初始为 0，后续基于真实数据动态统计
+3. 虚构文本内容删除但保留单元框架，作为实践同学参考
+4. 素材模板为可选项：创建单元时可选不需要素材（纯文本单元）
+
+### 工程规范（新增）
+1. 后台内容管理路径 `/admin/content`，复用 HttpSession 认证
+2. YAML 写入策略：内存优先（立即生效）→ YamlInserter 写盘（持久化）→ cosService.clearCache()（刷新缓存）
+3. 素材编号校对通过 SlotService.getAllSlots() 反射检查 hasMaterials 字段
+4. 删除单元前必须调用 check-delete API 检查绑定状态和编号错位风险
+5. 后台页面 padding-top 须为 5rem 以避开 fixed 导航栏
