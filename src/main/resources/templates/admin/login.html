@@ -167,9 +167,8 @@
         </form>
 
         <div class="login-tip">
-            <b>实践同学账号：</b>volunteer<br>
-            <b>项目管理员：</b>admin<br>
-            账号配置由相关队员管理，成员请联系队员获取账号密码
+            <b>管理员 / 实践同学：</b>请使用分配的账号登录<br>
+            账号配置由项目负责人管理，成员请联系负责人获取账号密码
         </div>
 
         <a href="/" class="back-link">← 返回网站首页</a>
@@ -178,6 +177,12 @@
     <script>
         const urlParams = new URLSearchParams(window.location.search);
         const redirectUrl = urlParams.get('redirect') || '/admin/upload';
+        const kicked = urlParams.get('kicked');
+
+        // 被踢下线提示
+        if (kicked === '1') {
+            showErr('您的账号在其他设备登录，您已被迫下线');
+        }
 
         async function doLogin(e) {
             e.preventDefault();

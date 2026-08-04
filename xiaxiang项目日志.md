@@ -416,3 +416,96 @@ echo $! > app.pid
 # 兜底启动（任意目录，用启动参数强制 prod）
 nohup java -jar /opt/xiaxiang/xiaxiang-building-tour-1.0-SNAPSHOT.jar --app.env=prod > /opt/xiaxiang/app.log 2>&1 &
 ```
+
+---
+
+## 十三、环境隔离方案回退 + 景区导航页重构（2026-08-04）
+
+### 13.1 回退环境隔离方案（恢复本地/正式均可写入）
+
+**问题**：12章的环境隔离方案（dev禁写）导致本地无法测试绑定链路，且 application-dev.yml 被打进 jar 内部有污染风险。实测后确认该方案过于复杂，用户要求回退到"本地/正式均可上传绑定"模式，但保留"绑定实时更新"功能。
+
+**修复**：
+- `UploadController.ensureProdForWrites()` 改为始终返回 null（放行所有写入）
+- `upload.html` 移除 5 处 `if (!ENV_IS_PROD)` 前端拦截，环境徽章改为"本地/正式均允许写入"
+- `application-local.yml` 移除 `spring.profiles.active: dev`，不再强制激活 dev profile
+- 分支 `feat/allow-both-local-prod-upload` 保留，测试通过后合并到 main
+
+**保留功能**：YamlUpdater 写盘 → Thymeleaf 重渲染 → 占位符替换为真实素材（实时更新闭环未破坏）
+
+**涉及文件**：
+- [UploadController.java](file:///d:/JAVA/xiaxiang/src/main/java/org/example/xiaxiang/controller/UploadController.java) — 移除环境拦截
+- [upload.html](file:///d:/JAVA/xiaxiang/src/main/resources/templates/admin/upload.html) — 移除前端禁用逻辑
+
+### 13.2 CosService 空 key 异常修复（白屏问题）
+
+**问题**：点击地点/建筑页面时报白屏 JSON 错误 `{"success":false,"message":"文件 key 不能为空"}`。
+
+**根因**：`CosService` 的 5 个 getXxxUrl 方法调用 `getFileUrl(key)`，当素材未绑定（key 为空）时抛 `BusinessException`，全局异常处理器返回 JSON 错误页，导致页面渲染中断。
+
+**修复**：5 个方法全部改用 `getUrlSafely(key)`：
+| 方法 | 修复前 | 修复后 |
+|------|--------|--------|
+| `getModelUrl()` | key空→抛异常 | key空→返回null |
+| `getVideoUrl()` | key空→抛异常 | key空→返回null |
+| `getCoverImageUrl()` | key空→抛异常 | key空→返回null |
+| `getLocationModelUrl()` | key空→抛异常 | key空→返回null |
+| `getLocationImageUrl()` | key空→抛异常 | key空→返回null |
+
+Thymeleaf 模板已有 `th:if="${imageUrl != null}"` 判断，key 为空时自动降级为 Slot 占位符显示。
+
+**涉及文件**：[CosService.java](file:///d:/JAVA/xiaxiang/src/main/java/org/example/xiaxiang/service/CosService.java#L117-L216)
+
+### 13.3 景区导航页 `/map` 完全重构
+
+**问题**：`/map` 页面左侧地图无底图、无点击点；右侧无详情刷新；视频素材无展示位置。
+
+**修复（全链路）**：
+
+#### 后端
+- [AppProperties.java](file:///d:/JAVA/xiaxiang/src/main/java/org/example/xiaxiang/properties/AppProperties.java#L85-L86) 新增 `mapBackgroundImage` 字段（地图底图）
+- [AppProperties.java](file:///d:/JAVA/xiaxiang/src/main/java/org/example/xiaxiang/properties/AppProperties.java#L115) Location 新增 `videoKey` 字段
+- [SlotService.java](file:///d:/JAVA/xiaxiang/src/main/java/org/example/xiaxiang/service/SlotService.java#L207-L209) 新增 Slot：
+  - `IMG-02-00` 景区导航地图底图
+  - `VID-02-01~06` 6个地点全景视频
+- [CosService.java](file:///d:/JAVA/xiaxiang/src/main/java/org/example/xiaxiang/service/CosService.java#L210-L216) 新增 `getLocationVideoUrl()`
+- [IndexController.java](file:///d:/JAVA/xiaxiang/src/main/java/org/example/xiaxiang/controller/IndexController.java#L87-L101) `/map` 传递 `locationImageUrls` + `locationVideoUrls` + `mapBgImageUrl`
+- [IndexController.java](file:///d:/JAVA/xiaxiang/src/main/java/org/example/xiaxiang/controller/IndexController.java#L148-L155) `/location/{id}` 传递 `videoUrl`
+- [application.yml](file:///d:/JAVA/xiaxiang/src/main/resources/application.yml#L137-L203) 6个地点补全 `number/xCoordinate/yCoordinate/history/audioText/video-key` 字段
+
+#### 前端
+- [map.html](file:///d:/JAVA/xiaxiang/src/main/resources/templates/map.html) 完全重写：
+  - 左侧：地图底图（IMG-02-00 Slot占位符覆盖整个画布）+ 6个金色可点击点（带编号徽章+已游览绿色√）
+  - 右侧：地点详情（图片+视频+描述+历史背景+3个操作按钮）+ 游览进度条（localStorage 持久化）
+  - 图片点击放大查看（Lightbox 模态框）
+  - 视频区（VID-02-xx Slot占位符 / 真实视频播放器）
+- [location.html](file:///d:/JAVA/xiaxiang/src/main/java/org/example/xiaxiang/src/main/resources/templates/location.html#L149-L165) 新增"全景视频"卡片
+
+### 13.4 COS素材删除机制（已具备）
+
+后台 `/admin/upload` 页面**已支持删除 COS 桶文件**：
+- 后端：[UploadController.deleteFile()](file:///d:/JAVA/xiaxiang/src/main/java/org/example/xiaxiang/controller/UploadController.java#L274-L290) 调用 `cosClient.deleteObject()` 真实删除 COS 文件 + 清缓存
+- 前端：文件列表每行有"删除"按钮，二次确认后调用 `DELETE /admin/api/delete?key=xxx`
+
+**三种删除场景**：
+1. **只删 COS 文件，保留绑定**：在文件列表点"删除" → COS文件消失 → 网站该 Slot 降级为占位符
+2. **只解绑，保留 COS 文件**：在素材匹配中心点"解绑" → yml 字段清空 → COS文件仍在 → 网站降级为占位符
+3. **彻底删除（解绑+删COS）**：先解绑 → 再到文件列表删除 COS 文件
+
+---
+
+## 十四、项目约束更新（2026-08-04）
+
+### 硬约束（更新）
+1. 本地与正式环境均允许上传/绑定/删除（取消 dev 禁写限制）
+2. `application.yml` 必须提交到 Git（含全部业务数据，密钥用环境变量）
+3. `application-local.yml` 被 .gitignore 忽略（本地密钥专用）
+4. CosConfig 启动时必须校验密钥，缺失时 FAIL FAST
+5. 所有素材类型未绑定时必须显示 Slot 编号占位符
+
+### 工程规范（更新）
+1. 3D 模型加载三级 fallback：3D模型 → 部位图片 → DOM Slot占位符
+2. 所有列表页/详情页禁止使用 AI 生成图作为 fallback
+3. `CosService` 所有 getXxxUrl 方法必须用 `getUrlSafely()`，禁止用 `getFileUrl()`（避免空 key 抛异常白屏）
+4. 图片展示支持点击放大查看（Lightbox 模态框）
+5. 景区导航页 `/map` 必须包含：地图底图 + 6个可点击点 + 右侧详情刷新 + 游览进度持久化

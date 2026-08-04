@@ -87,7 +87,16 @@ public class IndexController {
     @GetMapping("/map")
     public String map(Model model) {
         log.info("[IndexController] 访问景区导航页");
-        model.addAttribute("locations", appProperties.getLocations());
+        List<AppProperties.Location> locations = appProperties.getLocations();
+        model.addAttribute("locations", locations);
+        // 地点图片URL Map（IMG-02-01~06）
+        model.addAttribute("locationImageUrls", cosService.buildUrlMap(locations,
+                AppProperties.Location::getId, AppProperties.Location::getImageKey));
+        // 地点视频URL Map（VID-02-01~06）
+        model.addAttribute("locationVideoUrls", cosService.buildUrlMap(locations,
+                AppProperties.Location::getId, AppProperties.Location::getVideoKey));
+        // 地图底图（IMG-02-00）
+        model.addAttribute("mapBgImageUrl", cosService.getUrlSafely(appProperties.getMapBackgroundImage()));
         return "map";
     }
 
@@ -138,10 +147,12 @@ public class IndexController {
 
         String modelUrl = cosService.getLocationModelUrl(id);
         String imageUrl = cosService.getLocationImageUrl(id);
+        String videoUrl = cosService.getLocationVideoUrl(id);
 
         model.addAttribute("location", location);
         model.addAttribute("modelUrl", modelUrl);
         model.addAttribute("imageUrl", imageUrl);
+        model.addAttribute("videoUrl", videoUrl);
 
         List<AppProperties.Location> otherLocations = appProperties.getLocations().stream()
                 .filter(l -> !l.getId().equals(id))

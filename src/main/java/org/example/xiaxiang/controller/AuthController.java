@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.example.xiaxiang.common.Result;
 import org.example.xiaxiang.properties.AdminProperties;
 import org.example.xiaxiang.service.MemberStatusService;
+import org.example.xiaxiang.service.SessionRegistry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -37,6 +38,9 @@ public class AuthController {
 
     @Autowired
     private MemberStatusService memberStatusService;
+
+    @Autowired
+    private SessionRegistry sessionRegistry;
 
     public static final String SESSION_USER_KEY = "CURRENT_ADMIN_USER";
 
@@ -97,6 +101,9 @@ public class AuthController {
 
         session.setAttribute(SESSION_USER_KEY, userInfo);
 
+        // 注册会话：若该账号已有旧会话，旧会话会被标记为"被踢下线"
+        sessionRegistry.register(user.getUsername(), session);
+
         log.info("[登录成功] {} ({})", user.getName(), user.getUsername());
         return Result.success(userInfo, "登录成功");
     }
@@ -108,7 +115,12 @@ public class AuthController {
         if (session != null) {
             Map<String, Object> u = (Map<String, Object>) session.getAttribute(SESSION_USER_KEY);
             if (u != null) {
+                String username = (String) u.get("username");
                 log.info("[登出] {}", u.get("name"));
+                // 主动登出：从注册表移除该账号的会话映射
+                if (username != null) {
+                    sessionRegistry.unregister(username);
+                }
             }
             session.invalidate();
         }

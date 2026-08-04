@@ -199,9 +199,20 @@ public class CosService {
     public String getLocationImageUrl(Integer locationId) {
         AppProperties.Location location = findLocationById(locationId);
         if (location == null) {
-            throw new BusinessException("地点不存在：ID=" + locationId);
+            return null;
         }
         return getUrlSafely(location.getImageKey());
+    }
+
+    /**
+     * 根据地点 ID 获取视频 URL
+     */
+    public String getLocationVideoUrl(Integer locationId) {
+        AppProperties.Location location = findLocationById(locationId);
+        if (location == null) {
+            return null;
+        }
+        return getUrlSafely(location.getVideoKey());
     }
 
     /**

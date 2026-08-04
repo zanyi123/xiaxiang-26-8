@@ -42,23 +42,86 @@ admin:
       password: "Sanxiaxiang1"
       role: "ADMIN"
       name: "黄坤水"
-      description: "项目负责人"
-    - username: "zanyi123"
-      password: "Xiaxiang2026"
+      description: "项目负责人·建筑数字化记录/建模"
+    - username: "liziran002"
+      password: "Sanxiaxiang2"
       role: "ADMIN"
-      name: "管理员"
-      description: "系统管理员"
-    - username: "volunteer01"
-      password: "volunteer123"
+      name: "李自然"
+      description: "总负责人·文献资料收集/现场采集"
+    - username: "pengyuxuan003"
+      password: "Sanxiaxiang3"
+      role: "ADMIN"
+      name: "彭宇轩"
+      description: "总负责人·文献资料收集/现场采集"
+    - username: "chenqixuan004"
+      password: "Sanxiaxiang4"
       role: "VOLUNTEER"
-      name: "实践同学A"
-      description: "暑期实践志愿者"
+      name: "陈绮旋"
+      description: "宣传推文（排版以及对接发布）"
+    - username: "huangzhenyu005"
+      password: "Sanxiaxiang5"
+      role: "VOLUNTEER"
+      name: "黄振宇"
+      description: "摄影记录（无人机、相机）"
+    - username: "liyaojun006"
+      password: "Sanxiaxiang6"
+      role: "VOLUNTEER"
+      name: "李耀俊"
+      description: "调研报告"
+    - username: "lizidong007"
+      password: "Sanxiaxiang7"
+      role: "VOLUNTEER"
+      name: "李子东"
+      description: "宣传/纪录片"
+    - username: "linlang008"
+      password: "Sanxiaxiang8"
+      role: "VOLUNTEER"
+      name: "林琅"
+      description: "纪实图组"
+    - username: "lintao009"
+      password: "Sanxiaxiang9"
+      role: "VOLUNTEER"
+      name: "林滔"
+      description: "建筑数字化记录/建模（协助）"
+    - username: "linxiaotong010"
+      password: "Sanxiaxiang10"
+      role: "VOLUNTEER"
+      name: "林小彤"
+      description: "宣传推文（内容撰写）"
+    - username: "linying011"
+      password: "Sanxiaxiang11"
+      role: "VOLUNTEER"
+      name: "林颖"
+      description: "摄影记录（手机）"
+    - username: "liujiayi012"
+      password: "Sanxiaxiang12"
+      role: "VOLUNTEER"
+      name: "刘佳怡"
+      description: "调研报告"
+    - username: "suzixuan013"
+      password: "Sanxiaxiang13"
+      role: "VOLUNTEER"
+      name: "苏梓轩"
+      description: "地方对接"
+    - username: "weilili014"
+      password: "Sanxiaxiang14"
+      role: "VOLUNTEER"
+      name: "韦丽丽"
+      description: "调研报告"
+    - username: "zhanghuiru015"
+      password: "Sanxiaxiang15"
+      role: "VOLUNTEER"
+      name: "张惠茹"
+      description: "纪实图组"
 
 # ========== 应用配置 ==========
 # 默认 prod（安全），本地 dev 通过 profile 覆盖
 app:
   mock-mode: false
   env: prod
+
+  # 景区导航地图底图（IMG-02-00）
+  map-background-image: ""
 
   buildings:
     - id: 1
@@ -74,22 +137,70 @@ app:
   locations:
     - id: 1
       name: "宝源坊"
-      description: "碉楼建筑展示区"
+      number: "01"
+      description: "碉楼建筑展示区，集中展示侨乡特色碉楼建筑群"
+      history: "宝源坊始建于清末民初，是开平华侨回乡建造碉楼的聚集地，现存碉楼林立，中西合璧的建筑风格见证了华侨文化交融的历史印记。"
+      xCoordinate: 18.0
+      yCoordinate: 32.0
+      image-key: ""
+      model-key: ""
+      video-key: ""
+      audioText: "欢迎来到宝源坊。这里是开平碉楼最集中的区域之一，每一座碉楼都承载着华侨家族的兴衰故事..."
     - id: 2
       name: "方形古井"
-      description: "古代饮水文化遗迹"
+      number: "02"
+      description: "古代饮水文化遗迹，见证侨乡村落的生活印记"
+      history: "方形古井开凿于清代嘉庆年间，井水清澈甘甜，滋养了宝源坊几代人。古井旁边的大榕树曾是村民聚集议事的场所。"
+      xCoordinate: 38.0
+      yCoordinate: 48.0
+      image-key: "images/e68ee5dac230abde3213b39c1f13ad2a.jpg"
+      model-key: ""
+      video-key: ""
+      audioText: "现在您看到的是方形古井，这座方形古井建于嘉庆年间，数百年来一直是村民饮水之源..."
     - id: 3
       name: "青石板街"
-      description: "古镇传统街道"
+      number: "03"
+      description: "古镇传统街道，踏石而行感受百年岁月"
+      history: "青石板街始建于清道光年间，街道全长约300米，由一块块青石板铺就而成，历经百年风雨仍保存完好，两侧店铺林立。"
+      xCoordinate: 52.0
+      yCoordinate: 28.0
+      image-key: ""
+      model-key: ""
+      video-key: ""
+      audioText: "脚下的是青石板街，每一块石板都承载着历史的痕迹。走在这条街上，仿佛能听到百年前商贩的叫卖声..."
     - id: 4
       name: "古榕树广场"
-      description: "村民聚会场所"
+      number: "04"
+      description: "村民聚会场所，百年古榕见证侨乡变迁"
+      history: "古榕树广场因一棵超过两百年的古榕树而得名，树根深叶茂，树荫如伞，是村民茶余饭后、节庆活动聚集之地。"
+      xCoordinate: 68.0
+      yCoordinate: 55.0
+      image-key: ""
+      model-key: ""
+      video-key: ""
+      audioText: "您现在来到古榕树广场，这棵两百多年的古榕树，见证了侨乡几代人的生活变迁..."
     - id: 5
       name: "陈氏宗祠"
-      description: "家族文化传承地"
+      number: "05"
+      description: "家族文化传承地，宗族制度与华侨精神的载体"
+      history: "陈氏宗祠始建于清光绪年间，是宝源坊陈氏家族集资兴建，供奉祖先牌位，举行宗族祭祀仪式，也是宗族议事重要场所。"
+      xCoordinate: 78.0
+      yCoordinate: 35.0
+      image-key: ""
+      model-key: ""
+      video-key: ""
+      audioText: "这是陈氏宗祠。传统宗祠建筑，雕梁画栋，具有浓郁的岭南建筑特色..."
     - id: 6
       name: "侨批展览馆"
-      description: "华侨书信文化展"
+      number: "06"
+      description: "华侨书信文化展，银信封藏家国情怀"
+      history: "侨批展览馆原为村里华侨银信局旧址，现改造为展览馆，收藏展示了大量清末至民国时期华侨寄回的侨批（银信）实物与故事。"
+      xCoordinate: 82.0
+      yCoordinate: 70.0
+      image-key: ""
+      model-key: ""
+      video-key: ""
+      audioText: "欢迎来到侨批展览馆。'侨批'即华侨通过民间渠道寄回的家书与汇款..."
 
   stories:
     - id: 1

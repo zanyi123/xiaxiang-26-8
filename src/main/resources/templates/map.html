@@ -2,9 +2,328 @@
 <html xmlns:th="http://www.thymeleaf.org" lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>景区导航 - 薪火侨乡</title>
     <link rel="stylesheet" href="/css/qiaoyun.css">
+    <style>
+        .map-section {
+            display: grid;
+            grid-template-columns: 1.1fr 1fr;
+            gap: 1.5rem;
+            padding: 1rem;
+        }
+        @media (max-width: 960px) {
+            .map-section { grid-template-columns: 1fr; }
+        }
+        .map-container {
+            background: var(--glass-bg, rgba(20, 30, 50, 0.6));
+            border: 1px solid var(--glass-border, rgba(255,255,255,0.1));
+            border-radius: 14px;
+            padding: 1.25rem;
+            backdrop-filter: blur(12px);
+        }
+        .map-title {
+            color: var(--warm-gold, #d4af37);
+            font-size: 1.1rem;
+            margin-bottom: 0.75rem;
+            letter-spacing: 2px;
+        }
+        .map-canvas-wrap {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 4 / 3;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid var(--glass-border, rgba(255,255,255,0.12));
+            background: linear-gradient(135deg, rgba(26, 42, 74, 0.7), rgba(10, 10, 10, 0.9));
+        }
+        /* 地图底图占位符：覆盖整个画布 */
+        .map-canvas-wrap .slot-placeholder {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            min-height: 0;
+            border-radius: 0;
+            border: none;
+            border-style: dashed;
+            border-width: 2px;
+        }
+        .map-canvas-wrap .slot-placeholder .slot-type-icon {
+            font-size: 2.5rem;
+            margin-bottom: 0.75rem;
+        }
+        .map-canvas-wrap .slot-placeholder .slot-badge {
+            font-size: 1.3rem;
+            padding: 0.5rem 1rem;
+        }
+        .map-canvas-wrap .slot-placeholder .slot-desc {
+            font-size: 0.9rem;
+        }
+        .map-bg-img {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: 1;
+        }
+        .map-marker-layer {
+            position: absolute;
+            inset: 0;
+            z-index: 10;
+        }
+        .map-marker {
+            position: absolute;
+            transform: translate(-50%, -50%);
+            cursor: pointer;
+            z-index: 11;
+            transition: transform 0.25s;
+        }
+        .map-marker:hover { transform: translate(-50%, -50%) scale(1.15); }
+        .map-marker-dot {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, #ffe680, #d4af37 55%, #8a6d10);
+            box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.25), 0 3px 10px rgba(0,0,0,0.6);
+            border: 1.5px solid #fff3c4;
+            position: relative;
+        }
+        .map-marker.active .map-marker-dot {
+            background: radial-gradient(circle at 30% 30%, #ffffff, #ffe680 50%, #d4af37);
+            box-shadow: 0 0 0 5px rgba(212, 175, 55, 0.45), 0 0 20px rgba(212, 175, 55, 0.8);
+        }
+        .map-marker-num {
+            position: absolute;
+            top: -1.6rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.75);
+            color: var(--warm-gold, #d4af37);
+            border: 1px solid var(--warm-gold, #d4af37);
+            border-radius: 4px;
+            padding: 1px 6px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+        }
+        .map-marker.visited::after {
+            content: "✓";
+            position: absolute;
+            bottom: -6px;
+            right: -6px;
+            width: 16px; height: 16px;
+            background: #2ecc71;
+            color: #fff;
+            border-radius: 50%;
+            font-size: 10px;
+            display: flex; align-items: center; justify-content: center;
+            border: 1.5px solid rgba(0,0,0,0.5);
+        }
+        .map-legend {
+            margin-top: 0.75rem;
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            color: var(--text-muted, #999);
+            font-size: 0.78rem;
+        }
+        .map-legend span::before {
+            content: "";
+            display: inline-block;
+            width: 10px; height: 10px;
+            border-radius: 50%;
+            margin-right: 5px;
+            vertical-align: middle;
+        }
+        .legend-point::before { background: #d4af37; }
+        .legend-visited::before { background: #2ecc71; }
+
+        .location-detail-panel {
+            background: var(--glass-bg, rgba(20, 30, 50, 0.6));
+            border: 1px solid var(--glass-border, rgba(255,255,255,0.1));
+            border-radius: 14px;
+            padding: 1.25rem;
+            backdrop-filter: blur(12px);
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            min-height: 480px;
+        }
+        .detail-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid var(--glass-border, rgba(255,255,255,0.1));
+        }
+        .detail-number {
+            width: 40px; height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, rgba(212,175,55,0.25), rgba(138,109,16,0.15));
+            border: 1.5px solid var(--warm-gold, #d4af37);
+            color: var(--warm-gold, #d4af37);
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 800; letter-spacing: 1px;
+            font-size: 0.95rem;
+        }
+        .detail-title {
+            color: var(--warm-gold, #d4af37);
+            font-size: 1.2rem;
+            margin: 0;
+            letter-spacing: 1px;
+        }
+        .detail-img-box {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 16 / 10;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid var(--glass-border, rgba(255,255,255,0.1));
+            background: rgba(0,0,0,0.4);
+        }
+        .detail-img-box img {
+            width: 100%; height: 100%; object-fit: cover;
+        }
+        .detail-desc {
+            color: var(--text-secondary, #ccc);
+            font-size: 0.92rem;
+            line-height: 1.7;
+            margin: 0;
+        }
+        .detail-history-title {
+            color: var(--warm-gold, #d4af37);
+            font-size: 0.9rem;
+            margin: 0 0 0.4rem 0;
+            padding-left: 0.5rem;
+            border-left: 3px solid var(--warm-gold, #d4af37);
+        }
+        .detail-history-content {
+            color: var(--text-secondary, #bbb);
+            font-size: 0.85rem;
+            line-height: 1.75;
+            margin: 0;
+            padding: 0.5rem 0.75rem;
+            background: rgba(0,0,0,0.25);
+            border-radius: 6px;
+        }
+        .detail-actions {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+        .detail-btn {
+            flex: 1;
+            min-width: 120px;
+            padding: 0.55rem 0.8rem;
+            border-radius: 8px;
+            border: 1px solid var(--glass-border, rgba(255,255,255,0.15));
+            background: rgba(255,255,255,0.04);
+            color: var(--text-secondary, #ccc);
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+        }
+        .detail-btn:hover {
+            background: rgba(212, 175, 55, 0.12);
+            border-color: var(--warm-gold, #d4af37);
+            color: var(--warm-gold, #d4af37);
+        }
+        .detail-btn-primary {
+            background: linear-gradient(135deg, rgba(212,175,55,0.25), rgba(138,109,16,0.2));
+            color: var(--warm-gold, #d4af37);
+            border-color: var(--warm-gold, #d4af37);
+        }
+        .progress-bar .progress-title {
+            color: var(--text-muted, #999);
+            font-size: 0.78rem;
+            margin-bottom: 0.35rem;
+        }
+        .progress-track {
+            height: 8px;
+            border-radius: 4px;
+            background: rgba(255,255,255,0.08);
+            overflow: hidden;
+            margin-bottom: 0.35rem;
+        }
+        .progress-fill {
+            height: 100%;
+            border-radius: 4px;
+            background: linear-gradient(90deg, var(--warm-gold, #d4af37), #ffe680);
+            transition: width 0.5s ease;
+        }
+        .progress-text {
+            color: var(--text-muted, #999);
+            font-size: 0.75rem;
+            text-align: right;
+        }
+        .video-box {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid var(--glass-border, rgba(255,255,255,0.1));
+            background: #000;
+        }
+        .video-box video {
+            width: 100%; height: 100%; object-fit: contain;
+        }
+        .welcome-tip {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted, #888);
+            text-align: center;
+            padding: 2rem 1rem;
+            gap: 0.75rem;
+        }
+        .welcome-tip-icon {
+            font-size: 3rem;
+            opacity: 0.5;
+        }
+        /* 图片点击放大查看 */
+        .detail-img-box img {
+            cursor: zoom-in;
+            transition: opacity 0.2s;
+        }
+        .detail-img-box img:hover { opacity: 0.85; }
+        .lightbox {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.92);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+            cursor: zoom-out;
+        }
+        .lightbox.active { display: flex; }
+        .lightbox img {
+            max-width: 92vw;
+            max-height: 88vh;
+            object-fit: contain;
+            border-radius: 8px;
+            box-shadow: 0 0 40px rgba(0,0,0,0.8);
+        }
+        .lightbox-close {
+            position: absolute;
+            top: 1rem;
+            right: 1.5rem;
+            color: #fff;
+            font-size: 2rem;
+            cursor: pointer;
+            background: rgba(0,0,0,0.5);
+            border: none;
+            border-radius: 50%;
+            width: 44px; height: 44px;
+            display: flex; align-items: center; justify-content: center;
+        }
+    </style>
 </head>
 <body>
     <header class="header">
@@ -30,60 +349,110 @@
 
     <main class="main">
         <div class="map-section">
+            <!-- 左侧：地图 + 点击点 -->
             <div class="map-container">
-                <h3 class="map-title">宝源坊景区地图</h3>
-                <div class="map-canvas" id="map-canvas">
-                    <div th:each="location : ${locations}" 
-                         class="map-marker" 
-                         th:data-id="${location.id}" 
-                         th:data-number="${location.number}"
-                         th:style="|left: ${location.xCoordinate}%; top: ${location.yCoordinate}%;|"
-                         th:onclick="selectLocation(${location.id})">
+                <h3 class="map-title">📍 宝源坊景区导航图</h3>
+                <div class="map-canvas-wrap" id="map-wrap">
+                    <!-- 地图底图：有素材显示图片，无素材显示Slot占位符 -->
+                    <img th:if="${mapBgImageUrl != null and #strings.length(mapBgImageUrl) > 0}"
+                         th:src="${mapBgImageUrl}"
+                         alt="宝源坊景区地图"
+                         class="map-bg-img">
+                    <div th:unless="${mapBgImageUrl != null and #strings.length(mapBgImageUrl) > 0}"
+                         class="slot-placeholder"
+                         style="position: absolute; inset: 0; z-index: 1;"
+                         data-slot-id="IMG-02-00">
+                        <div class="slot-type-icon">🗺️</div>
+                        <div class="slot-badge">IMG-02-00</div>
+                        <div class="slot-desc">景区导航 · 地图底图待填充</div>
                     </div>
-                    
-                    <div style="position: absolute; bottom: 1rem; left: 1rem; color: var(--stone-gray); font-size: 0.8rem; opacity: 0.6;">
-                        宝源坊 / 开平
+
+                    <!-- 点击点层 -->
+                    <div class="map-marker-layer">
+                        <div th:each="location : ${locations}"
+                             class="map-marker"
+                             th:data-id="${location.id}"
+                             th:style="|left: ${location.xCoordinate}%; top: ${location.yCoordinate}%;|"
+                             th:onclick="'selectLocation(' + ${location.id} + ')'">
+                            <div class="map-marker-num" th:text="${location.number}"></div>
+                            <div class="map-marker-dot"></div>
+                        </div>
                     </div>
+
+                    <div style="position: absolute; bottom: 0.5rem; left: 0.75rem; color: var(--stone-gray, #888); font-size: 0.75rem; opacity: 0.7; z-index: 5;">
+                        宝源坊 / 开平赤坎
+                    </div>
+                </div>
+
+                <div class="map-legend">
+                    <span class="legend-point">金色标记 = 可点击游览点</span>
+                    <span class="legend-visited">绿色√ = 已游览</span>
                 </div>
             </div>
 
+            <!-- 右侧：地点详情 -->
             <div class="location-detail-panel" id="detail-panel">
-                <div class="detail-header">
-                    <div class="detail-number" id="detail-number">01</div>
-                    <h2 class="detail-title" id="detail-title">选择地点</h2>
-                </div>
-                
-                <div class="detail-image" id="detail-image">
-                    <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=jiangmen%20kaiping%20ancient%20village%20map%20illustration&image_size=square" alt="地点图片">
-                </div>
-                
-                <p class="detail-desc" id="detail-desc">
-                    点击左侧地图上的金色标记，选择您想游览的地点。
-                </p>
-                
-                <div class="detail-history" id="detail-history" style="display: none;">
-                    <h4 class="detail-history-title">历史背景</h4>
-                    <p class="detail-history-content" id="detail-history-content"></p>
-                </div>
-                
-                <div class="detail-actions" id="detail-actions" style="display: none;">
-                    <button class="detail-btn detail-btn-primary" onclick="view3D()">
-                        📐 查看3D模型
-                    </button>
-                    <button class="detail-btn" onclick="playGuide()">
-                        🎧 AI讲解
-                    </button>
-                    <button class="detail-btn" onclick="navigateTo()">
-                        🗺️ 导航前往
-                    </button>
+
+                <!-- 未选择状态 -->
+                <div id="welcome-tip" class="welcome-tip">
+                    <div class="welcome-tip-icon">🏮</div>
+                    <div style="font-size: 1rem; color: var(--warm-gold);">欢迎来到宝源坊</div>
+                    <div style="font-size: 0.85rem; max-width: 320px; line-height: 1.7;">
+                        请点击左侧地图上的<span style="color: var(--warm-gold);">金色标记点</span>，
+                        即可查看对应地点的介绍、图片与讲解。游览进度会自动保存。
+                    </div>
                 </div>
 
-                <div class="progress-bar">
-                    <div class="progress-title">游览进度</div>
-                    <div class="progress-track">
-                        <div class="progress-fill" id="progress-fill" style="width: 0%;"></div>
+                <!-- 已选择：显示详情（JS控制，Thymeleaf只做初始空状态+URL Map注入） -->
+                <div id="detail-content" style="display: none; flex-direction: column; gap: 1rem;">
+                    <div class="detail-header">
+                        <div class="detail-number" id="detail-number">01</div>
+                        <h2 class="detail-title" id="detail-title">地点名称</h2>
                     </div>
-                    <div class="progress-text" id="progress-text">已游览 0/6 个地点</div>
+
+                    <!-- 地点图片：IMG-02-{id} 有素材显示图（可点击放大），无素材显示Slot占位符 -->
+                    <div class="detail-img-box" id="detail-image-box">
+                        <!-- JS动态渲染 -->
+                    </div>
+
+                    <!-- 地点视频：VID-02-{id} 有素材显示视频播放器，无素材显示Slot占位符 -->
+                    <div id="detail-video-wrap" style="display: none;">
+                        <div class="video-box" id="detail-video-box"></div>
+                    </div>
+
+                    <p class="detail-desc" id="detail-desc"></p>
+
+                    <div id="history-wrap" style="display: none;">
+                        <h4 class="detail-history-title">历史背景</h4>
+                        <p class="detail-history-content" id="detail-history-content"></p>
+                    </div>
+
+                    <div class="detail-actions" id="detail-actions" style="display: none;">
+                        <button class="detail-btn detail-btn-primary" onclick="view3D()">
+                            📐 查看3D模型
+                        </button>
+                        <button class="detail-btn" onclick="playGuide()">
+                            🎧 AI讲解
+                        </button>
+                        <button class="detail-btn" onclick="goToDetail()">
+                            🔗 地点详情
+                        </button>
+                    </div>
+                </div>
+
+                <div style="margin-top: auto;">
+                    <div class="progress-bar">
+                        <div class="progress-title">游览进度（自动保存）</div>
+                        <div class="progress-track">
+                            <div class="progress-fill" id="progress-fill" style="width: 0%;"></div>
+                        </div>
+                        <div class="progress-text" id="progress-text">已游览 0/6 个地点</div>
+                    </div>
+                    <div style="display: flex; gap: 0.5rem; margin-top: 0.5rem;">
+                        <button class="detail-btn" style="flex:1; padding: 0.35rem 0.6rem; font-size: 0.75rem;" onclick="resetProgress()">
+                            🔄 重置进度
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -96,7 +465,7 @@
     <div class="ai-guide-panel" id="ai-guide-panel">
         <h3 class="ai-guide-title">AI智能讲解</h3>
         <div class="ai-guide-text" id="ai-guide-text">
-            点击地图上的地点标记，我可以为您讲解该地点的历史故事。
+            点击左侧地图上的地点标记，我将为您讲解该地点的历史故事。
         </div>
         <div class="ai-guide-controls">
             <button class="ai-control-btn" onclick="pauseGuide()" id="btn-pause">暂停</button>
@@ -105,112 +474,209 @@
     </div>
 
     <script src="/js/qiaoyun-tts.js"></script>
+    <script src="/js/slot-placeholder.js"></script>
     <script th:inline="javascript">
+        // ============ 从后端注入数据 ============
         const locations = /*[[${locations}]]*/ [];
+        const locationImageUrls = /*[[${locationImageUrls}]]*/ {};
+        const locationVideoUrls = /*[[${locationVideoUrls}]]*/ {};
+        const PROGRESS_KEY = 'xiaxiang_visited_locations_v1';
+
         let currentLocationId = null;
-        let visitedLocations = [];
+        let visited = loadVisited();
 
+        // ============ 初始化：恢复进度，标记已游览点 ============
+        document.addEventListener('DOMContentLoaded', () => {
+            applyVisitedMarkers();
+            updateProgress();
+        });
+
+        // ============ 核心：选择地点（右侧刷新） ============
         function selectLocation(id) {
+            const loc = locations.find(l => l.id === id);
+            if (!loc) return;
             currentLocationId = id;
-            const location = locations.find(l => l.id === id);
-            if (!location) return;
 
-            document.querySelectorAll('.map-marker').forEach(marker => {
-                marker.classList.remove('active');
-            });
-            document.querySelector(`.map-marker[data-id="${id}"]`).classList.add('active');
+            // 1. 标记左侧点击点
+            document.querySelectorAll('.map-marker').forEach(m => m.classList.remove('active'));
+            const marker = document.querySelector(`.map-marker[data-id="${id}"]`);
+            if (marker) marker.classList.add('active');
 
-            document.getElementById('detail-number').textContent = location.number;
-            document.getElementById('detail-title').textContent = location.name;
-            document.getElementById('detail-desc').textContent = location.description;
-            
-            const imgUrl = `https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=jiangmen%20kaiping%20${encodeURIComponent(location.name)}%20ancient%20architecture%20cultural%20heritage%20cinematic%20photography&image_size=square`;
-            document.querySelector('#detail-image img').src = imgUrl;
+            // 2. 隐藏欢迎提示，显示详情
+            document.getElementById('welcome-tip').style.display = 'none';
+            document.getElementById('detail-content').style.display = 'flex';
 
-            document.getElementById('detail-history-content').textContent = location.history;
-            document.getElementById('detail-history').style.display = 'block';
+            // 3. 填充基础信息
+            document.getElementById('detail-number').textContent = loc.number || String(loc.id).padStart(2,'0');
+            document.getElementById('detail-title').textContent = loc.name;
+            document.getElementById('detail-desc').textContent = loc.description || '';
+
+            // 4. 渲染图片（有URL显示图，无URL显示Slot占位符 IMG-02-{id}）
+            const imgBox = document.getElementById('detail-image-box');
+            const imgUrl = locationImageUrls[String(id)] || locationImageUrls[id];
+            const slotId = 'IMG-02-' + String(loc.id).padStart(2,'0');
+            if (imgUrl && imgUrl.length > 0) {
+                imgBox.innerHTML = `<img src="${imgUrl}" alt="${loc.name}" onclick="openLightbox('${imgUrl}')">`;
+            } else {
+                imgBox.innerHTML = `
+                    <div class="slot-placeholder" style="position: absolute; inset: 0;" data-slot-id="${slotId}">
+                        <div class="slot-type-icon">🖼️</div>
+                        <div class="slot-badge">${slotId}</div>
+                        <div class="slot-desc">${loc.name} · 封面图待填充</div>
+                    </div>`;
+            }
+
+            // 4.5 渲染视频（VID-02-{id}）
+            const videoWrap = document.getElementById('detail-video-wrap');
+            const videoBox = document.getElementById('detail-video-box');
+            const videoUrl = locationVideoUrls[String(id)] || locationVideoUrls[id];
+            const videoSlotId = 'VID-02-' + String(loc.id).padStart(2,'0');
+            if (videoUrl && videoUrl.length > 0) {
+                videoWrap.style.display = 'block';
+                videoBox.innerHTML = `<video src="${videoUrl}" controls></video>`;
+            } else {
+                videoWrap.style.display = 'block';
+                videoBox.innerHTML = `
+                    <div class="slot-placeholder" style="position: absolute; inset: 0;" data-slot-id="${videoSlotId}">
+                        <div class="slot-type-icon">🎬</div>
+                        <div class="slot-badge">${videoSlotId}</div>
+                        <div class="slot-desc">${loc.name} · 全景视频待填充</div>
+                    </div>`;
+            }
+
+            // 5. 历史背景
+            const historyWrap = document.getElementById('history-wrap');
+            const history = loc.history;
+            if (history && history.length > 0) {
+                document.getElementById('detail-history-content').textContent = history;
+                historyWrap.style.display = 'block';
+            } else {
+                historyWrap.style.display = 'none';
+            }
+
+            // 6. 操作按钮
             document.getElementById('detail-actions').style.display = 'flex';
 
-            if (!visitedLocations.includes(id)) {
-                visitedLocations.push(id);
-                updateProgress();
-            }
+            // 7. 标记为已游览（持久化到localStorage）
+            markVisited(id);
+            applyVisitedMarkers();
+            updateProgress();
+
+            // 8. 右侧详情AI讲解文本
+            const guideText = loc.audioText || loc.history || loc.description || '';
+            document.getElementById('ai-guide-text').textContent = guideText;
+
+            // 9. 滚动右侧到顶部（小屏体验）
+            document.getElementById('detail-panel').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }
 
+        // ============ 游览进度：localStorage持久化 ============
+        function loadVisited() {
+            try {
+                const raw = localStorage.getItem(PROGRESS_KEY);
+                if (!raw) return [];
+                const arr = JSON.parse(raw);
+                return Array.isArray(arr) ? arr.filter(x => typeof x === 'number') : [];
+            } catch (e) { return []; }
+        }
+        function saveVisited() {
+            try { localStorage.setItem(PROGRESS_KEY, JSON.stringify(visited)); } catch (e) {}
+        }
+        function markVisited(id) {
+            if (!visited.includes(id)) {
+                visited.push(id);
+                saveVisited();
+            }
+        }
+        function applyVisitedMarkers() {
+            document.querySelectorAll('.map-marker').forEach(m => {
+                const mid = parseInt(m.getAttribute('data-id'), 10);
+                if (visited.includes(mid)) m.classList.add('visited');
+                else m.classList.remove('visited');
+            });
+        }
         function updateProgress() {
             const total = locations.length;
-            const visited = visitedLocations.length;
-            const percentage = (visited / total) * 100;
-            
-            document.getElementById('progress-fill').style.width = `${percentage}%`;
-            document.getElementById('progress-text').textContent = `已游览 ${visited}/${total} 个地点`;
+            const n = visited.filter(x => locations.some(l => l.id === x)).length;
+            const pct = total > 0 ? (n / total) * 100 : 0;
+            document.getElementById('progress-fill').style.width = pct + '%';
+            document.getElementById('progress-text').textContent = `已游览 ${n}/${total} 个地点`;
+        }
+        function resetProgress() {
+            if (!confirm('确定要重置游览进度吗？')) return;
+            visited = [];
+            saveVisited();
+            applyVisitedMarkers();
+            updateProgress();
         }
 
+        // ============ 操作按钮 ============
         function view3D() {
-            if (currentLocationId) {
-                window.location.href = `/location/${currentLocationId}`;
-            }
+            if (currentLocationId) window.location.href = `/location/${currentLocationId}#canvas-container`;
         }
-
         function playGuide() {
-            if (currentLocationId) {
-                const location = locations.find(l => l.id === currentLocationId);
-                if (location && location.audioText) {
-                    speak(location.audioText);
-                }
-            }
+            const loc = locations.find(l => l.id === currentLocationId);
+            if (!loc) return;
+            const text = loc.audioText || loc.history || loc.description;
+            if (!text) { alert('该地点暂无讲解内容'); return; }
+            speak(text);
+        }
+        function goToDetail() {
+            if (currentLocationId) window.location.href = `/location/${currentLocationId}`;
         }
 
-        function navigateTo() {
-            if (currentLocationId) {
-                const location = locations.find(l => l.id === currentLocationId);
-                alert(`正在为您导航前往：${location.name}\n\n温馨提示：这是虚拟导航，实际导航请使用手机地图应用。`);
-            }
-        }
-
+        // ============ AI讲解面板 ============
         function toggleAiGuide() {
-            const panel = document.getElementById('ai-guide-panel');
-            panel.classList.toggle('active');
+            document.getElementById('ai-guide-panel').classList.toggle('active');
         }
-
         function pauseGuide() {
             if (!window.QiaoyunTTS) return;
             QiaoyunTTS.pause();
-            var btn = document.getElementById('btn-pause');
-            if (btn) { btn.textContent = '继续播放'; btn.setAttribute('onclick', 'resumeGuide()'); }
+            const b = document.getElementById('btn-pause');
+            if (b) { b.textContent = '继续播放'; b.setAttribute('onclick', 'resumeGuide()'); }
         }
-
         function resumeGuide() {
             if (!window.QiaoyunTTS) return;
             QiaoyunTTS.resume();
-            resetPauseBtn();
+            const b = document.getElementById('btn-pause');
+            if (b) { b.textContent = '暂停'; b.setAttribute('onclick', 'pauseGuide()'); }
         }
-
-        function resetPauseBtn() {
-            var btn = document.getElementById('btn-pause');
-            if (btn) { btn.textContent = '暂停'; btn.setAttribute('onclick', 'pauseGuide()'); }
-        }
-
         function stopGuide() {
             if (!window.QiaoyunTTS) return;
             QiaoyunTTS.stop();
             document.getElementById('ai-guide-btn').classList.remove('playing');
-            resetPauseBtn();
+            const b = document.getElementById('btn-pause');
+            if (b) { b.textContent = '暂停'; b.setAttribute('onclick', 'pauseGuide()'); }
         }
-
         function speak(text) {
-            if (!window.QiaoyunTTS) { alert('语音功能加载失败'); return; }
-            QiaoyunTTS.speakGuide(text, function() {
+            if (!window.QiaoyunTTS) { alert('语音功能加载失败，请刷新重试'); return; }
+            stopGuide();
+            QiaoyunTTS.speakGuide(text, () => {
                 document.getElementById('ai-guide-btn').classList.remove('playing');
-                resetPauseBtn();
+                const b = document.getElementById('btn-pause');
+                if (b) { b.textContent = '暂停'; b.setAttribute('onclick', 'pauseGuide()'); }
             });
             document.getElementById('ai-guide-btn').classList.add('playing');
         }
 
-        updateProgress();
+        // ============ 图片放大查看 Lightbox ============
+        function openLightbox(src) {
+            document.getElementById('lightbox-img').src = src;
+            document.getElementById('lightbox').classList.add('active');
+        }
+        function closeLightbox() {
+            document.getElementById('lightbox').classList.remove('active');
+            document.getElementById('lightbox-img').src = '';
+        }
     </script>
     <footer class="footer" style="text-align: center; padding: 1.5rem; border-top: 1px solid var(--border-color, #3a3a3a); margin-top: 2rem;">
         <p style="margin-top: 0.5rem;">© 2024 侨韵薪火实践团 版权所有 · <a href="/admin/upload" style="color: var(--text-muted); font-size: 0.78rem; text-decoration: none;">管理入口</a></p>
     </footer>
+
+    <!-- 图片放大查看 Lightbox -->
+    <div class="lightbox" id="lightbox" onclick="closeLightbox()">
+        <button class="lightbox-close" onclick="closeLightbox()">×</button>
+        <img id="lightbox-img" src="" alt="">
+    </div>
 </body>
 </html>

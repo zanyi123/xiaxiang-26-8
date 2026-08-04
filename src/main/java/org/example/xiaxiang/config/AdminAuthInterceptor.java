@@ -20,6 +20,9 @@ import java.util.List;
  * - 未登录请求：
  *   · HTML 页面请求 → 自动跳 /admin/login?redirect=xxx
  *   · API 请求（/admin/api/*） → 返回 401 JSON
+ * - 被踢下线（同账号在新设备登录）：
+ *   · HTML 页面请求 → 跳 /admin/login?kicked=1&redirect=xxx
+ *   · API 请求 → 返回 401 JSON，reason=kicked
  */
 @Slf4j
 @Component
@@ -30,6 +33,9 @@ public class AdminAuthInterceptor implements HandlerInterceptor {
             "/admin/login",
             "/admin/api/login"
     );
+
+    /** session 中标记"被踢下线"的属性名 */
+    private static final String KICKED_ATTR = "KICKED_OUT";
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
@@ -48,29 +54,43 @@ public class AdminAuthInterceptor implements HandlerInterceptor {
 
         HttpSession session = request.getSession(false);
         boolean logged = false;
+        boolean kicked = false;
         if (session != null) {
             Object u = session.getAttribute(AuthController.SESSION_USER_KEY);
             logged = (u != null);
+            if (!logged) {
+                // 检查是否是被踢下线的 session
+                Object k = session.getAttribute(KICKED_ATTR);
+                kicked = (k != null);
+            }
         }
 
         if (logged) {
             return true;
         }
 
-        // 未登录：API 返回 401，页面跳登录
+        // 被踢下线：一次性提示，清除标记
+        if (kicked) {
+            try { session.removeAttribute(KICKED_ATTR); } catch (Exception ignore) {}
+        }
+
+        // API 请求返回 401 JSON
         if (path.startsWith("/admin/api/")) {
             response.setStatus(401);
             response.setContentType("application/json;charset=UTF-8");
-            response.getWriter().write("{\"success\":false,\"message\":\"未登录，请先登录\"}");
+            String reason = kicked ? "kicked" : "unauthorized";
+            String msg = kicked ? "您的账号在其他设备登录，您已被迫下线" : "未登录，请先登录";
+            response.getWriter().write("{\"success\":false,\"message\":\"" + msg + "\",\"reason\":\"" + reason + "\"}");
             return false;
         }
 
-        // 页面请求跳登录，带上 redirect 参数
+        // 页面请求跳登录页
         String redirect = request.getRequestURI();
         if (request.getQueryString() != null) {
             redirect = redirect + "?" + request.getQueryString();
         }
-        response.sendRedirect(request.getContextPath() + "/admin/login?redirect=" + java.net.URLEncoder.encode(redirect, "UTF-8"));
+        String kickedParam = kicked ? "kicked=1&" : "";
+        response.sendRedirect(request.getContextPath() + "/admin/login?" + kickedParam + "redirect=" + java.net.URLEncoder.encode(redirect, "UTF-8"));
         return false;
     }
 }

@@ -763,6 +763,25 @@
         // 本地/正式均允许写入COS和YAML，绑定后Thymeleaf实时渲染更新
         const ENV_IS_PROD = true;
 
+        // ============== 全局 401 拦截（被踢下线自动跳登录页）==============
+        const _origFetch = window.fetch;
+        window.fetch = async function(...args) {
+            const resp = await _origFetch.apply(this, args);
+            if (resp.status === 401) {
+                try {
+                    const j = await resp.clone().json();
+                    if (j.reason === 'kicked') {
+                        alert('您的账号在其他设备登录，您已被迫下线');
+                        location.href = '/admin/login?kicked=1';
+                        return resp;
+                    }
+                } catch(e) {}
+                // 普通未登录，跳登录页
+                location.href = '/admin/login?redirect=' + encodeURIComponent(location.pathname + location.search);
+            }
+            return resp;
+        };
+
         let currentCategory = 'images';
         let uploadQueue = [];
 

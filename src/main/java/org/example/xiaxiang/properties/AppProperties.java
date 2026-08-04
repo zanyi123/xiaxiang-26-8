@@ -82,6 +82,9 @@ public class AppProperties {
     /** 项目成果数据 */
     private List<AchievementItem> achievements;
 
+    /** 景区导航地图底图（IMG-02-00） */
+    private String mapBackgroundImage;
+
     /**
      * 建筑信息子对象
      */
@@ -109,6 +112,7 @@ public class AppProperties {
         private Double yCoordinate;
         private String modelKey;
         private String imageKey;
+        private String videoKey;
         private String audioText;
     }
 

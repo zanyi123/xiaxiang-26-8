@@ -203,7 +203,10 @@ public class SlotService {
             String lname = nameOf(() -> appProperties.getLocations().get(idx).getName(), "地点" + (idx+1));
             list.add(slot(T_IMG, 2, i+1, "locations[" + i + "].imageKey", P_CLOUD, lname + " · 封面图"));
             list.add(slot(T_MDL, 2, i+1, "locations[" + i + "].modelKey", P_CLOUD, lname + " · 3D模型"));
+            list.add(slot(T_VID, 2, i+1, "locations[" + i + "].videoKey", P_CLOUD, lname + " · 全景视频"));
         }
+        // 地图底图：云游侨乡主页面地图背景
+        list.add(slot(T_IMG, 2, 0, "mapBackgroundImage", P_CLOUD, "景区导航 · 地图底图"));
 
         // --- Module 04: stories (侨乡故事) ---
         n = safeSize(appProperties.getStories());

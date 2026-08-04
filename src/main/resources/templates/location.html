@@ -147,6 +147,24 @@
                     </div>
 
                     <div class="info-card">
+                        <h3 class="info-card-title">全景视频</h3>
+                        <!-- VID-02-{id} 有素材显示视频播放器，无素材显示Slot占位符 -->
+                        <video th:if="${videoUrl != null and #strings.length(videoUrl) > 0}"
+                               th:src="${videoUrl}"
+                               controls
+                               style="width: 100%; border-radius: 10px; background: #000;">
+                        </video>
+                        <div th:unless="${videoUrl != null and #strings.length(videoUrl) > 0}"
+                             class="slot-placeholder"
+                             style="position: relative; min-height: 160px;"
+                             th:attr="data-slot-id=${'VID-02-' + location.id}">
+                            <div class="slot-type-icon">🎬</div>
+                            <div class="slot-badge" th:text="${'VID-02-' + location.id}"></div>
+                            <div class="slot-desc" th:text="${location.name} + ' · 全景视频待填充'"></div>
+                        </div>
+                    </div>
+
+                    <div class="info-card">
                         <h3 class="info-card-title">相关地点</h3>
                         <div class="related-locations">
                             <a th:each="loc : ${otherLocations}" 
