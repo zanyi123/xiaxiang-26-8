@@ -3522,3 +3522,1457 @@ body::after {
 .slot-filled .slot-placeholder {
     display: none !important;
 }
+
+/* ============================================ */
+/* ===== 主题切换：浅色主题 (Light Theme) ===== */
+/* ===== 参考图片：绿色系 · 清新自然 ===== */
+/* ============================================ */
+
+body[data-theme="light"] {
+    --ink-black: #ffffff;
+    --deep-blue: #f7f9f8;
+    --stone-gray: #f0f4f2;
+    --warm-gold: #2d9a5f;
+    --warm-gold-light: #3cb371;
+    --warm-gold-dark: #1f7a48;
+    --terracotta: #e87c3a;
+    --border-dark: #e1e6e3;
+    --glass-bg: rgba(255, 255, 255, 0.9);
+    --glass-bg-light: rgba(255, 255, 255, 0.75);
+    --glass-border: rgba(45, 154, 95, 0.25);
+    --glass-border-light: rgba(45, 154, 95, 0.15);
+    --text-primary: #1f2937;
+    --text-secondary: #5a6b5f;
+    --text-muted: #8b9990;
+}
+
+body[data-theme="light"] {
+    background: var(--deep-blue);
+}
+
+body[data-theme="light"]::before {
+    background: 
+        radial-gradient(ellipse at 20% 20%, rgba(45, 154, 95, 0.06) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 80%, rgba(232, 124, 58, 0.04) 0%, transparent 50%),
+        radial-gradient(ellipse at 50% 50%, rgba(247, 249, 248, 0.95) 0%, var(--deep-blue) 100%);
+}
+
+body[data-theme="light"]::after {
+    background-image: 
+        linear-gradient(rgba(45, 154, 95, 0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(45, 154, 95, 0.02) 1px, transparent 1px);
+    background-size: 40px 40px;
+}
+
+/* Header 浅色 */
+body[data-theme="light"] .header {
+    background: rgba(255, 255, 255, 0.95);
+    border-bottom: 1px solid var(--glass-border-light);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+body[data-theme="light"] .header-logo {
+    color: var(--warm-gold);
+    text-shadow: none;
+}
+
+body[data-theme="light"] .header-logo::before {
+    background: linear-gradient(135deg, var(--warm-gold) 0%, var(--terracotta) 100%);
+}
+
+body[data-theme="light"] .header-nav a {
+    color: var(--text-secondary);
+}
+
+body[data-theme="light"] .header-nav a:hover {
+    color: var(--warm-gold);
+}
+
+body[data-theme="light"] .header-icon-btn {
+    border-color: var(--glass-border-light);
+    color: var(--text-secondary);
+}
+
+body[data-theme="light"] .header-icon-btn:hover {
+    border-color: var(--warm-gold);
+    color: var(--warm-gold);
+    background: rgba(45, 154, 95, 0.08);
+}
+
+body[data-theme="light"] .header-btn {
+    background: linear-gradient(135deg, var(--warm-gold) 0%, var(--warm-gold-light) 100%);
+    color: white;
+    box-shadow: 0 4px 15px rgba(45, 154, 95, 0.3);
+}
+
+body[data-theme="light"] .header-btn:hover {
+    box-shadow: 0 6px 25px rgba(45, 154, 95, 0.45);
+}
+
+/* Hero 区域浅色 */
+body[data-theme="light"] .hero-bg::after {
+    background: linear-gradient(90deg, rgba(255,255,255,0.85) 0%, rgba(255,255,255,0.6) 40%, rgba(255,255,255,0.4) 70%, rgba(255,255,255,0.85) 100%),
+                linear-gradient(180deg, rgba(255,255,255,0.3) 0%, transparent 30%, transparent 70%, rgba(255,255,255,0.85) 100%);
+}
+
+body[data-theme="light"] .hero-chapter {
+    background: rgba(45, 154, 95, 0.08);
+    border-color: var(--glass-border);
+    color: var(--warm-gold);
+}
+
+body[data-theme="light"] .hero-title {
+    color: var(--text-primary);
+    text-shadow: none;
+}
+
+body[data-theme="light"] .hero-subtitle {
+    color: var(--text-primary);
+}
+
+body[data-theme="light"] .hero-tagline {
+    color: var(--text-secondary);
+}
+
+body[data-theme="light"] .hero-btn-primary {
+    background: linear-gradient(135deg, var(--warm-gold) 0%, var(--warm-gold-light) 100%);
+    color: white;
+    box-shadow: 0 6px 25px rgba(45, 154, 95, 0.35);
+}
+
+body[data-theme="light"] .hero-btn-secondary {
+    background: white;
+    color: var(--warm-gold);
+    border-color: var(--warm-gold);
+}
+
+body[data-theme="light"] .hero-btn-secondary:hover {
+    background: rgba(45, 154, 95, 0.06);
+}
+
+body[data-theme="light"] .stat-number {
+    color: var(--warm-gold);
+    text-shadow: none;
+}
+
+/* 卡片浅色样式 */
+body[data-theme="light"] .feature-card,
+body[data-theme="light"] .feature-map-card,
+body[data-theme="light"] .location-card,
+body[data-theme="light"] .archive-card,
+body[data-theme="light"] .timeline-content,
+body[data-theme="light"] .story-item,
+body[data-theme="light"] .knowledge-card,
+body[data-theme="light"] .culture-card,
+body[data-theme="light"] .video-card,
+body[data-theme="light"] .blog-card,
+body[data-theme="light"] .team-card,
+body[data-theme="light"] .goal-card,
+body[data-theme="light"] .archive-detail-card,
+body[data-theme="light"] .knowledge-detail-card,
+body[data-theme="light"] .checkin-section {
+    background: white;
+    border: 1px solid var(--border-dark);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+}
+
+body[data-theme="light"] .feature-card:hover,
+body[data-theme="light"] .location-card:hover,
+body[data-theme="light"] .archive-card:hover,
+body[data-theme="light"] .timeline-content:hover,
+body[data-theme="light"] .knowledge-card:hover,
+body[data-theme="light"] .culture-card:hover,
+body[data-theme="light"] .video-card:hover,
+body[data-theme="light"] .blog-card:hover,
+body[data-theme="light"] .team-card:hover,
+body[data-theme="light"] .goal-card:hover,
+body[data-theme="light"] .archive-detail-card:hover,
+body[data-theme="light"] .knowledge-detail-card:hover {
+    background: white;
+    border-color: var(--warm-gold);
+    box-shadow: 0 8px 25px rgba(45, 154, 95, 0.12);
+}
+
+/* Section 标题浅色 */
+body[data-theme="light"] .section-label,
+body[data-theme="light"] .story-label,
+body[data-theme="light"] .page-hero-label {
+    background: rgba(45, 154, 95, 0.08);
+    border-color: var(--glass-border);
+    color: var(--warm-gold);
+}
+
+body[data-theme="light"] .section-title,
+body[data-theme="light"] .story-title,
+body[data-theme="light"] .location-name {
+    color: var(--text-primary);
+}
+
+body[data-theme="light"] .section-subtitle {
+    color: var(--text-secondary);
+}
+
+/* 按钮浅色 */
+body[data-theme="light"] .detail-btn,
+body[data-theme="light"] .location-card-btn,
+body[data-theme="light"] .guide-btn,
+body[data-theme="light"] .ai-control-btn {
+    background: white;
+    color: var(--warm-gold);
+    border-color: var(--warm-gold);
+}
+
+body[data-theme="light"] .detail-btn:hover,
+body[data-theme="light"] .location-card-btn:hover,
+body[data-theme="light"] .guide-btn:hover,
+body[data-theme="light"] .ai-control-btn:hover {
+    background: rgba(45, 154, 95, 0.08);
+}
+
+body[data-theme="light"] .detail-btn-primary,
+body[data-theme="light"] .ai-control-btn.primary,
+body[data-theme="light"] .story-play-btn {
+    background: linear-gradient(135deg, var(--warm-gold) 0%, var(--warm-gold-light) 100%);
+    color: white;
+    border: none;
+}
+
+/* 标签浅色 */
+body[data-theme="light"] .location-tag,
+body[data-theme="light"] .culture-category,
+body[data-theme="light"] .blog-category,
+body[data-theme="light"] .story-item-category {
+    background: rgba(45, 154, 95, 0.1);
+    color: var(--warm-gold);
+    border-color: var(--glass-border);
+}
+
+/* 页脚浅色 */
+body[data-theme="light"] .footer {
+    background: linear-gradient(0deg, #eef2f0 0%, rgba(247, 249, 248, 0.95) 100%);
+    border-top: 1px solid var(--border-dark);
+}
+
+body[data-theme="light"] .footer-logo {
+    color: var(--warm-gold);
+}
+
+body[data-theme="light"] .footer p {
+    color: var(--text-muted);
+}
+
+body[data-theme="light"] .footer-links a {
+    color: var(--text-secondary);
+}
+
+body[data-theme="light"] .footer-links a:hover {
+    color: var(--warm-gold);
+}
+
+/* 章节导航浅色 */
+body[data-theme="light"] .chapter-line {
+    background: linear-gradient(180deg, var(--warm-gold) 0%, var(--glass-border) 50%, var(--warm-gold) 100%);
+}
+
+body[data-theme="light"] .chapter-label {
+    color: var(--warm-gold);
+}
+
+body[data-theme="light"] .chapter-dot {
+    background: white;
+    border-color: var(--glass-border);
+}
+
+body[data-theme="light"] .chapter-dot.active {
+    background: var(--warm-gold);
+    border-color: var(--warm-gold);
+    box-shadow: 0 0 15px rgba(45, 154, 95, 0.4);
+}
+
+/* 地图容器浅色 */
+body[data-theme="light"] .map-container,
+body[data-theme="light"] .location-detail-panel {
+    background: white;
+    border: 1px solid var(--border-dark);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+}
+
+body[data-theme="light"] .map-canvas {
+    background: linear-gradient(135deg, #e8f5ee 0%, #f5f9f6 100%);
+    border-color: var(--glass-border-light);
+}
+
+body[data-theme="light"] .map-marker {
+    background: var(--warm-gold);
+    border-color: white;
+    box-shadow: 0 0 15px rgba(45, 154, 95, 0.4);
+}
+
+body[data-theme="light"] .map-marker.active {
+    background: var(--terracotta);
+    box-shadow: 0 0 25px rgba(232, 124, 58, 0.6);
+}
+
+/* 时间线浅色 */
+body[data-theme="light"] .timeline-year {
+    color: var(--warm-gold);
+}
+
+body[data-theme="light"] .timeline-title {
+    color: var(--text-primary);
+}
+
+body[data-theme="light"] .timeline-desc {
+    color: var(--text-secondary);
+}
+
+/* 互动体验浅色 */
+body[data-theme="light"] .life-experience {
+    background: white;
+    border: 1px solid var(--border-dark);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+}
+
+body[data-theme="light"] .life-step-num {
+    background: var(--glass-bg);
+    border-color: var(--glass-border);
+    color: var(--text-muted);
+}
+
+body[data-theme="light"] .life-step.active .life-step-num {
+    background: var(--warm-gold);
+    color: white;
+    border-color: var(--warm-gold);
+}
+
+body[data-theme="light"] .life-step-label {
+    color: var(--text-muted);
+}
+
+body[data-theme="light"] .life-step.active .life-step-label {
+    color: var(--warm-gold);
+}
+
+body[data-theme="light"] .life-choice-card {
+    background: white;
+    border-color: var(--glass-border-light);
+}
+
+body[data-theme="light"] .life-choice-card:hover {
+    border-color: var(--warm-gold);
+    background: rgba(45, 154, 95, 0.05);
+}
+
+body[data-theme="light"] .life-choice-card.selected {
+    border-color: var(--warm-gold);
+    background: rgba(45, 154, 95, 0.1);
+}
+
+/* AI 助手浅色 */
+body[data-theme="light"] .ai-guide-btn {
+    background: linear-gradient(135deg, var(--warm-gold) 0%, var(--warm-gold-light) 100%);
+    box-shadow: 0 6px 25px rgba(45, 154, 95, 0.4);
+}
+
+body[data-theme="light"] .ai-guide-btn:hover {
+    box-shadow: 0 10px 40px rgba(45, 154, 95, 0.5);
+}
+
+body[data-theme="light"] .ai-guide-panel {
+    background: white;
+    border: 1px solid var(--border-dark);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+}
+
+body[data-theme="light"] .ai-guide-title {
+    color: var(--warm-gold);
+}
+
+body[data-theme="light"] .ai-guide-text {
+    color: var(--text-secondary);
+}
+
+/* 搜索建议浅色 */
+body[data-theme="light"] .search-suggestions {
+    background: white;
+    border: 1px solid var(--border-dark);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+body[data-theme="light"] .suggestion-item {
+    border-bottom-color: var(--glass-border-light);
+}
+
+body[data-theme="light"] .suggestion-item:hover {
+    background: rgba(45, 154, 95, 0.05);
+}
+
+body[data-theme="light"] .suggestion-type {
+    background: rgba(45, 154, 95, 0.1);
+    color: var(--warm-gold);
+}
+
+body[data-theme="light"] .suggestion-text {
+    color: var(--text-primary);
+}
+
+/* Slot 占位符浅色 */
+body[data-theme="light"] .slot-placeholder {
+    background: rgba(45, 154, 95, 0.05);
+    border-color: rgba(45, 154, 95, 0.3);
+}
+
+body[data-theme="light"] .slot-placeholder:hover {
+    background: rgba(45, 154, 95, 0.1);
+}
+
+body[data-theme="light"] .slot-placeholder .slot-badge {
+    background: rgba(45, 154, 95, 0.15);
+    color: var(--warm-gold);
+}
+
+body[data-theme="light"] .slot-placeholder .slot-desc {
+    color: var(--text-muted);
+}
+
+/* 信息卡片浅色 */
+body[data-theme="light"] .info-item {
+    background: #f5f7f6;
+    border-color: var(--glass-border-light);
+}
+
+body[data-theme="light"] .info-item .label {
+    color: var(--text-muted);
+}
+
+body[data-theme="light"] .info-item .value {
+    color: var(--warm-gold);
+}
+
+/* 进度条浅色 */
+body[data-theme="light"] .progress-track {
+    background: #e4e9e6;
+}
+
+body[data-theme="light"] .progress-fill {
+    background: linear-gradient(90deg, var(--warm-gold) 0%, var(--warm-gold-light) 100%);
+}
+
+/* 主题切换按钮特殊样式 */
+.theme-toggle-btn {
+    transition: all 0.3s ease;
+}
+
+.theme-toggle-btn:hover {
+    transform: rotate(15deg);
+}
+
+/* 主题切换过渡动画 */
+body {
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+body * {
+    transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+}
+
+/* 回退按钮浅色 */
+body[data-theme="light"] .back-link {
+    color: var(--warm-gold);
+    border-color: var(--glass-border);
+}
+
+body[data-theme="light"] .back-link:hover {
+    background: rgba(45, 154, 95, 0.08);
+    border-color: var(--warm-gold);
+}
+
+/* 内容详情浅色 */
+body[data-theme="light"] .detail-history {
+    background: #f5f7f6;
+    border-left-color: var(--warm-gold);
+}
+
+body[data-theme="light"] .detail-history-title {
+    color: var(--warm-gold);
+}
+
+body[data-theme="light"] .detail-history-content {
+    color: var(--text-secondary);
+}
+
+body[data-theme="light"] .guide-text {
+    background: #f5f7f6;
+    border-left-color: var(--warm-gold);
+}
+
+body[data-theme="light"] .guide-text {
+    color: var(--text-secondary);
+}
+
+/* 关联链接浅色 */
+body[data-theme="light"] .related-link {
+    background: #f5f7f6;
+    color: var(--text-secondary);
+}
+
+body[data-theme="light"] .related-link:hover {
+    color: var(--warm-gold);
+    border-color: var(--warm-gold);
+    background: rgba(45, 154, 95, 0.05);
+}
+
+/* Canvas容器浅色 */
+body[data-theme="light"] #canvas-container,
+body[data-theme="light"] .canvas-wrapper {
+    background: #eef2f0;
+    border-color: var(--glass-border-light);
+}
+
+/* 加载样式浅色 */
+body[data-theme="light"] .loading {
+    background: rgba(255, 255, 255, 0.95);
+    color: var(--warm-gold);
+}
+
+body[data-theme="light"] .spinner {
+    border-color: rgba(45, 154, 95, 0.2);
+    border-top-color: var(--warm-gold);
+}
+
+/* Tab 切换浅色 */
+body[data-theme="light"] .tab {
+    background: white;
+    border-color: var(--glass-border-light);
+    color: var(--text-secondary);
+}
+
+body[data-theme="light"] .tab:hover {
+    border-color: var(--warm-gold);
+    color: var(--warm-gold);
+}
+
+body[data-theme="light"] .tab.active {
+    background: linear-gradient(135deg, var(--warm-gold) 0%, var(--warm-gold-light) 100%);
+    color: white;
+    border-color: var(--warm-gold);
+}
+
+body[data-theme="light"] .tab-content {
+    background: white;
+    border-color: var(--border-dark);
+}
+
+/* CTA 区块浅色 */
+body[data-theme="light"] .section > div[style*="backdrop-filter"] {
+    background: white !important;
+    border-color: var(--border-dark) !important;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04) !important;
+}
+
+/* ============================================ */
+/* ===== 浅色主题：布局重构（参考图风格） ===== */
+/* ============================================ */
+
+/* --- 导航栏重构：扁平白色导航 --- */
+body[data-theme="light"] .header {
+    background: rgba(255, 255, 255, 0.98);
+    border-bottom: 1px solid var(--border-dark);
+    box-shadow: none;
+    height: 64px;
+}
+
+body[data-theme="light"] .header-content {
+    height: 64px;
+    max-width: 1200px;
+}
+
+body[data-theme="light"] .header-logo {
+    font-size: 1.15rem;
+    letter-spacing: 0.05em;
+}
+
+body[data-theme="light"] .header-logo::before {
+    display: none;
+}
+
+body[data-theme="light"] .header-nav {
+    gap: 2rem;
+}
+
+body[data-theme="light"] .header-nav a {
+    font-size: 0.92rem;
+    font-weight: 500;
+    position: relative;
+    padding: 0.3rem 0;
+}
+
+body[data-theme="light"] .header-nav a::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: var(--warm-gold);
+    transition: width 0.3s ease;
+}
+
+body[data-theme="light"] .header-nav a:hover,
+body[data-theme="light"] .header-nav a.active {
+    color: var(--warm-gold);
+}
+
+body[data-theme="light"] .header-nav a:hover::after,
+body[data-theme="light"] .header-nav a.active::after {
+    width: 100%;
+}
+
+/* 浅色主题：隐藏大CTA按钮，改为图标组 */
+body[data-theme="light"] .header-btn {
+    display: none;
+}
+
+body[data-theme="light"] .header-divider {
+    display: none;
+}
+
+body[data-theme="light"] .header-right {
+    gap: 0.5rem;
+}
+
+/* --- Hero区重构：左文右卡布局 --- */
+body[data-theme="light"] .hero-section .hero-content {
+    display: grid !important;
+    grid-template-columns: 1.2fr 0.8fr !important;
+    grid-template-rows: auto auto auto auto !important;
+    gap: 1.5rem 3rem !important;
+    max-width: 1200px !important;
+    margin: 0 auto !important;
+    padding: 3rem 2rem !important;
+}
+
+body[data-theme="light"] .hero-section .hero-bg {
+    background: linear-gradient(135deg, rgba(247, 249, 248, 0.92) 0%, rgba(247, 249, 248, 0.85) 100%),
+                linear-gradient(180deg, #f7f9f8 0%, #eef2f0 100%);
+}
+
+body[data-theme="light"] .hero-section .hero-bg::after {
+    display: none;
+}
+
+body[data-theme="light"] .hero-section .hero-content > .hero-chapter {
+    grid-column: 1 !important;
+    grid-row: 1 !important;
+}
+
+body[data-theme="light"] .hero-section .hero-content > .hero-title {
+    grid-column: 1 !important;
+    grid-row: 2 !important;
+}
+
+body[data-theme="light"] .hero-section .hero-content > .hero-subtitle {
+    grid-column: 1 !important;
+    grid-row: 3 !important;
+}
+
+body[data-theme="light"] .hero-section .hero-content > .hero-tagline {
+    grid-column: 1 !important;
+    grid-row: 3 !important;
+    margin-top: 2.5rem !important;
+}
+
+body[data-theme="light"] .hero-section .hero-content > .hero-buttons {
+    grid-column: 2 !important;
+    grid-row: 1 / 4 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 1.2rem !important;
+    justify-content: center !important;
+    align-items: stretch !important;
+    margin-bottom: 0 !important;
+}
+
+body[data-theme="light"] .hero-section .hero-content > .hero-stats {
+    grid-column: 1 !important;
+    grid-row: 4 !important;
+}
+
+/* --- 卡片式按钮（参考图风格） --- */
+body[data-theme="light"] .hero-btn-primary,
+body[data-theme="light"] .hero-btn-secondary {
+    width: 100%;
+    min-height: 120px;
+    padding: 1.8rem 2rem;
+    border-radius: 16px;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    text-align: left;
+    position: relative;
+    overflow: hidden;
+}
+
+body[data-theme="light"] .hero-btn-primary {
+    background: linear-gradient(135deg, var(--warm-gold) 0%, var(--warm-gold-light) 100%);
+    color: white;
+    box-shadow: 0 8px 32px rgba(45, 154, 95, 0.25);
+}
+
+body[data-theme="light"] .hero-btn-primary::before {
+    content: '🏛️';
+    position: absolute;
+    right: 1.5rem;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 3rem;
+    opacity: 0.2;
+}
+
+body[data-theme="light"] .hero-btn-primary::after {
+    content: '进入3D全景与特色建筑展示 →';
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 400;
+    opacity: 0.9;
+    margin-top: 0.8rem;
+}
+
+body[data-theme="light"] .hero-btn-primary {
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+body[data-theme="light"] .hero-btn-secondary {
+    background: white;
+    color: var(--text-primary);
+    border: 2px solid var(--border-dark);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+}
+
+body[data-theme="light"] .hero-btn-secondary::before {
+    content: '✨';
+    position: absolute;
+    right: 1.5rem;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 3rem;
+    opacity: 0.15;
+}
+
+body[data-theme="light"] .hero-btn-secondary::after {
+    content: '五分钟互动体验，解锁你的侨乡结局 →';
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 400;
+    color: var(--text-secondary);
+    margin-top: 0.8rem;
+}
+
+body[data-theme="light"] .hero-btn-secondary {
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+body[data-theme="light"] .hero-btn-secondary:hover {
+    border-color: var(--warm-gold);
+    background: white;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(45, 154, 95, 0.12);
+}
+
+body[data-theme="light"] .hero-btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 40px rgba(45, 154, 95, 0.35);
+}
+
+/* Hero标题区域调整 */
+body[data-theme="light"] .hero-title {
+    font-size: 4rem;
+    line-height: 1.1;
+    font-weight: 800;
+}
+
+body[data-theme="light"] .hero-subtitle {
+    font-size: 1.2rem;
+    color: var(--text-primary);
+    margin-top: 1rem;
+}
+
+body[data-theme="light"] .hero-tagline {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    margin-top: 0.8rem;
+}
+
+body[data-theme="light"] .hero-chapter {
+    display: inline-block;
+    font-size: 0.85rem;
+    letter-spacing: 0.15em;
+    padding: 0.4rem 1rem;
+}
+
+/* 隐藏3D控制面板 */
+body[data-theme="light"] .hero-3d-control {
+    display: none;
+}
+
+/* Hero统计数据 */
+body[data-theme="light"] .hero-stats {
+    grid-column: 1;
+    display: flex;
+    gap: 3rem;
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border-dark);
+}
+
+body[data-theme="light"] .stat-number {
+    font-size: 1.8rem;
+    font-weight: 700;
+}
+
+body[data-theme="light"] .stat-label {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+/* --- 章节导航：改为左侧竖向导航（浅色主题） --- */
+body[data-theme="light"] .chapter-nav {
+    position: fixed;
+    left: 2rem;
+    top: 50%;
+    transform: translateY(-50%);
+    flex-direction: column;
+    gap: 0;
+    padding: 1rem 0.8rem;
+    background: white;
+    border: 1px solid var(--border-dark);
+    border-radius: 24px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+    z-index: 100;
+}
+
+body[data-theme="light"] .chapter-label {
+    display: none;
+}
+
+body[data-theme="light"] .chapter-line {
+    display: none;
+}
+
+body[data-theme="light"] .chapter-dot {
+    width: 10px;
+    height: 10px;
+    margin: 0.6rem 0;
+    background: var(--border-dark);
+    border-color: transparent;
+    position: relative;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+body[data-theme="light"] .chapter-dot::before {
+    content: attr(data-label);
+    position: absolute;
+    left: calc(100% + 12px);
+    top: 50%;
+    transform: translateY(-50%);
+    white-space: nowrap;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+    background: white;
+    padding: 0.2rem 0.6rem;
+    border-radius: 6px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border: 1px solid var(--border-dark);
+}
+
+body[data-theme="light"] .chapter-dot:hover::before {
+    opacity: 1;
+}
+
+body[data-theme="light"] .chapter-dot.active {
+    background: var(--warm-gold);
+    box-shadow: 0 0 0 4px rgba(45, 154, 95, 0.15);
+}
+
+body[data-theme="light"] .chapter-dot:first-child,
+body[data-theme="light"] .chapter-dot:last-child {
+    display: none;
+}
+
+/* --- 内容区域间距调整 --- */
+body[data-theme="light"] .section {
+    padding: 5rem 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+body[data-theme="light"] .section-header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+body[data-theme="light"] .section-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+body[data-theme="light"] .section-subtitle {
+    color: var(--text-secondary);
+    font-size: 1rem;
+}
+
+body[data-theme="light"] .section-label {
+    font-size: 0.8rem;
+    letter-spacing: 0.2em;
+}
+
+/* --- 卡片样式优化（浅色主题） --- */
+body[data-theme="light"] .feature-card,
+body[data-theme="light"] .location-card,
+body[data-theme="light"] .archive-card,
+body[data-theme="light"] .timeline-content,
+body[data-theme="light"] .knowledge-card,
+body[data-theme="light"] .culture-card,
+body[data-theme="light"] .video-card,
+body[data-theme="light"] .blog-card,
+body[data-theme="light"] .team-card,
+body[data-theme="light"] .goal-card,
+body[data-theme="light"] .archive-detail-card,
+body[data-theme="light"] .knowledge-detail-card {
+    background: white;
+    border-radius: 16px;
+    border: 1px solid var(--border-dark);
+    padding: 1.8rem;
+    transition: all 0.3s ease;
+}
+
+body[data-theme="light"] .feature-card:hover,
+body[data-theme="light"] .location-card:hover,
+body[data-theme="light"] .archive-card:hover,
+body[data-theme="light"] .knowledge-card:hover,
+body[data-theme="light"] .culture-card:hover,
+body[data-theme="light"] .team-card:hover,
+body[data-theme="light"] .goal-card:hover,
+body[data-theme="light"] .archive-detail-card:hover,
+body[data-theme="light"] .knowledge-detail-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08);
+}
+
+/* --- 互动体验卡片（参考图网格布局） --- */
+body[data-theme="light"] .life-choice-card {
+    background: white;
+    border-radius: 14px;
+    border: 2px solid var(--border-dark);
+    padding: 1.5rem;
+    transition: all 0.3s ease;
+}
+
+body[data-theme="light"] .life-choice-card:hover {
+    border-color: var(--warm-gold);
+    transform: translateY(-4px);
+    box-shadow: 0 12px 28px rgba(45, 154, 95, 0.12);
+}
+
+body[data-theme="light"] .life-choice-card.selected {
+    border-color: var(--warm-gold);
+    background: linear-gradient(135deg, rgba(45, 154, 95, 0.05) 0%, rgba(45, 154, 95, 0.1) 100%);
+}
+
+/* --- 建筑故事卡片 --- */
+body[data-theme="light"] .story-item {
+    background: white;
+    border-radius: 16px;
+    border: 1px solid var(--border-dark);
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+body[data-theme="light"] .story-item:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.1);
+}
+
+/* --- 项目成果卡片（四列网格） --- */
+body[data-theme="light"] .achievement-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.5rem;
+}
+
+/* --- 时间线优化 --- */
+body[data-theme="light"] .timeline-item {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem 1.8rem;
+    border: 1px solid var(--border-dark);
+}
+
+/* --- 页脚优化 --- */
+body[data-theme="light"] .footer {
+    background: #2d3436;
+    color: #b2bec3;
+    border-top: none;
+    margin-top: 4rem;
+    padding: 3rem 2rem 2rem;
+}
+
+body[data-theme="light"] .footer-logo {
+    color: white;
+}
+
+body[data-theme="light"] .footer a {
+    color: #dfe6e9;
+}
+
+body[data-theme="light"] .footer a:hover {
+    color: var(--warm-gold-light);
+}
+
+/* --- 响应式调整 --- */
+@media (max-width: 900px) {
+    body[data-theme="light"] .hero-content {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+    }
+    
+    body[data-theme="light"] .hero-buttons {
+        grid-column: 1;
+        grid-row: auto;
+        flex-direction: row;
+    }
+    
+    body[data-theme="light"] .hero-btn-primary,
+    body[data-theme="light"] .hero-btn-secondary {
+        min-height: 100px;
+    }
+    
+    body[data-theme="light"] .chapter-nav {
+        display: none;
+    }
+    
+    body[data-theme="light"] .achievement-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* --- 隐藏Hero区"向下滑动"指示（用CSS创建） --- */
+body[data-theme="light"] .hero-section::after {
+    content: '向下滑动 发现更多';
+    position: absolute;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    letter-spacing: 0.1em;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+body[data-theme="light"] .hero-section::before {
+    content: '↓';
+    position: absolute;
+    bottom: 3.8rem;
+    left: 50%;
+    transform: translateX(-50%);
+    color: var(--warm-gold);
+    font-size: 1rem;
+    animation: bounce 2s infinite;
+}
+
+@keyframes bounce {
+    0%, 20%, 50%, 80%, 100% { transform: translate(-50%, 0); }
+    40% { transform: translate(-50%, -8px); }
+    60% { transform: translate(-50%, -4px); }
+}
+
+/* --- 内容卡片数字标签 --- */
+body[data-theme="light"] .feature-card::before,
+body[data-theme="light"] .knowledge-card::before {
+    font-family: 'Georgia', serif;
+    color: rgba(45, 154, 95, 0.2);
+    font-size: 4rem;
+    font-weight: 700;
+    position: absolute;
+    top: 1rem;
+    right: 1.5rem;
+    line-height: 1;
+}
+
+/* --- 按钮统一圆角 --- */
+body[data-theme="light"] button {
+    border-radius: 12px;
+}
+
+/* --- 滚动条样式 --- */
+body[data-theme="light"] ::-webkit-scrollbar {
+    width: 8px;
+}
+
+body[data-theme="light"] ::-webkit-scrollbar-track {
+    background: var(--deep-blue);
+}
+
+body[data-theme="light"] ::-webkit-scrollbar-thumb {
+    background: var(--border-dark);
+    border-radius: 4px;
+}
+
+body[data-theme="light"] ::-webkit-scrollbar-thumb:hover {
+    background: var(--warm-gold);
+}
+
+/* ============================================ */
+/* ===== 浅色主题：实质性布局重构 ===== */
+/* ===== 参考图：分区布局 + 按键入口变化 ===== */
+/* ===== 注：首页已改为导览模式，使用portal-cards-grid ===== */
+/* ============================================ */
+
+/* --- 认识侨乡区：三栏图标卡 --- */
+body[data-theme="light"] #about-qiaoxiang .qiaoxiang-cards {
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 1.5rem !important;
+}
+
+body[data-theme="light"] #about-qiaoxiang .qiaoxiang-cards > div {
+    padding: 2rem 1.5rem !important;
+    border-radius: 18px !important;
+    text-align: left !important;
+    border: 1px solid var(--border-dark) !important;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+}
+
+body[data-theme="light"] #about-qiaoxiang .qiaoxiang-cards > div > div:first-child {
+    font-size: 2.5rem !important;
+    margin-bottom: 0.75rem !important;
+}
+
+/* --- 项目成果区 --- */
+body[data-theme="light"] #achievement .achievement-grid {
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: 1.2rem !important;
+}
+
+body[data-theme="light"] #achievement .achievement-grid > div {
+    padding: 1.5rem 1rem !important;
+    border-radius: 14px !important;
+}
+
+/* --- CTA区 --- */
+body[data-theme="light"] .main > section:last-child {
+    padding: 4rem 2rem;
+}
+
+body[data-theme="light"] .main > section:last-child > div {
+    background: linear-gradient(135deg, var(--warm-gold) 0%, var(--warm-gold-light) 100%) !important;
+    color: white !important;
+    border-radius: 24px !important;
+    border: none !important;
+    max-width: 900px !important;
+}
+
+body[data-theme="light"] .main > section:last-child h2 {
+    color: white !important;
+}
+
+body[data-theme="light"] .main > section:last-child p {
+    color: rgba(255, 255, 255, 0.9) !important;
+}
+
+body[data-theme="light"] .main > section:last-child .hero-btn-primary {
+    background: white !important;
+    color: var(--warm-gold) !important;
+}
+
+body[data-theme="light"] .main > section:last-child .hero-btn-secondary {
+    background: rgba(255, 255, 255, 0.2) !important;
+    color: white !important;
+    border: 2px solid rgba(255, 255, 255, 0.4) !important;
+}
+
+/* --- 深色主题保持原样，只有浅色主题应用新布局 --- */
+
+/* 响应式：小屏幕改回单列 */
+@media (max-width: 900px) {
+    body[data-theme="light"] #about-qiaoxiang .qiaoxiang-cards {
+        grid-template-columns: 1fr !important;
+    }
+    
+    body[data-theme="light"] #achievement .achievement-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+}
+
+/* --- 深色主题保持不变 --- */
+body:not([data-theme="light"]) #tour::before,
+body:not([data-theme="light"]) .hero-section::after,
+body:not([data-theme="light"]) .hero-section::before {
+    display: none;
+}
+
+/* ============================================ */
+/* ===== 导览入口卡片样式（实景图背景） ===== */
+/* ===== 每张卡片使用宝源坊实景照片 ===== */
+/* ============================================ */
+
+.portal-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0;
+}
+
+/* 区块容器 - 去掉装饰背景，保持简洁 */
+.portal-container {
+    position: relative;
+    padding: 1.5rem 0.5rem;
+    margin: 0.5rem 0;
+    overflow: visible;
+}
+
+.portal-container::before,
+.portal-container::after {
+    display: none !important;
+}
+
+/* --- 入口卡片：实景图全背景 --- */
+.portal-entry-card {
+    display: block !important;
+    position: relative !important;
+    aspect-ratio: 4/3;
+    border-radius: 16px !important;
+    overflow: hidden !important;
+    text-decoration: none !important;
+    color: white !important;
+    cursor: pointer !important;
+    transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35), 0 2px 6px rgba(0, 0, 0, 0.2) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    -webkit-appearance: none !important;
+    appearance: none !important;
+}
+
+/* 照片背景层 */
+.portal-card-bg {
+    position: absolute;
+    inset: 0;
+    background-image: var(--card-bg);
+    background-size: cover;
+    background-position: center;
+    transition: transform 0.6s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+/* 底部渐变遮罩层（确保文字可读） */
+.portal-entry-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg,
+        rgba(0, 0, 0, 0.05) 0%,
+        rgba(0, 0, 0, 0.15) 40%,
+        rgba(0, 0, 0, 0.55) 75%,
+        rgba(0, 0, 0, 0.85) 100%);
+    z-index: 1;
+    transition: background 0.4s ease;
+}
+
+/* 顶部金色边框装饰 */
+.portal-entry-card::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, var(--warm-gold), transparent);
+    opacity: 0.6;
+    z-index: 3;
+}
+
+/* 文字内容区 */
+.portal-card-content {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 1.25rem 1.25rem 1.1rem;
+    z-index: 2;
+    color: white;
+    text-align: left;
+}
+
+/* 徽章标签 */
+.portal-card-badge {
+    display: inline-block;
+    padding: 0.2rem 0.65rem;
+    background: rgba(212, 175, 55, 0.9);
+    color: #1a2a4a;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    border-radius: 4px;
+    margin-bottom: 0.6rem;
+    backdrop-filter: blur(8px);
+}
+
+.portal-card-title {
+    color: #fff !important;
+    font-size: 1.15rem !important;
+    font-weight: 700 !important;
+    letter-spacing: 1px !important;
+    margin: 0 0 0.3rem 0 !important;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+    line-height: 1.3;
+}
+
+.portal-card-desc {
+    color: rgba(255, 255, 255, 0.85) !important;
+    font-size: 0.82rem !important;
+    line-height: 1.5 !important;
+    margin: 0 !important;
+    text-decoration: none !important;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
+}
+
+.portal-entry-card:link,
+.portal-entry-card:visited {
+    text-decoration: none !important;
+    color: white !important;
+}
+
+/* --- Hover 效果 --- */
+.portal-entry-card:hover {
+    transform: translateY(-6px) scale(1.02) !important;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45), 0 6px 15px rgba(0, 0, 0, 0.3) !important;
+    border-color: rgba(212, 175, 55, 0.5) !important;
+}
+
+.portal-entry-card:hover .portal-card-bg {
+    transform: scale(1.08);
+}
+
+.portal-entry-card:hover::before {
+    background: linear-gradient(180deg,
+        rgba(0, 0, 0, 0.1) 0%,
+        rgba(0, 0, 0, 0.3) 35%,
+        rgba(0, 0, 0, 0.65) 70%,
+        rgba(0, 0, 0, 0.9) 100%);
+}
+
+.portal-entry-card:hover::after {
+    height: 4px;
+    opacity: 1;
+}
+
+.portal-entry-card:hover .portal-card-badge {
+    background: var(--warm-gold);
+    box-shadow: 0 0 16px rgba(212, 175, 55, 0.5);
+}
+
+/* --- 主要入口卡片（带金色发光边框） --- */
+.portal-entry-card.primary {
+    border-color: rgba(212, 175, 55, 0.6) !important;
+    box-shadow: 0 4px 25px rgba(212, 175, 55, 0.2), 0 2px 6px rgba(0, 0, 0, 0.35) !important;
+}
+
+.portal-entry-card.primary::after {
+    height: 4px;
+    opacity: 0.8;
+    background: linear-gradient(90deg, var(--terracotta), var(--warm-gold), var(--terracotta));
+}
+
+.portal-entry-card.primary .portal-card-badge {
+    background: linear-gradient(135deg, var(--warm-gold), var(--terracotta));
+    color: white;
+}
+
+.portal-entry-card.primary:hover {
+    box-shadow: 0 24px 55px rgba(212, 175, 55, 0.35), 0 6px 15px rgba(0, 0, 0, 0.35) !important;
+}
+
+/* --- 浅色主题适配 --- */
+body[data-theme="light"] .portal-entry-card {
+    box-shadow: 0 6px 25px rgba(0, 0, 0, 0.12), 0 2px 6px rgba(0, 0, 0, 0.06) !important;
+    border-color: rgba(212, 175, 55, 0.3) !important;
+}
+
+body[data-theme="light"] .portal-entry-card::before {
+    background: linear-gradient(180deg,
+        rgba(20, 30, 50, 0.05) 0%,
+        rgba(20, 30, 50, 0.1) 40%,
+        rgba(20, 30, 50, 0.45) 75%,
+        rgba(20, 30, 50, 0.75) 100%);
+}
+
+body[data-theme="light"] .portal-entry-card:hover {
+    box-shadow: 0 20px 45px rgba(0, 0, 0, 0.15) !important;
+    border-color: var(--warm-gold) !important;
+}
+
+body[data-theme="light"] .portal-entry-card:hover::before {
+    background: linear-gradient(180deg,
+        rgba(20, 30, 50, 0.1) 0%,
+        rgba(20, 30, 50, 0.2) 35%,
+        rgba(20, 30, 50, 0.55) 70%,
+        rgba(20, 30, 50, 0.85) 100%);
+}
+
+body[data-theme="light"] .portal-card-title {
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.7);
+}
+
+body[data-theme="light"] .portal-card-desc {
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
+}
+
+body[data-theme="light"] .portal-entry-card.primary {
+    border-color: var(--warm-gold) !important;
+    box-shadow: 0 6px 30px rgba(212, 175, 55, 0.2), 0 2px 6px rgba(0, 0, 0, 0.06) !important;
+}
+
+/* ============================================ */
+/* ===== 响应式：导览卡片 ===== */
+/* ============================================ */
+
+@media (max-width: 900px) {
+    .portal-cards-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    .portal-entry-card {
+        aspect-ratio: 16/9;
+    }
+    .portal-card-content {
+        padding: 1rem;
+    }
+}
+
+@media (max-width: 600px) {
+    .portal-container {
+        padding: 1rem 0.25rem;
+    }
+    .portal-entry-card {
+        aspect-ratio: 16/10;
+    }
+    .portal-card-title {
+        font-size: 1rem !important;
+    }
+    .portal-card-desc {
+        font-size: 0.75rem !important;
+    }
+    .portal-card-badge {
+        font-size: 0.65rem;
+        padding: 0.15rem 0.5rem;
+    }
+}

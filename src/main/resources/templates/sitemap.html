@@ -4,19 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>网站导览 - 薪火侨乡</title>
-    <link rel="stylesheet" href="/css/qiaoyun.css">
+    <link rel="stylesheet" href="/css/qiaoyun.css?v=20260808">
     <style>
         * { box-sizing: border-box; }
         html, body { height: 100%; margin: 0; }
         body { display: flex; flex-direction: column; min-height: 100vh; }
+
         .portal-container {
             flex: 1;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            padding: 2rem 1.5rem;
+            padding: 6rem 1.5rem 2rem;
         }
+
         .portal-title {
             text-align: center;
             margin-bottom: 2rem;
@@ -26,61 +28,176 @@
             font-size: 2rem;
             letter-spacing: 4px;
             margin-bottom: 0.5rem;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
         }
         .portal-title p {
             color: var(--text-secondary);
             font-size: 0.95rem;
         }
+
         .portal-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             gap: 1.25rem;
             width: 100%;
-            max-width: 1100px;
+            max-width: 1200px;
         }
+
         .portal-card {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 1.75rem 1rem;
-            background: var(--glass-bg);
-            border: 1px solid var(--glass-border);
-            border-radius: 16px;
-            text-decoration: none;
-            color: inherit;
-            cursor: pointer;
-            transition: all 0.3s;
-            text-align: center;
+            display: block !important;
+            position: relative !important;
+            aspect-ratio: 4/3;
+            border-radius: 16px !important;
+            overflow: hidden !important;
+            text-decoration: none !important;
+            color: white !important;
+            cursor: pointer !important;
+            transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35), 0 2px 6px rgba(0, 0, 0, 0.2) !important;
+            border: 1px solid rgba(255, 255, 255, 0.08) !important;
+            -webkit-appearance: none !important;
+            appearance: none !important;
         }
+
         .portal-card:hover {
-            border-color: var(--warm-gold);
-            transform: translateY(-4px);
-            box-shadow: 0 8px 24px rgba(212, 175, 55, 0.2);
+            transform: translateY(-6px) scale(1.02) !important;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5), 0 4px 12px rgba(212, 175, 55, 0.3) !important;
+            border-color: rgba(212, 175, 55, 0.5) !important;
         }
-        .portal-card-icon {
-            font-size: 2.5rem;
-            margin-bottom: 0.75rem;
+
+        .portal-card-bg {
+            position: absolute;
+            inset: 0;
+            background-image: var(--card-bg);
+            background-size: cover;
+            background-position: center;
+            transition: transform 0.6s cubic-bezier(0.25, 0.8, 0.25, 1);
         }
+
+        .portal-card:hover .portal-card-bg {
+            transform: scale(1.08);
+        }
+
+        .portal-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg,
+                rgba(0, 0, 0, 0.05) 0%,
+                rgba(0, 0, 0, 0.15) 40%,
+                rgba(0, 0, 0, 0.55) 75%,
+                rgba(0, 0, 0, 0.85) 100%);
+            z-index: 1;
+            transition: background 0.4s ease;
+        }
+
+        .portal-card:hover::before {
+            background: linear-gradient(180deg,
+                rgba(0, 0, 0, 0.1) 0%,
+                rgba(0, 0, 0, 0.25) 40%,
+                rgba(0, 0, 0, 0.6) 75%,
+                rgba(0, 0, 0, 0.9) 100%);
+        }
+
+        .portal-card-content {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 1.25rem 1.1rem 1.1rem;
+            z-index: 2;
+            color: white;
+        }
+
+        .portal-card-badge {
+            position: absolute;
+            top: 0.85rem;
+            left: 0.85rem;
+            padding: 0.25rem 0.65rem;
+            background: linear-gradient(135deg, rgba(212, 175, 55, 0.95), rgba(196, 98, 16, 0.9));
+            color: #1a2a4a;
+            font-size: 0.68rem;
+            font-weight: 700;
+            border-radius: 6px;
+            letter-spacing: 0.5px;
+            z-index: 3;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            text-shadow: none;
+        }
+
         .portal-card-title {
-            color: var(--warm-gold);
-            font-size: 1rem;
-            font-weight: 600;
+            font-size: 1.05rem;
+            font-weight: 700;
             margin-bottom: 0.3rem;
             letter-spacing: 0.5px;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8), 0 0 20px rgba(0, 0, 0, 0.4);
+            color: white;
         }
+
         .portal-card-desc {
-            color: var(--text-muted);
             font-size: 0.78rem;
+            color: rgba(255, 255, 255, 0.9);
             line-height: 1.4;
+            text-shadow: 0 1px 6px rgba(0, 0, 0, 0.8);
         }
+
         .portal-card.primary {
-            background: linear-gradient(135deg, rgba(212, 175, 55, 0.12), rgba(196, 98, 16, 0.08));
-            border-color: rgba(212, 175, 55, 0.4);
+            border: 2px solid rgba(212, 175, 55, 0.6) !important;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35), 0 0 24px rgba(212, 175, 55, 0.2), 0 2px 6px rgba(0, 0, 0, 0.2) !important;
         }
-        .portal-card.primary .portal-card-icon {
-            color: var(--warm-gold);
+
+        .portal-card.primary:hover {
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5), 0 0 32px rgba(212, 175, 55, 0.4) !important;
         }
+
+        /* 浅色主题样式 - 加强遮罩和文字可读性 */
+        body[data-theme="light"] .portal-container {
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.5) 0%, rgba(247, 249, 248, 0.8) 100%);
+        }
+
+        body[data-theme="light"] .portal-card::before {
+            background: linear-gradient(180deg,
+                rgba(0, 0, 0, 0.2) 0%,
+                rgba(0, 0, 0, 0.35) 30%,
+                rgba(0, 0, 0, 0.65) 65%,
+                rgba(0, 0, 0, 0.9) 100%);
+        }
+
+        body[data-theme="light"] .portal-card:hover::before {
+            background: linear-gradient(180deg,
+                rgba(0, 0, 0, 0.25) 0%,
+                rgba(0, 0, 0, 0.45) 30%,
+                rgba(0, 0, 0, 0.75) 65%,
+                rgba(0, 0, 0, 0.92) 100%);
+        }
+
+        body[data-theme="light"] .portal-card-title {
+            color: #ffffff;
+            text-shadow: 0 2px 12px rgba(0, 0, 0, 1), 0 0 28px rgba(0, 0, 0, 0.7), 0 1px 3px rgba(0, 0, 0, 0.8);
+        }
+
+        body[data-theme="light"] .portal-card-desc {
+            color: rgba(255, 255, 255, 0.98);
+            text-shadow: 0 1px 8px rgba(0, 0, 0, 0.9), 0 1px 2px rgba(0, 0, 0, 0.7);
+        }
+
+        body[data-theme="light"] .portal-card-badge {
+            box-shadow: 0 3px 12px rgba(0, 0, 0, 0.4);
+        }
+
+        body[data-theme="light"] .portal-title h1 {
+            color: var(--warm-gold-dark);
+            text-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+        }
+
+        body[data-theme="light"] .portal-title p {
+            color: #5a6a7a;
+        }
+
+        body[data-theme="light"] .portal-footer {
+            color: #7a8a9a;
+        }
+
         .portal-footer {
             text-align: center;
             padding: 1rem;
@@ -91,6 +208,7 @@
             color: var(--warm-gold);
             text-decoration: none;
         }
+
         @media (max-width: 900px) {
             .portal-grid { grid-template-columns: repeat(2, 1fr); }
             .portal-title h1 { font-size: 1.5rem; }
@@ -117,6 +235,7 @@
                 <a href="/admin">后台登录</a>
             </nav>
             <div class="header-right">
+                <button class="header-icon-btn theme-toggle-btn" id="theme-toggle" title="切换主题" onclick="toggleTheme()">🌙</button>
                 <button class="header-btn" onclick="window.location.href='/map'">开始云游</button>
             </div>
         </div>
@@ -130,115 +249,163 @@
 
         <div class="portal-grid">
             <!-- 01 首页 -->
-            <a href="/" class="portal-card primary">
-                <div class="portal-card-icon">🏠</div>
-                <div class="portal-card-title">首页</div>
-                <div class="portal-card-desc">遇见薪火侨乡</div>
+            <a href="/" class="portal-card primary" style="--card-bg: url('/images/sitemap-home.jpg')">
+                <div class="portal-card-bg"></div>
+                <div class="portal-card-content">
+                    <span class="portal-card-badge">首页</span>
+                    <h3 class="portal-card-title">薪火侨乡</h3>
+                    <p class="portal-card-desc">遇见薪火侨乡</p>
+                </div>
             </a>
 
             <!-- 02 云游侨乡 -->
-            <a href="/map" class="portal-card primary">
-                <div class="portal-card-icon">🗺️</div>
-                <div class="portal-card-title">云游侨乡</div>
-                <div class="portal-card-desc">宝源坊3D全景</div>
+            <a href="/map" class="portal-card primary" style="--card-bg: url('/images/sitemap-map.jpg')">
+                <div class="portal-card-bg"></div>
+                <div class="portal-card-content">
+                    <span class="portal-card-badge">360°</span>
+                    <h3 class="portal-card-title">云游侨乡</h3>
+                    <p class="portal-card-desc">宝源坊3D全景</p>
+                </div>
             </a>
 
             <!-- 03 我的侨乡人生 -->
-            <a href="/#life" class="portal-card primary">
-                <div class="portal-card-icon">✨</div>
-                <div class="portal-card-title">我的侨乡人生</div>
-                <div class="portal-card-desc">互动体验 · 五分钟</div>
+            <a href="/#life" class="portal-card primary" style="--card-bg: url('/images/sitemap-life.jpg')">
+                <div class="portal-card-bg"></div>
+                <div class="portal-card-content">
+                    <span class="portal-card-badge">互动</span>
+                    <h3 class="portal-card-title">我的侨乡人生</h3>
+                    <p class="portal-card-desc">互动体验 · 五分钟</p>
+                </div>
             </a>
 
             <!-- 04 建筑故事 -->
-            <a href="/#building-story" class="portal-card primary">
-                <div class="portal-card-icon">🏛️</div>
-                <div class="portal-card-title">建筑故事</div>
-                <div class="portal-card-desc">宝源坊6栋特色建筑</div>
+            <a href="/#building-story" class="portal-card primary" style="--card-bg: url('/images/sitemap-story.jpg')">
+                <div class="portal-card-bg"></div>
+                <div class="portal-card-content">
+                    <span class="portal-card-badge">故事</span>
+                    <h3 class="portal-card-title">建筑故事</h3>
+                    <p class="portal-card-desc">宝源坊6栋特色建筑</p>
+                </div>
             </a>
 
             <!-- 05 项目成果 -->
-            <a href="/#achievement" class="portal-card primary">
-                <div class="portal-card-icon">📊</div>
-                <div class="portal-card-title">项目成果</div>
-                <div class="portal-card-desc">航拍 · 建模 · 记录</div>
+            <a href="/#achievement" class="portal-card primary" style="--card-bg: url('/images/sitemap-achievement.jpg')">
+                <div class="portal-card-bg"></div>
+                <div class="portal-card-content">
+                    <span class="portal-card-badge">成果</span>
+                    <h3 class="portal-card-title">项目成果</h3>
+                    <p class="portal-card-desc">航拍 · 建模 · 记录</p>
+                </div>
             </a>
 
             <!-- 06 知识库 -->
-            <a href="/knowledge" class="portal-card">
-                <div class="portal-card-icon">📚</div>
-                <div class="portal-card-title">知识库</div>
-                <div class="portal-card-desc">侨乡建筑知识</div>
+            <a href="/knowledge" class="portal-card" style="--card-bg: url('/images/sitemap-knowledge.jpg')">
+                <div class="portal-card-bg"></div>
+                <div class="portal-card-content">
+                    <span class="portal-card-badge">知识</span>
+                    <h3 class="portal-card-title">知识库</h3>
+                    <p class="portal-card-desc">侨乡建筑知识</p>
+                </div>
             </a>
 
             <!-- 07 侨乡故事 -->
-            <a href="/stories" class="portal-card">
-                <div class="portal-card-icon">📖</div>
-                <div class="portal-card-title">侨乡故事</div>
-                <div class="portal-card-desc">华侨远行与归来</div>
+            <a href="/stories" class="portal-card" style="--card-bg: url('/images/sitemap-stories.jpg')">
+                <div class="portal-card-bg"></div>
+                <div class="portal-card-content">
+                    <span class="portal-card-badge">故事</span>
+                    <h3 class="portal-card-title">侨乡故事</h3>
+                    <p class="portal-card-desc">华侨远行与归来</p>
+                </div>
             </a>
 
             <!-- 08 田野档案 -->
-            <a href="/archive" class="portal-card">
-                <div class="portal-card-icon">📂</div>
-                <div class="portal-card-title">田野档案</div>
-                <div class="portal-card-desc">实地调研采集</div>
+            <a href="/archive" class="portal-card" style="--card-bg: url('/images/sitemap-archive.jpg')">
+                <div class="portal-card-bg"></div>
+                <div class="portal-card-content">
+                    <span class="portal-card-badge">档案</span>
+                    <h3 class="portal-card-title">田野档案</h3>
+                    <p class="portal-card-desc">实地调研采集</p>
+                </div>
             </a>
 
             <!-- 09 建筑解剖 -->
-            <a href="/anatomy" class="portal-card">
-                <div class="portal-card-icon">🔬</div>
-                <div class="portal-card-title">建筑解剖</div>
-                <div class="portal-card-desc">拆解建筑结构</div>
+            <a href="/anatomy" class="portal-card" style="--card-bg: url('/images/sitemap-anatomy.jpg')">
+                <div class="portal-card-bg"></div>
+                <div class="portal-card-content">
+                    <span class="portal-card-badge">解剖</span>
+                    <h3 class="portal-card-title">建筑解剖</h3>
+                    <p class="portal-card-desc">拆解建筑结构</p>
+                </div>
             </a>
 
             <!-- 10 老照片对比 -->
-            <a href="/photo-compare" class="portal-card">
-                <div class="portal-card-icon">📷</div>
-                <div class="portal-card-title">老照片对比</div>
-                <div class="portal-card-desc">百年变迁对比</div>
+            <a href="/photo-compare" class="portal-card" style="--card-bg: url('/images/sitemap-photo-compare.jpg')">
+                <div class="portal-card-bg"></div>
+                <div class="portal-card-content">
+                    <span class="portal-card-badge">对比</span>
+                    <h3 class="portal-card-title">老照片对比</h3>
+                    <p class="portal-card-desc">百年变迁对比</p>
+                </div>
             </a>
 
             <!-- 11 侨批文化 -->
-            <a href="/qiaopi" class="portal-card">
-                <div class="portal-card-icon">✉️</div>
-                <div class="portal-card-title">侨批文化</div>
-                <div class="portal-card-desc">华侨家书故事</div>
+            <a href="/qiaopi" class="portal-card" style="--card-bg: url('/images/sitemap-qiaopi.jpg')">
+                <div class="portal-card-bg"></div>
+                <div class="portal-card-content">
+                    <span class="portal-card-badge">文化</span>
+                    <h3 class="portal-card-title">侨批文化</h3>
+                    <p class="portal-card-desc">华侨家书故事</p>
+                </div>
             </a>
 
             <!-- 12 方言学习 -->
-            <a href="/dialect" class="portal-card">
-                <div class="portal-card-icon">🗣️</div>
-                <div class="portal-card-title">方言学习</div>
-                <div class="portal-card-desc">学几句开平话</div>
+            <a href="/dialect" class="portal-card" style="--card-bg: url('/images/sitemap-dialect.jpg')">
+                <div class="portal-card-bg"></div>
+                <div class="portal-card-content">
+                    <span class="portal-card-badge">方言</span>
+                    <h3 class="portal-card-title">方言学习</h3>
+                    <p class="portal-card-desc">学几句开平话</p>
+                </div>
             </a>
 
             <!-- 13 知识答题 -->
-            <a href="/quiz" class="portal-card">
-                <div class="portal-card-icon">🧠</div>
-                <div class="portal-card-title">知识答题</div>
-                <div class="portal-card-desc">侨乡文化挑战</div>
+            <a href="/quiz" class="portal-card" style="--card-bg: url('/images/sitemap-quiz.jpg')">
+                <div class="portal-card-bg"></div>
+                <div class="portal-card-content">
+                    <span class="portal-card-badge">挑战</span>
+                    <h3 class="portal-card-title">知识答题</h3>
+                    <p class="portal-card-desc">侨乡文化挑战</p>
+                </div>
             </a>
 
             <!-- 14 虚拟盖章 -->
-            <a href="/stamps" class="portal-card">
-                <div class="portal-card-icon">📮</div>
-                <div class="portal-card-title">虚拟盖章</div>
-                <div class="portal-card-desc">收集特色印章</div>
+            <a href="/stamps" class="portal-card" style="--card-bg: url('/images/sitemap-stamps.jpg')">
+                <div class="portal-card-bg"></div>
+                <div class="portal-card-content">
+                    <span class="portal-card-badge">收集</span>
+                    <h3 class="portal-card-title">虚拟盖章</h3>
+                    <p class="portal-card-desc">收集特色印章</p>
+                </div>
             </a>
 
             <!-- 15 关于我们 -->
-            <a href="/about" class="portal-card">
-                <div class="portal-card-icon">🏢</div>
-                <div class="portal-card-title">关于我们</div>
-                <div class="portal-card-desc">团队 · 合作 · 项目</div>
+            <a href="/about" class="portal-card" style="--card-bg: url('/images/sitemap-about.jpg')">
+                <div class="portal-card-bg"></div>
+                <div class="portal-card-content">
+                    <span class="portal-card-badge">团队</span>
+                    <h3 class="portal-card-title">关于我们</h3>
+                    <p class="portal-card-desc">团队 · 合作 · 项目</p>
+                </div>
             </a>
 
             <!-- 16 返回首页 -->
-            <a href="/" class="portal-card">
-                <div class="portal-card-icon">←</div>
-                <div class="portal-card-title">返回首页</div>
-                <div class="portal-card-desc">遇见薪火侨乡</div>
+            <a href="/" class="portal-card" style="--card-bg: url('/images/sitemap-return.jpg')">
+                <div class="portal-card-bg"></div>
+                <div class="portal-card-content">
+                    <span class="portal-card-badge">返回</span>
+                    <h3 class="portal-card-title">返回首页</h3>
+                    <p class="portal-card-desc">遇见薪火侨乡</p>
+                </div>
             </a>
         </div>
     </div>
@@ -246,5 +413,6 @@
     <div class="portal-footer">
         <p>© 2026 侨韵薪火实践团 · <a href="/">薪火侨乡</a> · <a href="/admin/upload" style="color: var(--text-muted); text-decoration: none;">管理入口</a></p>
     </div>
+    <script src="/js/theme-switch.js?v=20260808"></script>
 </body>
 </html>

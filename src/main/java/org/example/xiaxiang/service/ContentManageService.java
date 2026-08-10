@@ -74,6 +74,7 @@ public class ContentManageService {
         list.add(buildPhotoCompareDef());
         list.add(buildTeamDef());
         list.add(buildArchiveDef());
+        list.add(buildLocationDef());
         return list;
     }
 
@@ -207,6 +208,21 @@ public class ContentManageService {
             field("role", "角色", "text", false, null),
             field("major", "专业", "text", false, null),
             field("bio", "简介", "textarea", false, null)
+        ));
+        return m;
+    }
+
+    private ModuleDef buildLocationDef() {
+        ModuleDef m = new ModuleDef();
+        m.setKey("locations"); m.setName("建筑故事"); m.setModuleIndex(2); m.setSlotPrefix("IMG");
+        m.setFields(Arrays.asList(
+            field("name", "建筑名称", "text", true, null),
+            field("number", "编号", "text", false, null),
+            field("description", "简短描述", "textarea", false, null),
+            field("history", "历史背景", "textarea", false, null),
+            field("audioText", "AI讲解文案", "textarea", false, null),
+            field("xCoordinate", "地图X坐标", "text", false, null),
+            field("yCoordinate", "地图Y坐标", "text", false, null)
         ));
         return m;
     }
@@ -550,6 +566,7 @@ public class ContentManageService {
             case "photoCompares": return (List<Object>) (List<?>) appProperties.getPhotoCompares();
             case "team": return (List<Object>) (List<?>) appProperties.getTeam();
             case "archives": return (List<Object>) (List<?>) appProperties.getArchives();
+            case "locations": return (List<Object>) (List<?>) appProperties.getLocations();
             default: throw new IllegalArgumentException("未知模块: " + moduleKey);
         }
     }
@@ -590,6 +607,9 @@ public class ContentManageService {
                     break;
                 case "archives":
                     item = AppProperties.ArchiveItem.class.getDeclaredConstructor().newInstance();
+                    break;
+                case "locations":
+                    item = AppProperties.Location.class.getDeclaredConstructor().newInstance();
                     break;
                 default:
                     throw new IllegalArgumentException("未知模块: " + moduleKey);
@@ -713,6 +733,11 @@ public class ContentManageService {
             case "photoCompares":
                 slots.add(String.format("%s-%02d-%02d", prefix, module, posIndex * 2 - 1));  // 老照片
                 slots.add(String.format("%s-%02d-%02d", prefix, module, posIndex * 2));       // 新照片
+                break;
+            case "locations":
+                slots.add(String.format("%s-%02d-%02d", prefix, module, posIndex));   // 封面图 IMG-02-xx
+                slots.add(String.format("MDL-%02d-%02d", module, posIndex));           // 3D模型 MDL-02-xx
+                slots.add(String.format("VID-%02d-%02d", module, posIndex));           // 全景视频 VID-02-xx
                 break;
             default:
                 slots.add(String.format("%s-%02d-%02d", prefix, module, posIndex));

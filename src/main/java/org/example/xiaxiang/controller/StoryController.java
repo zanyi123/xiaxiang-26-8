@@ -27,6 +27,7 @@ public class StoryController {
         log.info("[StoryController] 访问侨乡故事列表页");
         model.addAttribute("stories", appProperties.getStories());
         model.addAttribute("locations", appProperties.getLocations());
+        model.addAttribute("timeline", appProperties.getTimeline());
         // 素材 URL Map（封面图 + 音频）
         model.addAttribute("coverUrls", cosService.buildUrlMap(appProperties.getStories(), AppProperties.Story::getId, AppProperties.Story::getCoverImage));
         model.addAttribute("audioUrls", cosService.buildUrlMap(appProperties.getStories(), AppProperties.Story::getId, AppProperties.Story::getAudioKey));

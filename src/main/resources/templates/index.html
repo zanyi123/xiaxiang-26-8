@@ -4,7 +4,66 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>薪火侨乡 - 侨乡建筑数字化云游平台</title>
-    <link rel="stylesheet" href="/css/qiaoyun.css">
+    <link rel="stylesheet" href="/css/qiaoyun.css?v=20260808c">
+    <style>
+        /* MBTI测试面板切换 */
+        .life-panel {
+            display: none;
+        }
+        .life-panel.active {
+            display: block;
+        }
+        
+        /* 导览模式切换相关样式 */
+        .portal-hidden { display: none !important; }
+        .content-hidden { display: none !important; }
+        
+        /* 导览模式按钮 */
+        .portal-toggle-btn {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            color: var(--warm-gold);
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.82rem;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+        .portal-toggle-btn:hover {
+            border-color: var(--warm-gold);
+            background: rgba(212, 175, 55, 0.1);
+        }
+        .portal-toggle-btn.active {
+            background: var(--warm-gold);
+            color: #1a1a2e;
+        }
+        
+        /* 导览卡片容器（默认隐藏） */
+        .portal-container {
+            display: none;
+        }
+        body[data-portal-mode="true"] .portal-container {
+            display: block;
+        }
+        body[data-portal-mode="true"] .content-container {
+            display: none;
+        }
+        
+        @media (max-width: 900px) {
+            .tour-layout { grid-template-columns: 1fr !important; }
+            .tour-buildings-grid { grid-template-columns: repeat(2, 1fr) !important; }
+            .story-buildings-grid { grid-template-columns: 1fr !important; }
+            .qiaoxiang-cards { grid-template-columns: 1fr !important; }
+            .achievement-grid { grid-template-columns: repeat(2, 1fr) !important; }
+            .achievement-team { grid-template-columns: 1fr !important; }
+            .life-choices { grid-template-columns: 1fr !important; }
+            .life-steps { gap: 0.75rem !important; }
+            .life-step-line { width: 1rem !important; }
+        }
+    </style>
 </head>
 <body>
     <header class="header">
@@ -30,6 +89,8 @@
                 <button class="header-icon-btn" title="搜索" onclick="toggleSearch()">🔍</button>
                 <button class="header-icon-btn" title="地图" onclick="startTour()">🗺️</button>
                 <button class="header-icon-btn" title="音频" onclick="toggleAiGuide()">🎧</button>
+                <button class="header-icon-btn theme-toggle-btn" id="theme-toggle" title="切换主题" onclick="toggleTheme()">🌙</button>
+                <button class="portal-toggle-btn" id="portal-mode-toggle" title="切换导览模式" onclick="togglePortalMode()">🗂️ 导览</button>
                 <div class="header-divider"></div>
                 <button class="header-btn" onclick="startTour()">开始云游</button>
             </div>
@@ -83,264 +144,304 @@
                 </div>
             </div>
 
-            <div class="hero-3d-control">
-                <div class="control-dial">
-                    <div class="control-center"></div>
-                    <button class="control-btn up" title="向上">↑</button>
-                    <button class="control-btn down" title="向下">↓</button>
-                    <button class="control-btn left" title="向左">←</button>
-                    <button class="control-btn right" title="向右">→</button>
-                    <button class="control-btn zoom-in" title="放大">+</button>
-                    <button class="control-btn zoom-out" title="缩小">−</button>
-                    <button class="control-btn rotate" title="旋转" onclick="startTour()">↻</button>
-                    <button class="control-btn fullscreen" title="全屏" onclick="startTour()">⛶</button>
-                </div>
-            </div>
         </section>
 
-        <!-- 区块02：云游侨乡（核心入口） -->
+        <!-- 区块02：云游侨乡 -->
         <section id="tour" class="section">
             <div class="section-header">
                 <span class="section-label">云游侨乡</span>
-                <h2 class="section-title">云游侨乡</h2>
-                <p class="section-subtitle">认识空间 → 探索建筑 · <span style="color: var(--warm-gold);">📍 首个试点村落：宝源坊</span></p>
+                <h2 class="section-title">云游宝源坊</h2>
+                <p class="section-subtitle">沉浸式3D全景 · 探索侨乡建筑 · <span style="color: var(--warm-gold);">📍 首个试点村落：宝源坊</span></p>
             </div>
 
-            <!-- 左右分栏：左侧3D全景占位，右侧6栋建筑 -->
-            <div style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 2rem; align-items: stretch;" class="tour-layout">
-                <!-- 左侧：宝源坊3D全景入口 -->
-                <div style="position: relative; border-radius: 16px; overflow: hidden; border: 1px solid var(--glass-border); min-height: 380px; background: linear-gradient(135deg, rgba(26, 42, 74, 0.5), rgba(10, 10, 10, 0.8));">
-                    <!-- 动态渲染全景封面图：对应 locations[0] 的封面，即 IMG-02-01 -->
-                    <img th:if="${locations != null and !#lists.isEmpty(locations) and locationImageUrls != null and locationImageUrls[locations[0].id] != null}"
-                         th:src="${locationImageUrls[locations[0].id]}"
-                         style="width: 100%; height: 100%; object-fit: cover; position: absolute; inset: 0;"
-                         th:alt="${locations[0].name}">
-                    <div th:unless="${locations != null and !#lists.isEmpty(locations) and locationImageUrls != null and locationImageUrls[locations[0].id] != null}"
-                         class="slot-placeholder"
-                         style="position: absolute; inset: 0; border-radius: 16px;"
-                         th:attr="data-slot-id=${locations != null and !#lists.isEmpty(locations)} ? ${'IMG-02-' + locations[0].id} : 'IMG-02-01'">
-                        <div class="slot-type-icon">🖼️</div>
-                        <div class="slot-badge" th:text="${locations != null and !#lists.isEmpty(locations)} ? ${'IMG-02-' + locations[0].id} : 'IMG-02-01'"></div>
-                        <div class="slot-desc">宝源坊全景图 · 待填充素材</div>
+            <!-- 实际内容（默认显示） -->
+            <div class="content-container">
+                <div style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 2rem; align-items: stretch;" class="tour-layout">
+                    <!-- 左侧：宝源坊3D全景入口 -->
+                    <div style="position: relative; border-radius: 16px; overflow: hidden; border: 1px solid var(--glass-border); min-height: 380px; background: linear-gradient(135deg, rgba(26, 42, 74, 0.5), rgba(10, 10, 10, 0.8));">
+                        <img th:if="${locations != null and !#lists.isEmpty(locations) and locationImageUrls != null and locationImageUrls[locations[0].id] != null}"
+                             th:src="${locationImageUrls[locations[0].id]}"
+                             style="width: 100%; height: 100%; object-fit: cover; position: absolute; inset: 0;"
+                             th:alt="${locations[0].name}">
+                        <div th:unless="${locations != null and !#lists.isEmpty(locations) and locationImageUrls != null and locationImageUrls[locations[0].id] != null}"
+                             class="slot-placeholder"
+                             style="position: absolute; inset: 0; border-radius: 16px;"
+                             th:attr="data-slot-id=${locations != null and !#lists.isEmpty(locations)} ? ${'IMG-02-' + locations[0].id} : 'IMG-02-01'">
+                            <div class="slot-type-icon">🖼️</div>
+                            <div class="slot-badge" th:text="${locations != null and !#lists.isEmpty(locations)} ? ${'IMG-02-' + locations[0].id} : 'IMG-02-01'"></div>
+                            <div class="slot-desc">宝源坊全景图 · 待填充素材</div>
+                        </div>
+                        <div style="position: absolute; top: 1rem; left: 1rem; display: flex; flex-direction: column; gap: 0.5rem;">
+                            <span style="padding: 0.3rem 0.8rem; background: rgba(212, 175, 55, 0.9); color: #1a1a2e; border-radius: 6px; font-size: 0.8rem; font-weight: 600;">🏆 首个数字化试点</span>
+                            <span style="padding: 0.2rem 0.8rem; background: rgba(0, 0, 0, 0.6); color: var(--text-primary); border-radius: 6px; font-size: 0.75rem;">📍 宝源坊 · 广东省古村落</span>
+                        </div>
+                        <div style="position: absolute; bottom: 0; left: 0; right: 0; padding: 1.5rem; background: linear-gradient(transparent, rgba(0,0,0,0.85));">
+                            <h3 style="color: var(--warm-gold); font-size: 1.4rem; margin-bottom: 0.5rem; letter-spacing: 1px;">宝源坊3D全景</h3>
+                            <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1rem;">村落整体三维展示 · 古村空间布局 · 建筑群分布</p>
+                            <button class="hero-btn-primary" onclick="startTour()" style="padding: 0.5rem 1.2rem; font-size: 0.9rem;">进入宝源坊全景 →</button>
+                        </div>
                     </div>
-                    <div style="position: absolute; top: 1rem; left: 1rem; display: flex; flex-direction: column; gap: 0.5rem;">
-                        <span style="padding: 0.3rem 0.8rem; background: rgba(212, 175, 55, 0.9); color: #1a1a2e; border-radius: 6px; font-size: 0.8rem; font-weight: 600;">🏆 首个数字化试点</span>
-                        <span style="padding: 0.2rem 0.8rem; background: rgba(0, 0, 0, 0.6); color: var(--text-primary); border-radius: 6px; font-size: 0.75rem;">📍 宝源坊 · 广东省古村落</span>
-                    </div>
-                    <div style="position: absolute; bottom: 0; left: 0; right: 0; padding: 1.5rem; background: linear-gradient(transparent, rgba(0,0,0,0.85));">
-                        <h3 style="color: var(--warm-gold); font-size: 1.4rem; margin-bottom: 0.5rem; letter-spacing: 1px;">宝源坊3D全景</h3>
-                        <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1rem;">村落整体三维展示 · 古村空间布局 · 建筑群分布</p>
-                        <button class="hero-btn-primary" onclick="startTour()" style="padding: 0.5rem 1.2rem; font-size: 0.9rem;">进入宝源坊全景 →</button>
-                    </div>
-                </div>
 
-                <!-- 右侧：特色建筑展示 -->
-                <div>
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                        <h3 style="color: var(--warm-gold); font-size: 1.15rem; letter-spacing: 1px;">📍 宝源坊 · 6栋特色建筑</h3>
-                        <a href="/map" style="color: var(--text-muted); font-size: 0.85rem; text-decoration: none;">查看地图 →</a>
-                    </div>
-                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem;" class="tour-buildings-grid">
-                        <div th:each="location, locIter : ${locations}" th:if="${locIter.index < 6}" 
-                             th:onclick="|window.location.href='/location/' + ${location.id}|"
-                             style="cursor: pointer; border-radius: 10px; overflow: hidden; border: 1px solid var(--glass-border-light); background: var(--glass-bg); transition: all 0.3s;"
-                             onmouseover="this.style.borderColor='var(--warm-gold)'; this.style.transform='translateY(-3px)'"
-                             onmouseout="this.style.borderColor='var(--glass-border-light)'; this.style.transform='translateY(0)'">
-                            <div style="position: relative; height: 90px; overflow: hidden;" th:classappend="${locationImageUrls != null and locationImageUrls[location.id] != null} ? 'slot-filled'">
-                                <img th:if="${locationImageUrls != null and locationImageUrls[location.id] != null}"
-                                     th:src="${locationImageUrls[location.id]}"
-                                     th:alt="${location.name}" style="width: 100%; height: 100%; object-fit: cover;">
-                                <div th:unless="${locationImageUrls != null and locationImageUrls[location.id] != null}"
-                                     class="slot-placeholder slot-placeholder-small"
-                                     th:attr="data-slot-id=${'IMG-02-' + location.id}">
-                                    <div class="slot-type-icon">🖼️</div>
-                                    <div class="slot-badge" th:text="${'IMG-02-' + location.id}"></div>
-                                    <div class="slot-desc">待填充素材</div>
+                    <!-- 右侧：特色建筑展示 -->
+                    <div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                            <h3 style="color: var(--warm-gold); font-size: 1.15rem; letter-spacing: 1px;">📍 宝源坊 · 6栋特色建筑</h3>
+                            <a href="/map" style="color: var(--text-muted); font-size: 0.85rem; text-decoration: none;">查看地图 →</a>
+                        </div>
+                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem;" class="tour-buildings-grid">
+                            <div th:each="location, locIter : ${locations}" th:if="${locIter.index < 6}" 
+                                 th:onclick="|window.location.href='/location/' + ${location.id}|"
+                                 style="cursor: pointer; border-radius: 10px; overflow: hidden; border: 1px solid var(--glass-border-light); background: var(--glass-bg); transition: all 0.3s;"
+                                 onmouseover="this.style.borderColor='var(--warm-gold)'; this.style.transform='translateY(-3px)'"
+                                 onmouseout="this.style.borderColor='var(--glass-border-light)'; this.style.transform='translateY(0)'">
+                                <div th:if="${locationImageUrls != null and locationImageUrls[location.id] != null}" style="height: 80px; background: var(--glass-border);" th:style="'background-image: url(' + ${locationImageUrls[location.id]} + '); background-size: cover; background-position: center;'"></div>
+                                <div th:unless="${locationImageUrls != null and locationImageUrls[location.id] != null}" style="height: 80px; background: var(--glass-border); display: flex; align-items: center; justify-content: center; color: var(--text-muted); font-size: 0.75rem;" th:attr="data-slot-id=${'IMG-02-' + location.id}">
+                                    <div class="slot-placeholder" style="position: absolute; inset: 0;">
+                                        <div class="slot-type-icon">🖼️</div>
+                                    </div>
                                 </div>
-                                <div style="position: absolute; top: 0.3rem; left: 0.3rem; background: rgba(212, 175, 55, 0.9); color: #1a1a2e; width: 1.3rem; height: 1.3rem; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700;" th:text="${location.number}"></div>
-                            </div>
-                            <div style="padding: 0.5rem; text-align: center;">
-                                <div style="color: var(--text-primary); font-size: 0.8rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" th:text="${location.name}"></div>
+                                <div style="padding: 0.6rem 0.5rem; text-align: center;">
+                                    <div style="color: var(--warm-gold); font-size: 0.78rem; font-weight: 600;" th:text="${location.name}">建筑名称</div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- 新手引导条 -->
-            <div style="margin-top: 2rem; padding: 1.5rem; background: var(--glass-bg); border: 1px solid var(--glass-border-light); border-radius: 12px; display: flex; justify-content: space-around; align-items: center; flex-wrap: wrap; gap: 1rem;" class="guide-bar">
-                <div style="text-align: center;">
-                    <div style="font-size: 2rem; margin-bottom: 0.3rem;">🗺️</div>
-                    <div style="color: var(--warm-gold); font-size: 0.9rem; font-weight: 600;">① 看村落全景</div>
-                    <div style="color: var(--text-muted); font-size: 0.75rem; margin-top: 0.2rem;">了解整体格局</div>
-                </div>
-                <div style="color: var(--warm-gold); font-size: 1.5rem;">→</div>
-                <div style="text-align: center;">
-                    <div style="font-size: 2rem; margin-bottom: 0.3rem;">🏛️</div>
-                    <div style="color: var(--warm-gold); font-size: 0.9rem; font-weight: 600;">② 选择特色建筑</div>
-                    <div style="color: var(--text-muted); font-size: 0.75rem; margin-top: 0.2rem;">进入详细展示</div>
-                </div>
-                <div style="color: var(--warm-gold); font-size: 1.5rem;">→</div>
-                <div style="text-align: center;">
-                    <div style="font-size: 2rem; margin-bottom: 0.3rem;">📖</div>
-                    <div style="color: var(--warm-gold); font-size: 0.9rem; font-weight: 600;">③ 阅读建筑故事</div>
-                    <div style="color: var(--text-muted); font-size: 0.75rem; margin-top: 0.2rem;">了解历史文化</div>
+            <!-- 导览卡片（导览模式显示） -->
+            <div class="portal-container portal-section-architecture">
+                <div class="portal-cards-grid">
+                    <a class="portal-entry-card primary" style="--card-bg: url('/images/card-baoyuanfeng-panorama.jpg')" href="/map">
+                        <div class="portal-card-bg"></div>
+                        <div class="portal-card-content">
+                            <span class="portal-card-badge">360°</span>
+                            <h3 class="portal-card-title">宝源坊3D全景</h3>
+                            <p class="portal-card-desc">沉浸式3D云游 · 古村空间布局</p>
+                        </div>
+                    </a>
+                    <a class="portal-entry-card" style="--card-bg: url('/images/card-diaolou-buildings.jpg')" href="/map">
+                        <div class="portal-card-bg"></div>
+                        <div class="portal-card-content">
+                            <span class="portal-card-badge">6栋</span>
+                            <h3 class="portal-card-title">6栋特色建筑</h3>
+                            <p class="portal-card-desc">碉楼、古井、宗祠等精选建筑</p>
+                        </div>
+                    </a>
+                    <a class="portal-entry-card" style="--card-bg: url('/images/card-architecture-story.jpg')" href="/stories">
+                        <div class="portal-card-bg"></div>
+                        <div class="portal-card-content">
+                            <span class="portal-card-badge">故事</span>
+                            <h3 class="portal-card-title">建筑故事集</h3>
+                            <p class="portal-card-desc">聆听AI讲解 · 阅读侨乡故事</p>
+                        </div>
+                    </a>
                 </div>
             </div>
         </section>
 
-        <!-- 区块03：互动体验 · 我的侨乡人生（传播入口） -->
+        <!-- 区块03：互动体验 -->
         <section id="life" class="section" style="background: linear-gradient(180deg, transparent, rgba(26, 42, 74, 0.2), transparent);">
             <div class="section-header">
                 <span class="section-label">互动体验</span>
                 <h2 class="section-title">我的侨乡人生</h2>
-                <p class="section-subtitle">如果出生在侨乡，你会走向怎样的人生？ · <span style="color: var(--warm-gold);">📍 试点村落：宝源坊</span></p>
+                <p class="section-subtitle">五分钟体验侨乡人生 · 解锁多种结局 · <span style="color: var(--warm-gold);">📍 试点村落：宝源坊</span></p>
             </div>
 
-            <div style="max-width: 900px; margin: 0 auto; padding: 2rem; background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 20px; backdrop-filter: blur(15px);" class="life-experience">
-                <!-- 步骤指示器 -->
-                <div style="display: flex; justify-content: center; gap: 2rem; margin-bottom: 2rem;" class="life-steps">
-                    <div class="life-step active" data-step="1">
-                        <div class="life-step-num">1</div>
-                        <div class="life-step-label">出生选择</div>
+            <!-- 实际内容（默认显示） -->
+            <div class="content-container">
+                <div style="max-width: 700px; margin: 0 auto; padding: 2rem; background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 16px; text-align: center;">
+                    <div style="display: flex; gap: 0.5rem; justify-content: center; margin-bottom: 1.5rem;">
+                        <div class="life-step active" data-step="1"><div class="life-step-num">1</div><div class="life-step-label">选择出身</div></div>
+                        <div class="life-step-line"></div>
+                        <div class="life-step" data-step="2"><div class="life-step-num">2</div><div class="life-step-label">第一阶段</div></div>
+                        <div class="life-step-line"></div>
+                        <div class="life-step" data-step="3"><div class="life-step-num">3</div><div class="life-step-label">第二阶段</div></div>
+                        <div class="life-step-line"></div>
+                        <div class="life-step" data-step="4"><div class="life-step-num">4</div><div class="life-step-label">人生结局</div></div>
                     </div>
-                    <div class="life-step-line"></div>
-                    <div class="life-step" data-step="2">
-                        <div class="life-step-num">2</div>
-                        <div class="life-step-label">第一阶段</div>
+
+                    <!-- 步骤1：出生选择 -->
+                    <div id="life-step-1" class="life-panel active">
+                        <h3 style="color: var(--warm-gold); font-size: 1.3rem; margin-bottom: 1.5rem; letter-spacing: 1px;">选择你的出身</h3>
+                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;" class="life-choices">
+                            <div class="life-choice-card" data-origin="1" onclick="selectOrigin(1)">
+                                <div style="font-size: 2rem; margin-bottom: 0.5rem;">💰</div>
+                                <div style="color: var(--warm-gold); font-weight: 600; margin-bottom: 0.3rem;">商贸之家</div>
+                                <div style="color: var(--text-muted); font-size: 0.78rem;">远洋经商</div>
+                            </div>
+                            <div class="life-choice-card" data-origin="2" onclick="selectOrigin(2)">
+                                <div style="font-size: 2rem; margin-bottom: 0.5rem;">📚</div>
+                                <div style="color: var(--warm-gold); font-weight: 600; margin-bottom: 0.3rem;">书香之家</div>
+                                <div style="color: var(--text-muted); font-size: 0.78rem;">求学改变命运</div>
+                            </div>
+                            <div class="life-choice-card" data-origin="3" onclick="selectOrigin(3)">
+                                <div style="font-size: 2rem; margin-bottom: 0.5rem;">🏡</div>
+                                <div style="color: var(--warm-gold); font-weight: 600; margin-bottom: 0.3rem;">普通人家</div>
+                                <div style="color: var(--text-muted); font-size: 0.78rem;">守护家乡</div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="life-step-line"></div>
-                    <div class="life-step" data-step="3">
-                        <div class="life-step-num">3</div>
-                        <div class="life-step-label">第二阶段</div>
+
+                    <!-- 步骤2：第一阶段 -->
+                    <div id="life-step-2" class="life-panel">
+                        <h3 style="color: var(--warm-gold); font-size: 1.3rem; margin-bottom: 1.5rem; letter-spacing: 1px;">人生第一阶段：你将如何起步？</h3>
+                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;" class="life-choices">
+                            <div class="life-choice-card" data-choice1="1" onclick="selectChoice1(1)">
+                                <div style="font-size: 2rem; margin-bottom: 0.5rem;">🚢</div>
+                                <div style="color: var(--warm-gold); font-weight: 600; margin-bottom: 0.3rem;">出洋闯荡</div>
+                                <div style="color: var(--text-muted); font-size: 0.78rem;">远赴南洋谋生</div>
+                            </div>
+                            <div class="life-choice-card" data-choice1="2" onclick="selectChoice1(2)">
+                                <div style="font-size: 2rem; margin-bottom: 0.5rem;">🌾</div>
+                                <div style="color: var(--warm-gold); font-weight: 600; margin-bottom: 0.3rem;">留守家乡</div>
+                                <div style="color: var(--text-muted); font-size: 0.78rem;">耕耘这片土地</div>
+                            </div>
+                            <div class="life-choice-card" data-choice1="3" onclick="selectChoice1(3)">
+                                <div style="font-size: 2rem; margin-bottom: 0.5rem;">📖</div>
+                                <div style="color: var(--warm-gold); font-weight: 600; margin-bottom: 0.3rem;">学习新知</div>
+                                <div style="color: var(--text-muted); font-size: 0.78rem;">读书求学进取</div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="life-step-line"></div>
-                    <div class="life-step" data-step="4">
-                        <div class="life-step-num">4</div>
-                        <div class="life-step-label">人生结局</div>
+
+                    <!-- 步骤3：第二阶段 -->
+                    <div id="life-step-3" class="life-panel">
+                        <h3 style="color: var(--warm-gold); font-size: 1.3rem; margin-bottom: 1.5rem; letter-spacing: 1px;">人生第二阶段：你将如何抉择？</h3>
+                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;" class="life-choices">
+                            <div class="life-choice-card" data-choice2="1" onclick="selectChoice2(1)">
+                                <div style="font-size: 2rem; margin-bottom: 0.5rem;">💎</div>
+                                <div style="color: var(--warm-gold); font-weight: 600; margin-bottom: 0.3rem;">创造财富</div>
+                                <div style="color: var(--text-muted); font-size: 0.78rem;">商业帝国崛起</div>
+                            </div>
+                            <div class="life-choice-card" data-choice2="2" onclick="selectChoice2(2)">
+                                <div style="font-size: 2rem; margin-bottom: 0.5rem;">🏛️</div>
+                                <div style="color: var(--warm-gold); font-weight: 600; margin-bottom: 0.3rem;">建设家乡</div>
+                                <div style="color: var(--text-muted); font-size: 0.78rem;">回乡兴家立业</div>
+                            </div>
+                            <div class="life-choice-card" data-choice2="3" onclick="selectChoice2(3)">
+                                <div style="font-size: 2rem; margin-bottom: 0.5rem;">🎭</div>
+                                <div style="color: var(--warm-gold); font-weight: 600; margin-bottom: 0.3rem;">传承文化</div>
+                                <div style="color: var(--text-muted); font-size: 0.78rem;">守护侨乡文脉</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 步骤4：人生结局 -->
+                    <div id="life-step-4" class="life-panel">
+                        <div id="life-result-content" style="text-align: center;"></div>
+                    </div>
+
+                    <!-- 重新开始按钮 -->
+                    <div style="margin-top: 1.5rem;">
+                        <button class="hero-btn-secondary" id="life-restart-btn" onclick="restartLife()" style="display: none; padding: 0.5rem 1.2rem; font-size: 0.85rem;">🔄 重新开始</button>
                     </div>
                 </div>
+            </div>
 
-                <!-- 步骤1：出生选择 -->
-                <div id="life-step-1" class="life-panel active">
-                    <h3 style="text-align: center; color: var(--warm-gold); margin-bottom: 1.5rem; font-size: 1.2rem;">选择你的出身</h3>
-                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;" class="life-choices">
-                        <div class="life-choice-card" data-origin="1" onclick="selectOrigin(1)">
-                            <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">💰</div>
-                            <div style="color: var(--warm-gold); font-weight: 600; margin-bottom: 0.3rem;">商贸之家</div>
-                            <div style="color: var(--text-muted); font-size: 0.8rem;">远洋经商</div>
+            <!-- 导览卡片（导览模式显示） -->
+            <div class="portal-container portal-section-life">
+                <div class="portal-cards-grid">
+                    <a class="portal-entry-card primary" style="--card-bg: url('/images/card-merchant-life.jpg')" href="javascript:void(0)" onclick="selectOriginFromPortal(1)">
+                        <div class="portal-card-bg"></div>
+                        <div class="portal-card-content">
+                            <span class="portal-card-badge">商</span>
+                            <h3 class="portal-card-title">商贸之家</h3>
+                            <p class="portal-card-desc">远洋经商 · 商业帝国崛起</p>
                         </div>
-                        <div class="life-choice-card" data-origin="2" onclick="selectOrigin(2)">
-                            <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">📚</div>
-                            <div style="color: var(--warm-gold); font-weight: 600; margin-bottom: 0.3rem;">书香之家</div>
-                            <div style="color: var(--text-muted); font-size: 0.8rem;">求学改变命运</div>
+                    </a>
+                    <a class="portal-entry-card" style="--card-bg: url('/images/card-scholar-life.jpg')" href="javascript:void(0)" onclick="selectOriginFromPortal(2)">
+                        <div class="portal-card-bg"></div>
+                        <div class="portal-card-content">
+                            <span class="portal-card-badge">学</span>
+                            <h3 class="portal-card-title">书香之家</h3>
+                            <p class="portal-card-desc">求学改变命运 · 读书进取</p>
                         </div>
-                        <div class="life-choice-card" data-origin="3" onclick="selectOrigin(3)">
-                            <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">🏡</div>
-                            <div style="color: var(--warm-gold); font-weight: 600; margin-bottom: 0.3rem;">普通人家</div>
-                            <div style="color: var(--text-muted); font-size: 0.8rem;">守护家乡</div>
+                    </a>
+                    <a class="portal-entry-card" style="--card-bg: url('/images/card-rural-life.jpg')" href="javascript:void(0)" onclick="selectOriginFromPortal(3)">
+                        <div class="portal-card-bg"></div>
+                        <div class="portal-card-content">
+                            <span class="portal-card-badge">农</span>
+                            <h3 class="portal-card-title">普通人家</h3>
+                            <p class="portal-card-desc">守护家乡 · 耕耘这片土地</p>
                         </div>
-                    </div>
-                </div>
-
-                <!-- 步骤2：第一阶段 -->
-                <div id="life-step-2" class="life-panel">
-                    <h3 style="text-align: center; color: var(--warm-gold); margin-bottom: 1.5rem; font-size: 1.2rem;">人生第一阶段：你将如何起步？</h3>
-                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;" class="life-choices">
-                        <div class="life-choice-card" data-choice1="1" onclick="selectChoice1(1)">
-                            <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">🚢</div>
-                            <div style="color: var(--warm-gold); font-weight: 600; margin-bottom: 0.3rem;">出洋闯荡</div>
-                            <div style="color: var(--text-muted); font-size: 0.8rem;">远赴南洋谋生</div>
-                        </div>
-                        <div class="life-choice-card" data-choice1="2" onclick="selectChoice1(2)">
-                            <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">🌾</div>
-                            <div style="color: var(--warm-gold); font-weight: 600; margin-bottom: 0.3rem;">留守家乡</div>
-                            <div style="color: var(--text-muted); font-size: 0.8rem;">耕耘这片土地</div>
-                        </div>
-                        <div class="life-choice-card" data-choice1="3" onclick="selectChoice1(3)">
-                            <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">📖</div>
-                            <div style="color: var(--warm-gold); font-weight: 600; margin-bottom: 0.3rem;">学习新知</div>
-                            <div style="color: var(--text-muted); font-size: 0.8rem;">读书求学进取</div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 步骤3：第二阶段 -->
-                <div id="life-step-3" class="life-panel">
-                    <h3 style="text-align: center; color: var(--warm-gold); margin-bottom: 1.5rem; font-size: 1.2rem;">人生第二阶段：你将如何抉择？</h3>
-                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;" class="life-choices">
-                        <div class="life-choice-card" data-choice2="1" onclick="selectChoice2(1)">
-                            <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">💎</div>
-                            <div style="color: var(--warm-gold); font-weight: 600; margin-bottom: 0.3rem;">创造财富</div>
-                            <div style="color: var(--text-muted); font-size: 0.8rem;">商业帝国崛起</div>
-                        </div>
-                        <div class="life-choice-card" data-choice2="2" onclick="selectChoice2(2)">
-                            <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">🏛️</div>
-                            <div style="color: var(--warm-gold); font-weight: 600; margin-bottom: 0.3rem;">建设家乡</div>
-                            <div style="color: var(--text-muted); font-size: 0.8rem;">回乡兴家立业</div>
-                        </div>
-                        <div class="life-choice-card" data-choice2="3" onclick="selectChoice2(3)">
-                            <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">🎭</div>
-                            <div style="color: var(--warm-gold); font-weight: 600; margin-bottom: 0.3rem;">传承文化</div>
-                            <div style="color: var(--text-muted); font-size: 0.8rem;">守护侨乡文脉</div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 步骤4：人生结局 -->
-                <div id="life-step-4" class="life-panel">
-                    <div id="life-result-content" style="text-align: center;"></div>
-                </div>
-
-                <!-- 返回按钮 -->
-                <div style="text-align: center; margin-top: 1.5rem;">
-                    <button class="hero-btn-secondary" id="life-restart-btn" onclick="restartLife()" style="display: none;">🔄 重新体验</button>
+                    </a>
                 </div>
             </div>
         </section>
 
-        <!-- 区块04：建筑故事（文化深度） -->
+        <!-- 区块04：建筑故事 -->
         <section id="building-story" class="section">
             <div class="section-header">
                 <span class="section-label">建筑故事</span>
                 <h2 class="section-title">建筑故事</h2>
                 <p class="section-subtitle">走进一座建筑，读懂一段历史 · <span style="color: var(--warm-gold);">📍 宝源坊 · 精选建筑</span></p>
             </div>
-            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem;" class="story-buildings-grid">
-                <div th:each="location, locIter : ${locations}" th:if="${locIter.index < 3}"
-                     th:onclick="|window.location.href='/location/' + ${location.id}|"
-                     style="cursor: pointer; background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 16px; overflow: hidden; transition: all 0.4s;"
-                     onmouseover="this.style.borderColor='var(--warm-gold)'; this.style.transform='translateY(-6px)'"
-                     onmouseout="this.style.borderColor='var(--glass-border)'; this.style.transform='translateY(0)'">
-                    <div style="position: relative; height: 200px; overflow: hidden;">
-                        <img th:if="${locationImageUrls != null and locationImageUrls[location.id] != null}"
-                             th:src="${locationImageUrls[location.id]}"
-                             th:alt="${location.name}" style="width: 100%; height: 100%; object-fit: cover;">
+
+            <!-- 实际内容（默认显示） -->
+            <div class="content-container">
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem;" class="story-buildings-grid">
+                    <div th:each="location, locIter : ${locations}" th:if="${locIter.index < 3}"
+                         th:onclick="|window.location.href='/location/' + ${location.id}|"
+                         style="cursor: pointer; border-radius: 12px; overflow: hidden; border: 1px solid var(--glass-border-light); background: var(--glass-bg); transition: all 0.3s;"
+                         onmouseover="this.style.borderColor='var(--warm-gold)'; this.style.transform='translateY(-3px)'"
+                         onmouseout="this.style.borderColor='var(--glass-border-light)'; this.style.transform='translateY(0)'">
+                        <div th:if="${locationImageUrls != null and locationImageUrls[location.id] != null}" style="height: 180px;" th:style="'background-image: url(' + ${locationImageUrls[location.id]} + '); background-size: cover; background-position: center;'"></div>
                         <div th:unless="${locationImageUrls != null and locationImageUrls[location.id] != null}"
                              class="slot-placeholder"
+                             style="height: 180px; position: relative;"
                              th:attr="data-slot-id=${'IMG-02-' + location.id}">
                             <div class="slot-type-icon">🖼️</div>
                             <div class="slot-badge" th:text="${'IMG-02-' + location.id}"></div>
-                            <div class="slot-desc">待填充素材</div>
+                            <div class="slot-desc" th:text="${location.name} + ' · 历史建筑'"></div>
                         </div>
-                        <div style="position: absolute; bottom: 0; left: 0; right: 0; padding: 1rem; background: linear-gradient(transparent, rgba(0,0,0,0.9));">
-                            <span style="color: var(--warm-gold); font-size: 0.8rem;" th:text="${location.number} + ' · 历史建筑'"></span>
+                        <div style="padding: 1rem;">
+                            <h4 style="color: var(--warm-gold); font-size: 1rem; margin-bottom: 0.4rem; letter-spacing: 1px;" th:text="${location.name}">建筑名称</h4>
+                            <p style="color: var(--text-muted); font-size: 0.82rem; margin-bottom: 0.8rem;" th:text="${location.description}">建筑描述</p>
+                            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                                <span style="padding: 0.2rem 0.6rem; background: rgba(212, 175, 55, 0.1); color: var(--warm-gold); border-radius: 10px; font-size: 0.7rem;">3D模型</span>
+                                <span style="padding: 0.2rem 0.6rem; background: rgba(212, 175, 55, 0.1); color: var(--warm-gold); border-radius: 10px; font-size: 0.7rem;">AI讲解</span>
+                            </div>
+                            <div style="margin-top: 0.8rem; color: var(--warm-gold); font-size: 0.85rem; font-weight: 500;">进入故事 →</div>
                         </div>
-                    </div>
-                    <div style="padding: 1.25rem;">
-                        <h4 style="color: var(--warm-gold); font-size: 1.1rem; margin-bottom: 0.5rem;" th:text="${location.name}"></h4>
-                        <p style="color: var(--text-secondary); font-size: 0.85rem; line-height: 1.6; margin-bottom: 1rem;" th:text="${location.description}"></p>
-                        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1rem;">
-                            <span style="padding: 0.2rem 0.6rem; background: rgba(212, 175, 55, 0.1); color: var(--warm-gold); border-radius: 12px; font-size: 0.7rem;">3D模型</span>
-                            <span style="padding: 0.2rem 0.6rem; background: rgba(212, 175, 55, 0.1); color: var(--warm-gold); border-radius: 12px; font-size: 0.7rem;">AI讲解</span>
-                            <span style="padding: 0.2rem 0.6rem; background: rgba(212, 175, 55, 0.1); color: var(--warm-gold); border-radius: 12px; font-size: 0.7rem;">历史建筑</span>
-                        </div>
-                        <div style="color: var(--warm-gold); font-size: 0.85rem; font-weight: 600;">进入故事 →</div>
                     </div>
                 </div>
+                <div style="text-align: center; margin-top: 2rem;">
+                    <button class="hero-btn-secondary" onclick="window.location.href='/map'">查看更多宝源坊建筑故事 →</button>
+                </div>
             </div>
-            <div style="text-align: center; margin-top: 2rem;">
-                <button class="hero-btn-secondary" onclick="window.location.href='/map'">查看更多宝源坊建筑故事 →</button>
+
+            <!-- 导览卡片（导览模式显示） -->
+            <div class="portal-container portal-section-story">
+                <div class="portal-cards-grid">
+                    <a class="portal-entry-card primary" style="--card-bg: url('/images/card-diaolou-tower.jpg')" href="/location/1">
+                        <div class="portal-card-bg"></div>
+                        <div class="portal-card-content">
+                            <span class="portal-card-badge">碉楼</span>
+                            <h3 class="portal-card-title">宝源坊碉楼</h3>
+                            <p class="portal-card-desc">碉楼建筑展示区 · 侨乡特色</p>
+                        </div>
+                    </a>
+                    <a class="portal-entry-card" style="--card-bg: url('/images/card-ancient-well.jpg')" href="/location/2">
+                        <div class="portal-card-bg"></div>
+                        <div class="portal-card-content">
+                            <span class="portal-card-badge">古井</span>
+                            <h3 class="portal-card-title">方形古井</h3>
+                            <p class="portal-card-desc">古代饮水文化遗迹</p>
+                        </div>
+                    </a>
+                    <a class="portal-entry-card" style="--card-bg: url('/images/card-flagstone-street.jpg')" href="/location/3">
+                        <div class="portal-card-bg"></div>
+                        <div class="portal-card-content">
+                            <span class="portal-card-badge">古街</span>
+                            <h3 class="portal-card-title">青石板街</h3>
+                            <p class="portal-card-desc">古镇传统街道 · 百年岁月</p>
+                        </div>
+                    </a>
+                </div>
+                <div style="text-align: center; margin-top: 2rem;">
+                    <button class="hero-btn-secondary" onclick="window.location.href='/map'">查看更多宝源坊建筑 →</button>
+                </div>
             </div>
         </section>
 
@@ -422,20 +523,7 @@
                 </div>
             </div>
 
-            <!-- 历史时间线（来自后端 timeline 数据） -->
-            <div th:if="${timeline != null and !timeline.isEmpty()}" style="margin-top: 2.5rem;">
-                <h4 style="text-align: center; color: var(--warm-gold); font-size: 1.1rem; margin-bottom: 1.5rem; letter-spacing: 1px;">📜 宝源坊历史时间线</h4>
-                <div class="timeline">
-                    <div class="timeline-item" th:each="item : ${timeline}">
-                        <div class="timeline-dot"></div>
-                        <div class="timeline-content">
-                            <div class="timeline-year" th:text="${item.year}">年份</div>
-                            <div class="timeline-title" th:text="${item.title}">标题</div>
-                            <div class="timeline-desc" th:text="${item.description}">描述</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+
         </section>
 
         <!-- CTA 区块 -->
@@ -509,7 +597,7 @@
         }
 
         function exploreBuilding(locationId) {
-            window.location.href = '/location/' + locationId;
+            window.location.href = '/location/' + locationId + '?from=life';
         }
 
         function scrollToSection(id) {
@@ -608,7 +696,6 @@
         // ============ 我的侨乡人生互动逻辑 ============
         let lifeState = { origin: 0, choice1: 0, choice2: 0 };
 
-        // 9种结局映射表（origin × choice1 × choice2 共27种组合 → 9种结局）
         const lifeEndings = [
             { id: 1, title: '远赴南洋', icon: '🚢', desc: '你远渡重洋，在异国他乡艰苦打拼，成为一代华侨商人', building: '瑞石楼碉楼', tag: '开拓者', locationId: 1 },
             { id: 2, title: '归乡兴家', icon: '🏠', desc: '你带着海外积蓄回乡，建起碉楼，光耀门楣', building: '宝源门楼', tag: '归乡人', locationId: 1 },
@@ -651,7 +738,6 @@
         }
 
         function showResult() {
-            // 简单映射：根据三个选择计算结局索引（0-8）
             const idx = ((lifeState.origin - 1) * 3 + (lifeState.choice1 - 1) * 1 + (lifeState.choice2 - 1)) % 9;
             const ending = lifeEndings[idx];
             const content = document.getElementById('life-result-content');
@@ -666,7 +752,7 @@
                 </div>
                 <div style="margin-top: 1.5rem; display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap;">
                     <button class="hero-btn-primary" onclick="shareLife('${ending.title}', '${ending.tag}')" style="padding: 0.6rem 1.3rem; font-size: 0.9rem;">📤 分享我的人生</button>
-                    <button class="hero-btn-secondary" onclick="exploreBuilding(${ending.locationId})" style="padding: 0.6rem 1.3rem; font-size: 0.9rem;">🏛️ 探索对应建筑</button>
+                    <button class="hero-btn-secondary" onclick="startTour(${ending.locationId})" style="padding: 0.6rem 1.3rem; font-size: 0.9rem;">🏛️ 探索对应建筑</button>
                 </div>
             `;
             document.getElementById('life-restart-btn').style.display = 'inline-block';
@@ -681,6 +767,10 @@
             }
         }
 
+        function startTour(locationId) {
+            window.location.href = '/location/' + locationId;
+        }
+
         function restartLife() {
             lifeState = { origin: 0, choice1: 0, choice2: 0 };
             document.querySelectorAll('.life-choice-card').forEach(c => c.classList.remove('selected'));
@@ -688,91 +778,80 @@
             document.getElementById('life-restart-btn').style.display = 'none';
         }
 
+        // ============ 导览模式选择出身 ============
+        function selectOriginFromPortal(n) {
+            // 如果当前在导览模式，先切换回内容模式
+            if (document.body.getAttribute('data-portal-mode') === 'true') {
+                document.body.removeAttribute('data-portal-mode');
+                localStorage.setItem('qiaoyun-portal-mode', 'false');
+                const toggleBtn = document.getElementById('portal-mode-toggle');
+                if (toggleBtn) {
+                    toggleBtn.textContent = '🗂️ 导览';
+                    toggleBtn.classList.remove('active');
+                }
+            }
+            // 滚动到"我的侨乡人生"区域
+            const lifeSection = document.getElementById('life');
+            if (lifeSection) {
+                lifeSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+            // 延迟执行选择出身，等待滚动完成
+            setTimeout(() => selectOrigin(n), 600);
+        }
+
+        // ============ 导览模式切换 ============
+        function togglePortalMode() {
+            const body = document.body;
+            const isPortalMode = body.getAttribute('data-portal-mode') === 'true';
+            const toggleBtn = document.getElementById('portal-mode-toggle');
+            
+            if (isPortalMode) {
+                // 切换回实际内容模式
+                body.removeAttribute('data-portal-mode');
+                localStorage.setItem('qiaoyun-portal-mode', 'false');
+                if (toggleBtn) {
+                    toggleBtn.textContent = '🗂️ 导览';
+                    toggleBtn.classList.remove('active');
+                }
+            } else {
+                // 切换到导览模式
+                body.setAttribute('data-portal-mode', 'true');
+                localStorage.setItem('qiaoyun-portal-mode', 'true');
+                if (toggleBtn) {
+                    toggleBtn.textContent = '📄 内容';
+                    toggleBtn.classList.add('active');
+                }
+            }
+        }
+
+        // 导览模式初始化
+        function initPortalMode() {
+            const savedPortalMode = localStorage.getItem('qiaoyun-portal-mode');
+            const portalBtn = document.getElementById('portal-mode-toggle');
+            if (savedPortalMode === 'true') {
+                document.body.setAttribute('data-portal-mode', 'true');
+                if (portalBtn) {
+                    portalBtn.textContent = '📄 内容';
+                    portalBtn.classList.add('active');
+                }
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
             createParticles();
+            initPortalMode();
             window.addEventListener('scroll', updateChapterDots);
             document.addEventListener('click', function(e) {
                 const searchBox = document.querySelector('.header-search');
                 const suggestions = document.getElementById('search-suggestions');
                 if (searchBox && !searchBox.contains(e.target)) {
-                    if (suggestions) suggestions.style.display = 'none';
+                    if (suggestionsBox) suggestionsBox.style.display = 'none';
                 }
             });
         });
     </script>
 
-    <style>
-        /* 我的侨乡人生互动样式 */
-        .life-step {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 0.3rem;
-            opacity: 0.4;
-            transition: opacity 0.3s;
-        }
-        .life-step.active { opacity: 1; }
-        .life-step-num {
-            width: 2rem;
-            height: 2rem;
-            border-radius: 50%;
-            background: var(--glass-bg);
-            border: 1px solid var(--glass-border);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--text-muted);
-            font-size: 0.85rem;
-            font-weight: 600;
-        }
-        .life-step.active .life-step-num {
-            background: var(--warm-gold);
-            color: #1a1a2e;
-            border-color: var(--warm-gold);
-        }
-        .life-step-label {
-            color: var(--text-muted);
-            font-size: 0.75rem;
-        }
-        .life-step.active .life-step-label { color: var(--warm-gold); }
-        .life-step-line {
-            width: 2rem;
-            height: 1px;
-            background: var(--glass-border);
-        }
-        .life-panel { display: none; }
-        .life-panel.active { display: block; }
-        .life-choice-card {
-            padding: 1.5rem 1rem;
-            background: var(--glass-bg);
-            border: 1px solid var(--glass-border-light);
-            border-radius: 12px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        .life-choice-card:hover {
-            border-color: var(--warm-gold);
-            transform: translateY(-3px);
-        }
-        .life-choice-card.selected {
-            border-color: var(--warm-gold);
-            background: rgba(212, 175, 55, 0.1);
-            transform: translateY(-3px);
-        }
-
-        @media (max-width: 900px) {
-            .tour-layout { grid-template-columns: 1fr !important; }
-            .tour-buildings-grid { grid-template-columns: repeat(2, 1fr) !important; }
-            .story-buildings-grid { grid-template-columns: 1fr !important; }
-            .qiaoxiang-cards { grid-template-columns: 1fr !important; }
-            .achievement-grid { grid-template-columns: repeat(2, 1fr) !important; }
-            .achievement-team { grid-template-columns: 1fr !important; }
-            .life-choices { grid-template-columns: 1fr !important; }
-            .life-steps { gap: 0.75rem !important; }
-            .life-step-line { width: 1rem !important; }
-        }
-    </style>
-    <script src="/js/slot-placeholder.js"></script>
+    <script src="/js/slot-placeholder.js?v=20260808"></script>
+    <script src="/js/theme-switch.js?v=20260808"></script>
 </body>
 </html>

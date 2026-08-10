@@ -20,6 +20,11 @@ spring:
     suffix: .html
     mode: HTML
     encoding: UTF-8
+  web:
+    resources:
+      cache:
+        period: 0
+      add-mappings: true
   servlet:
     multipart:
       max-file-size: 10MB
@@ -136,12 +141,12 @@ app:
 
   locations:
     - id: 1
-      name: "宝源坊"
-      number: "01"
-      description: "碉楼建筑展示区，集中展示侨乡特色碉楼建筑群"
+      name: 宝源坊
+      number: 01
+      description: 碉楼建筑展示区，集中展示侨乡特色碉楼建筑群
       history: ""
-      xCoordinate: 18.0
-      yCoordinate: 32.0
+      xCoordinate: 18
+      yCoordinate: 32
       image-key: ""
       model-key: ""
       video-key: ""
@@ -334,10 +339,10 @@ app:
 
   team:
     - id: 1
-      name: "黄坤水"
-      role: "项目负责人"
-      major: "建筑学"
-      bio: ""
+      name: 黄坤水
+      role: 技术项目负责人
+      major: 计算机
+      bio: 伟大无需多言
 
   anatomies:
     - id: 1

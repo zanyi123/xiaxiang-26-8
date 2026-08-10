@@ -62,32 +62,32 @@
 
                 <div class="compare-grid" th:if="${photos != null and !photos.isEmpty()}">
                     <div class="compare-card" th:each="photo : ${photos}">
-                        <div class="compare-slider" th:data-id="${photo.id}"
+                        <div class="compare-slider" th:attr="data-id=${photo.id}"
                              onmousedown="startDrag(event, this)" ontouchstart="startDrag(event, this)">
                             <!-- 老照片（IMG-11-{奇数编号}：photo.id*2-1） -->
                             <img class="compare-img compare-img-old"
-                                 th:if="${oldImageUrls != null and oldImageUrls[__${photo.id}__] != null}"
-                                 th:src="${oldImageUrls[__${photo.id}__]}"
+                                 th:if="${oldImageUrls != null and oldImageUrls.get(photo.id) != null}"
+                                 th:src="${oldImageUrls.get(photo.id)}"
                                  th:alt="${photo.title} + '老照片'">
-                            <div th:unless="${oldImageUrls != null and oldImageUrls[__${photo.id}__] != null}"
+                            <div th:unless="${oldImageUrls != null and oldImageUrls.get(photo.id) != null}"
                                  class="slot-placeholder compare-img compare-img-old"
-                                 th:attr="data-slot-id=|IMG-11-${#numbers.formatInteger(photo.id * 2 - 1, 2, '0')}|"
+                                 th:attr="data-slot-id=|IMG-11-${#numbers.formatInteger(photo.id * 2 - 1, 2)}|"
                                  style="background: var(--glass-bg);">
                                 <div class="slot-type-icon">🖼️</div>
-                                <div class="slot-badge" th:text="|IMG-11-${#numbers.formatInteger(photo.id * 2 - 1, 2, '0')}|"></div>
+                                <div class="slot-badge" th:text="|IMG-11-${#numbers.formatInteger(photo.id * 2 - 1, 2)}|"></div>
                                 <div class="slot-desc" th:text="${photo.title} + ' · 老照片待上传'"></div>
                             </div>
                             <!-- 新照片（IMG-11-{偶数编号}：photo.id*2） -->
                             <div class="compare-img-new-wrap">
-                                <img th:if="${newImageUrls != null and newImageUrls[__${photo.id}__] != null}"
-                                     th:src="${newImageUrls[__${photo.id}__]}"
+                                <img th:if="${newImageUrls != null and newImageUrls.get(photo.id) != null}"
+                                     th:src="${newImageUrls.get(photo.id)}"
                                      th:alt="${photo.title} + '新照片'">
-                                <div th:unless="${newImageUrls != null and newImageUrls[__${photo.id}__] != null}"
+                                <div th:unless="${newImageUrls != null and newImageUrls.get(photo.id) != null}"
                                      class="slot-placeholder"
-                                     th:attr="data-slot-id=|IMG-11-${#numbers.formatInteger(photo.id * 2, 2, '0')}|"
+                                     th:attr="data-slot-id=|IMG-11-${#numbers.formatInteger(photo.id * 2, 2)}|"
                                      style="width: 100%; height: 100%; background: var(--glass-bg);">
                                     <div class="slot-type-icon">🖼️</div>
-                                    <div class="slot-badge" th:text="|IMG-11-${#numbers.formatInteger(photo.id * 2, 2, '0')}|"></div>
+                                    <div class="slot-badge" th:text="|IMG-11-${#numbers.formatInteger(photo.id * 2, 2)}|"></div>
                                     <div class="slot-desc" th:text="${photo.title} + ' · 新照片待上传'"></div>
                                 </div>
                             </div>
