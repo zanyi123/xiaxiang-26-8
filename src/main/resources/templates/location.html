@@ -60,8 +60,9 @@
                 <a href="/sitemap">网站导览</a>
                 <a href="/#tour">云游侨乡</a>
                 <a href="/#life">我的侨乡人生</a>
-                <a href="/#building-story">建筑故事</a>
+                <a href="/architecture-photo">建筑故事</a>
                 <a href="/#achievement">项目成果</a>
+                <a href="/video-show">视频展播</a>
                 <a href="/about">关于我们</a>
                 <a href="/admin">后台登录</a>
             </nav>
@@ -82,7 +83,7 @@
                 </div>
             </div>
 
-            <!-- 封面大横幅（对应 IMG-02-{id}） -->
+            <!-- 封面大横幅（对应 IMG-02-{id+1}，01为地图底图） -->
             <div class="location-cover-banner" style="position: relative; height: 260px; border-radius: 14px; overflow: hidden; margin-bottom: 1.5rem; border: 1px solid var(--glass-border); background: linear-gradient(135deg, rgba(26, 42, 74, 0.5), rgba(10, 10, 10, 0.8));">
                 <img th:if="${imageUrl != null and #strings.length(imageUrl) > 0}"
                      th:src="${imageUrl}"
@@ -91,9 +92,9 @@
                 <div th:unless="${imageUrl != null and #strings.length(imageUrl) > 0}"
                      class="slot-placeholder"
                      style="position: absolute; inset: 0;"
-                     th:attr="data-slot-id=${'IMG-02-' + location.id}">
+                     th:attr="data-slot-id=${'IMG-02-' + (location.id + 1)}">
                     <div class="slot-type-icon">🖼️</div>
-                    <div class="slot-badge" th:text="${'IMG-02-' + location.id}"></div>
+                    <div class="slot-badge" th:text="${'IMG-02-' + (location.id + 1)}"></div>
                     <div class="slot-desc" th:text="${location.name} + ' · 封面图待填充'"></div>
                 </div>
                 <div style="position: absolute; bottom: 0; left: 0; right: 0; padding: 1.25rem; background: linear-gradient(transparent, rgba(0,0,0,0.85));">
@@ -107,13 +108,13 @@
                     <div id="canvas-container" style="position: relative;">
                         <div class="model-info">3D高斯泼溅模型 · 支持鼠标旋转缩放</div>
                         <canvas id="3d-canvas"></canvas>
-                        <!-- 3D 模型未加载时的占位符（MDL-02-{id}） -->
+                        <!-- 3D 模型未加载时的占位符（MDL-02-{id+1}，01为地图底图） -->
                         <div id="model-placeholder"
                              class="slot-placeholder"
                              style="position: absolute; inset: 0; border-radius: 12px; display: none;"
-                             th:attr="data-slot-id=${'MDL-02-' + location.id}">
+                             th:attr="data-slot-id=${'MDL-02-' + (location.id + 1)}">
                             <div class="slot-type-icon">🧊</div>
-                            <div class="slot-badge" th:text="${'MDL-02-' + location.id}"></div>
+                            <div class="slot-badge" th:text="${'MDL-02-' + (location.id + 1)}"></div>
                             <div class="slot-desc" th:text="${location.name} + ' · 3D模型待填充'"></div>
                             <div class="slot-status">3D 模型加载中或尚未上传</div>
                         </div>
@@ -149,7 +150,7 @@
 
                     <div class="info-card">
                         <h3 class="info-card-title">全景视频</h3>
-                        <!-- VID-02-{id} 有素材显示视频播放器，无素材显示Slot占位符 -->
+                        <!-- VID-02-{id+1} 有素材显示视频播放器，无素材显示Slot占位符 -->
                         <video th:if="${videoUrl != null and #strings.length(videoUrl) > 0}"
                                th:src="${videoUrl}"
                                controls
@@ -158,9 +159,9 @@
                         <div th:unless="${videoUrl != null and #strings.length(videoUrl) > 0}"
                              class="slot-placeholder"
                              style="position: relative; min-height: 160px;"
-                             th:attr="data-slot-id=${'VID-02-' + location.id}">
+                             th:attr="data-slot-id=${'VID-02-' + (location.id + 1)}">
                             <div class="slot-type-icon">🎬</div>
-                            <div class="slot-badge" th:text="${'VID-02-' + location.id}"></div>
+                            <div class="slot-badge" th:text="${'VID-02-' + (location.id + 1)}"></div>
                             <div class="slot-desc" th:text="${location.name} + ' · 全景视频待填充'"></div>
                         </div>
                     </div>

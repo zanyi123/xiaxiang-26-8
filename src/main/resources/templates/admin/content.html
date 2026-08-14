@@ -427,18 +427,16 @@
         const key = currentModule.key;
         const id = item.id;
         switch (key) {
-            case 'stories': return `/story/${id}`;
-            case 'qiaopi': return `/qiaopi/${id}`;
-            case 'knowledge': return `/knowledge/${id}`;
-            case 'cultures': return '/sitemap'; // 列表页
-            case 'blogPosts': return '/blog/' + id;
-            case 'videos': return '/video/' + id;
+            case 'knowledge': return '/knowledge';
+            case 'cultures': return '/sitemap';
+            case 'blogPosts': return '/blog';
+            case 'videos': return '/video-show';
             case 'anatomies': return '/anatomy';
-            case 'photoCompares': return '/photo-compare';
             case 'team': return '/about';
-            case 'dialects': return '/dialect';
-            case 'archives': return '/archive';
             case 'locations': return '/location/' + id;
+            case 'interviews': return '/interview';
+            case 'collections': return '/collection';
+            case 'architecturePhotos': return '/architecture-photo';
             default: return null;
         }
     }
@@ -575,9 +573,11 @@
                     <textarea name="${f.name}" placeholder="请输入${f.label}">${escapeHtml(val)}</textarea>
                 </div>`;
             } else if (f.type === 'select') {
-                const opts = (f.options || []).map(o =>
-                    `<option value="${o}" ${val === o ? 'selected' : ''}>${o}</option>`
-                ).join('');
+                const labels = f.optionLabels || [];
+                const opts = (f.options || []).map((o, i) => {
+                    const display = labels[i] || o;
+                    return `<option value="${o}" ${val === o ? 'selected' : ''}>${display}</option>`;
+                }).join('');
                 return `<div class="form-group">
                     <label>${f.label} ${req}</label>
                     <select name="${f.name}">

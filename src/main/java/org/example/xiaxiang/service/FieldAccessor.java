@@ -24,8 +24,14 @@ import java.util.regex.Pattern;
 public class FieldAccessor {
 
     private static final Pattern PATH = Pattern.compile("^([a-zA-Z_][a-zA-Z0-9_]*)\\[(\\d+)\\]\\.([a-zA-Z_][a-zA-Z0-9_]*)$");
+    private static final Pattern SIMPLE_PATH = Pattern.compile("^([a-zA-Z_][a-zA-Z0-9_]*)$");
 
     public static String readField(Object root, String yamlPath) throws Exception {
+        Matcher simpleMatcher = SIMPLE_PATH.matcher(yamlPath);
+        if (simpleMatcher.matches()) {
+            Object v = getter(root, yamlPath);
+            return v == null ? null : v.toString();
+        }
         Path p = parse(yamlPath);
         List<?> list = (List<?>) getter(root, p.listField);
         if (list == null || p.index >= list.size()) return null;
@@ -36,6 +42,11 @@ public class FieldAccessor {
     }
 
     public static void writeField(Object root, String yamlPath, String value) throws Exception {
+        Matcher simpleMatcher = SIMPLE_PATH.matcher(yamlPath);
+        if (simpleMatcher.matches()) {
+            setter(root, yamlPath, value);
+            return;
+        }
         Path p = parse(yamlPath);
         List<Object> list = (List<Object>) getter(root, p.listField);
         if (list == null) {

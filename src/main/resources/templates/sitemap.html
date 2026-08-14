@@ -216,6 +216,47 @@
         @media (max-width: 480px) {
             .portal-grid { grid-template-columns: 1fr; }
         }
+
+        /* 新卡片CSS渐变背景 */
+        .bg-interview {
+            background: linear-gradient(135deg, #1a2f4a 0%, #2d4a3e 50%, #4a3d2d 100%);
+        }
+        .bg-interview::after {
+            content: '📝';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 4rem;
+            opacity: 0.3;
+            z-index: 1;
+        }
+        .bg-video-show {
+            background: linear-gradient(135deg, #2a1f3d 0%, #3d2a4a 50%, #1f3d3d 100%);
+        }
+        .bg-video-show::after {
+            content: '🎬';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 4rem;
+            opacity: 0.3;
+            z-index: 1;
+        }
+        .bg-collection {
+            background: linear-gradient(135deg, #3d2a1f 0%, #4a3d2a 50%, #2a3d1f 100%);
+        }
+        .bg-collection::after {
+            content: '🖼️';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 4rem;
+            opacity: 0.3;
+            z-index: 1;
+        }
     </style>
 </head>
 <body>
@@ -229,8 +270,9 @@
                 <a href="/sitemap">网站导览</a>
                 <a href="/#tour">云游侨乡</a>
                 <a href="/#life">我的侨乡人生</a>
-                <a href="/#building-story">建筑故事</a>
+                <a href="/architecture-photo">建筑故事</a>
                 <a href="/#achievement">项目成果</a>
+                <a href="/video-show">视频展播</a>
                 <a href="/about">关于我们</a>
                 <a href="/admin">后台登录</a>
             </nav>
@@ -279,12 +321,12 @@
             </a>
 
             <!-- 04 建筑故事 -->
-            <a href="/#building-story" class="portal-card primary" style="--card-bg: url('/images/sitemap-story.jpg')">
+            <a href="/architecture-photo" class="portal-card primary" style="--card-bg: url('/images/sitemap-story.jpg')">
                 <div class="portal-card-bg"></div>
                 <div class="portal-card-content">
                     <span class="portal-card-badge">故事</span>
                     <h3 class="portal-card-title">建筑故事</h3>
-                    <p class="portal-card-desc">宝源坊6栋特色建筑</p>
+                    <p class="portal-card-desc">宝源坊碉楼摄影集</p>
                 </div>
             </a>
 
@@ -294,7 +336,7 @@
                 <div class="portal-card-content">
                     <span class="portal-card-badge">成果</span>
                     <h3 class="portal-card-title">项目成果</h3>
-                    <p class="portal-card-desc">航拍 · 建模 · 记录</p>
+                    <p class="portal-card-desc">影像记录</p>
                 </div>
             </a>
 
@@ -308,27 +350,7 @@
                 </div>
             </a>
 
-            <!-- 07 侨乡故事 -->
-            <a href="/stories" class="portal-card" style="--card-bg: url('/images/sitemap-stories.jpg')">
-                <div class="portal-card-bg"></div>
-                <div class="portal-card-content">
-                    <span class="portal-card-badge">故事</span>
-                    <h3 class="portal-card-title">侨乡故事</h3>
-                    <p class="portal-card-desc">华侨远行与归来</p>
-                </div>
-            </a>
-
-            <!-- 08 田野档案 -->
-            <a href="/archive" class="portal-card" style="--card-bg: url('/images/sitemap-archive.jpg')">
-                <div class="portal-card-bg"></div>
-                <div class="portal-card-content">
-                    <span class="portal-card-badge">档案</span>
-                    <h3 class="portal-card-title">田野档案</h3>
-                    <p class="portal-card-desc">实地调研采集</p>
-                </div>
-            </a>
-
-            <!-- 09 建筑解剖 -->
+            <!-- 07 建筑解剖 -->
             <a href="/anatomy" class="portal-card" style="--card-bg: url('/images/sitemap-anatomy.jpg')">
                 <div class="portal-card-bg"></div>
                 <div class="portal-card-content">
@@ -338,37 +360,17 @@
                 </div>
             </a>
 
-            <!-- 10 老照片对比 -->
-            <a href="/photo-compare" class="portal-card" style="--card-bg: url('/images/sitemap-photo-compare.jpg')">
+            <!-- 08 视频展播（原老照片对比改为视频展播入口） -->
+            <a href="/video-show" class="portal-card" style="--card-bg: url('/images/sitemap-video-show.jpg')">
                 <div class="portal-card-bg"></div>
                 <div class="portal-card-content">
-                    <span class="portal-card-badge">对比</span>
-                    <h3 class="portal-card-title">老照片对比</h3>
-                    <p class="portal-card-desc">百年变迁对比</p>
+                    <span class="portal-card-badge">视频</span>
+                    <h3 class="portal-card-title">视频展播</h3>
+                    <p class="portal-card-desc">影像记录 · 精彩展播</p>
                 </div>
             </a>
 
-            <!-- 11 侨批文化 -->
-            <a href="/qiaopi" class="portal-card" style="--card-bg: url('/images/sitemap-qiaopi.jpg')">
-                <div class="portal-card-bg"></div>
-                <div class="portal-card-content">
-                    <span class="portal-card-badge">文化</span>
-                    <h3 class="portal-card-title">侨批文化</h3>
-                    <p class="portal-card-desc">华侨家书故事</p>
-                </div>
-            </a>
-
-            <!-- 12 方言学习 -->
-            <a href="/dialect" class="portal-card" style="--card-bg: url('/images/sitemap-dialect.jpg')">
-                <div class="portal-card-bg"></div>
-                <div class="portal-card-content">
-                    <span class="portal-card-badge">方言</span>
-                    <h3 class="portal-card-title">方言学习</h3>
-                    <p class="portal-card-desc">学几句开平话</p>
-                </div>
-            </a>
-
-            <!-- 13 知识答题 -->
+            <!-- 09 知识答题 -->
             <a href="/quiz" class="portal-card" style="--card-bg: url('/images/sitemap-quiz.jpg')">
                 <div class="portal-card-bg"></div>
                 <div class="portal-card-content">
@@ -378,18 +380,18 @@
                 </div>
             </a>
 
-            <!-- 14 虚拟盖章 -->
-            <a href="/stamps" class="portal-card" style="--card-bg: url('/images/sitemap-stamps.jpg')">
+            <!-- 10 采访专栏（原虚拟盖章改为采访专栏） -->
+            <a href="/interview" class="portal-card" style="--card-bg: url('/images/sitemap-interview.jpg')">
                 <div class="portal-card-bg"></div>
                 <div class="portal-card-content">
-                    <span class="portal-card-badge">收集</span>
-                    <h3 class="portal-card-title">虚拟盖章</h3>
-                    <p class="portal-card-desc">收集特色印章</p>
+                    <span class="portal-card-badge">专访</span>
+                    <h3 class="portal-card-title">采访专栏</h3>
+                    <p class="portal-card-desc">人物访谈 · 图文故事</p>
                 </div>
             </a>
 
             <!-- 15 关于我们 -->
-            <a href="/about" class="portal-card" style="--card-bg: url('/images/sitemap-about.jpg')">
+            <a href="/about" class="portal-card" style="--card-bg: url('/images/sitemap-aboutus.png')">
                 <div class="portal-card-bg"></div>
                 <div class="portal-card-content">
                     <span class="portal-card-badge">团队</span>
@@ -398,13 +400,13 @@
                 </div>
             </a>
 
-            <!-- 16 返回首页 -->
-            <a href="/" class="portal-card" style="--card-bg: url('/images/sitemap-return.jpg')">
+            <!-- 12 趣味收集（原返回首页改为趣味收集） -->
+            <a href="/collection" class="portal-card" style="--card-bg: url('/images/sitemap-collection.jpg')">
                 <div class="portal-card-bg"></div>
                 <div class="portal-card-content">
-                    <span class="portal-card-badge">返回</span>
-                    <h3 class="portal-card-title">返回首页</h3>
-                    <p class="portal-card-desc">遇见薪火侨乡</p>
+                    <span class="portal-card-badge">收藏</span>
+                    <h3 class="portal-card-title">趣味收集</h3>
+                    <p class="portal-card-desc">图片集锦 · 美好瞬间</p>
                 </div>
             </a>
         </div>

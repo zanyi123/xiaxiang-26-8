@@ -1,0 +1,95 @@
+{
+  "description": "素材智能分配记录 - 视频清单",
+  "source": "李子东-视频清单(1).xlsx",
+  "totalVideos": 11,
+  "allocationDate": "2026-08-14",
+  "modules": {
+    "云游侨乡-建筑总览 (VID-01)": {
+      "description": "建筑详情页使用，每个建筑配一个4K视频",
+      "slots": [
+        {
+          "slotId": "VID-01-01",
+          "videoTitle": "宝源坊碉楼1",
+          "assignedTo": "开平碉楼 (building.id=1)",
+          "purpose": "建筑特写视频"
+        },
+        {
+          "slotId": "VID-01-02",
+          "videoTitle": "宝源坊碉楼2",
+          "assignedTo": "自力村碉楼群 (building.id=2)",
+          "purpose": "建筑特写视频"
+        },
+        {
+          "slotId": "VID-01-03",
+          "videoTitle": "南溟里航拍",
+          "assignedTo": "赤坎古镇 (building.id=3)",
+          "purpose": "古镇航拍视频"
+        }
+      ]
+    },
+    "视频展播 (VID-09)": {
+      "description": "独立视频展播页面，展示宣传和航拍类视频",
+      "slots": [
+        {
+          "slotId": "VID-09-01",
+          "videoTitle": "宝源坊宣传视频",
+          "purpose": "村落整体宣传"
+        },
+        {
+          "slotId": "VID-09-02",
+          "videoTitle": "侨韵薪火三下乡总结视频",
+          "purpose": "项目成果展示"
+        },
+        {
+          "slotId": "VID-09-03",
+          "videoTitle": "宝源坊航拍1",
+          "purpose": "航拍展示"
+        },
+        {
+          "slotId": "VID-09-04",
+          "videoTitle": "宝源坊航拍2",
+          "purpose": "航拍展示"
+        },
+        {
+          "slotId": "VID-09-05",
+          "videoTitle": "宝源坊航拍3",
+          "purpose": "航拍展示"
+        },
+        {
+          "slotId": "VID-09-06",
+          "videoTitle": "开平碉楼航拍1",
+          "purpose": "航拍展示"
+        },
+        {
+          "slotId": "VID-09-07",
+          "videoTitle": "开平碉楼航拍2",
+          "purpose": "航拍展示"
+        },
+        {
+          "slotId": "VID-09-08",
+          "videoTitle": "开平碉楼航拍3",
+          "purpose": "航拍展示"
+        }
+      ]
+    }
+  },
+  "allocationLogic": {
+    "principle": "不重复匹配，先查验原模块待传需求，智能分配",
+    "steps": [
+      "1. 分析各模块素材需求清单",
+      "2. 对比视频清单内容",
+      "3. 按内容相关性分配到对应模块",
+      "4. 避免所有视频堆积在单一模块",
+      "5. 保留展播类视频在视频展播模块"
+    ]
+  },
+  "futureReference": {
+    "imageList": "图片清单待处理时，需按同样逻辑分配到对应模块",
+    "modelList": "模型清单待处理时，需按同样逻辑分配到对应模块",
+    "rules": [
+      "类型-模块编号-序号 格式：如 VID-01-01 表示视频-建筑模块-序号",
+      "不跨模块重复使用素材",
+      "先查验原模块需求，再分配新素材"
+    ]
+  }
+}

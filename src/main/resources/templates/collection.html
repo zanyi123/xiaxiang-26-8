@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>趣味收集 - 薪火侨乡</title>
+    <link rel="stylesheet" href="/css/qiaoyun.css?v=20260814">
+    <style>
+        body {
+            background: linear-gradient(135deg, rgba(26, 42, 74, 0.3), rgba(10, 10, 10, 0.5));
+        }
+        .collection-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 6rem 1.5rem 3rem;
+        }
+        .page-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+        .page-header h1 {
+            color: var(--warm-gold);
+            font-size: 2.2rem;
+            letter-spacing: 4px;
+            margin-bottom: 0.5rem;
+        }
+        .page-header p {
+            color: var(--text-secondary);
+            font-size: 1rem;
+        }
+        .collection-filters {
+            display: flex;
+            justify-content: center;
+            gap: 0.75rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+        .filter-btn {
+            padding: 0.5rem 1.2rem;
+            background: var(--glass-bg, rgba(20, 30, 50, 0.6));
+            border: 1px solid var(--glass-border, rgba(255,255,255,0.15));
+            border-radius: 20px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.88rem;
+        }
+        .filter-btn:hover, .filter-btn.active {
+            background: linear-gradient(135deg, rgba(212, 175, 55, 0.9), rgba(196, 98, 16, 0.85));
+            color: #1a2a4a;
+            border-color: rgba(212, 175, 55, 0.6);
+        }
+        .collection-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+        .collection-card {
+            position: relative;
+            aspect-ratio: 4/3;
+            border-radius: 16px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+            background: linear-gradient(135deg, rgba(26, 42, 74, 0.5), rgba(10, 10, 10, 0.8));
+            border: 1px solid var(--glass-border, rgba(255,255,255,0.1));
+        }
+        .collection-card:hover {
+            transform: translateY(-6px) scale(1.02);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5), 0 0 30px rgba(212, 175, 55, 0.25);
+            border-color: rgba(212, 175, 55, 0.5);
+        }
+        .collection-img {
+            position: absolute;
+            inset: 0;
+            background-size: cover;
+            background-position: center;
+            transition: transform 0.6s ease;
+        }
+        .collection-card:hover .collection-img {
+            transform: scale(1.08);
+        }
+        .collection-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg,
+                rgba(0, 0, 0, 0.05) 0%,
+                rgba(0, 0, 0, 0.15) 40%,
+                rgba(0, 0, 0, 0.6) 75%,
+                rgba(0, 0, 0, 0.9) 100%);
+            z-index: 1;
+            transition: background 0.4s ease;
+        }
+        .collection-card:hover .collection-overlay {
+            background: linear-gradient(180deg,
+                rgba(0, 0, 0, 0.1) 0%,
+                rgba(0, 0, 0, 0.25) 40%,
+                rgba(0, 0, 0, 0.7) 75%,
+                rgba(0, 0, 0, 0.95) 100%);
+        }
+        .collection-badge {
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+            padding: 0.3rem 0.7rem;
+            background: linear-gradient(135deg, rgba(212, 175, 55, 0.95), rgba(196, 98, 16, 0.9));
+            color: #1a2a4a;
+            font-size: 0.72rem;
+            font-weight: 700;
+            border-radius: 6px;
+            z-index: 3;
+        }
+        .collection-info {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 1.25rem 1.1rem;
+            z-index: 2;
+            color: white;
+        }
+        .collection-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 0.3rem;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
+        }
+        .collection-desc {
+            font-size: 0.82rem;
+            color: rgba(255, 255, 255, 0.9);
+            line-height: 1.4;
+            text-shadow: 0 1px 6px rgba(0, 0, 0, 0.8);
+        }
+        /* Lightbox 放大查看 */
+        .lightbox {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.92);
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+        .lightbox.active {
+            display: flex;
+        }
+        .lightbox img {
+            max-width: 90%;
+            max-height: 90vh;
+            object-fit: contain;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+        .lightbox-close {
+            position: absolute;
+            top: 1.5rem;
+            right: 1.5rem;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+            border: none;
+            font-size: 2rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+        .lightbox-close:hover {
+            background: rgba(212, 175, 55, 0.8);
+        }
+        @media (max-width: 768px) {
+            .collection-container { padding: 5rem 1rem 2rem; }
+            .page-header h1 { font-size: 1.6rem; }
+            .collection-grid { grid-template-columns: repeat(2, 1fr); gap: 1rem; }
+        }
+        @media (max-width: 480px) {
+            .collection-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <div class="header-left">
+                <a href="/" class="header-logo">薪火侨乡</a>
+            </div>
+            <nav class="header-nav">
+                <a href="/">首页</a>
+                <a href="/sitemap">网站导览</a>
+                <a href="/map">云游侨乡</a>
+                <a href="/knowledge">知识库</a>
+                <a href="/video-show">视频展播</a>
+                <a href="/about">关于我们</a>
+            </nav>
+            <div class="header-right">
+                <button class="header-icon-btn theme-toggle-btn" onclick="toggleTheme()">🌙</button>
+            </div>
+        </div>
+    </header>
+
+    <div class="collection-container">
+        <div class="page-header">
+            <h1>🎨 趣味收集</h1>
+            <p>用镜头记录侨乡之美，珍藏美好瞬间</p>
+        </div>
+
+        <div class="collection-filters" id="filter-bar">
+            <button class="filter-btn active" data-category="all">全部</button>
+        </div>
+
+        <div class="collection-grid" id="collection-grid">
+            <!-- 收藏卡片由 JS 动态渲染 -->
+        </div>
+    </div>
+
+    <!-- Lightbox -->
+    <div class="lightbox" id="lightbox" onclick="closeLightbox()">
+        <button class="lightbox-close">×</button>
+        <img id="lightbox-img" src="" alt="">
+    </div>
+
+    <footer class="footer" style="text-align: center; padding: 1.5rem; border-top: 1px solid var(--border-color, #3a3a3a); margin-top: 3rem;">
+        <p style="margin-top: 0.5rem;">© 2026 侨韵薪火实践团 版权所有</p>
+    </footer>
+
+    <script src="/js/slot-placeholder.js"></script>
+    <script th:inline="javascript">
+        const collections = /*[[${collections}]]*/ [];
+        const collectionImageUrls = /*[[${collectionImageUrls}]]*/ {};
+        let currentFilter = 'all';
+
+        function initFilters() {
+            const categories = [...new Set(collections.map(c => c.category).filter(Boolean))];
+            const filterBar = document.getElementById('filter-bar');
+            
+            categories.forEach(cat => {
+                const btn = document.createElement('button');
+                btn.className = 'filter-btn';
+                btn.textContent = cat;
+                btn.dataset.category = cat;
+                btn.onclick = () => {
+                    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    currentFilter = cat;
+                    renderCollections();
+                };
+                filterBar.appendChild(btn);
+            });
+        }
+
+        function renderCollections() {
+            const grid = document.getElementById('collection-grid');
+            let filtered = collections;
+            if (currentFilter !== 'all') {
+                filtered = collections.filter(c => c.category === currentFilter);
+            }
+
+            if (!filtered || filtered.length === 0) {
+                grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 3rem; color: var(--text-muted);">暂无收藏内容</div>';
+                return;
+            }
+
+            grid.innerHTML = filtered.map(item => {
+                const imgUrl = collectionImageUrls[String(item.id)] || collectionImageUrls[item.id];
+                const slotId = 'IMG-17-' + String(item.id).padStart(2, '0');
+                const bgStyle = imgUrl ? `background-image: url('${imgUrl}');` : '';
+                const placeholderHtml = !imgUrl ? 
+                    `<div class="slot-placeholder" style="position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;" data-slot-id="${slotId}">
+                        <div class="slot-type-icon">🖼️</div>
+                        <div class="slot-badge">${slotId}</div>
+                        <div class="slot-desc">图片待填充</div>
+                    </div>` : '';
+
+                return `
+                    <div class="collection-card" onclick="openLightbox('${imgUrl || ''}', '${item.title}')">
+                        <div class="collection-img" style="${bgStyle}">
+                            ${placeholderHtml}
+                        </div>
+                        <div class="collection-overlay"></div>
+                        <span class="collection-badge">${item.category || '收藏'}</span>
+                        <div class="collection-info">
+                            <h3 class="collection-title">${item.title}</h3>
+                            <p class="collection-desc">${item.description || ''}</p>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function openLightbox(src, title) {
+            if (!src) {
+                alert('该图片还未上传，请在后台素材管理中上传');
+                return;
+            }
+            document.getElementById('lightbox-img').src = src;
+            document.getElementById('lightbox').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeLightbox() {
+            document.getElementById('lightbox').classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeLightbox();
+        });
+
+        initFilters();
+        renderCollections();
+    </script>
+    <script src="/js/theme-switch.js?v=20260814"></script>
+</body>
+</html>

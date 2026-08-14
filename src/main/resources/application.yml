@@ -125,99 +125,92 @@ app:
   mock-mode: false
   env: prod
 
-  # 景区导航地图底图（IMG-02-00）
+  # 景区导航地图底图（IMG-02-01）
   map-background-image: ""
 
   buildings:
     - id: 1
-      name: "开平碉楼"
-      description: "世界文化遗产，融合中西建筑风格的经典之作"
+      name: "坊内现存碉楼"
+      description: "文化旧址，融合中西建筑风格的经典之作"
+      videoKey: "VID-01-01"
     - id: 2
-      name: "自力村碉楼群"
-      description: "开平碉楼最集中的村落，多部影视作品取景地"
+      name: "强亚村-老宅村碉楼群"
+      description: "开平碉楼集中的村落，古风古色"
+      videoKey: "VID-01-02"
     - id: 3
-      name: "赤坎古镇"
-      description: "岭南文化古镇，华侨历史文化聚集地"
+      name: "古屋内部"
+      description: "探秘纪实"
+      videoKey: "VID-01-03"
 
   locations:
     - id: 1
-      name: 宝源坊
-      number: 01
+      name: 宝源坊牌坊
+      number: 1
       description: 碉楼建筑展示区，集中展示侨乡特色碉楼建筑群
       history: ""
-      xCoordinate: 18
-      yCoordinate: 32
+      xCoordinate: 22.9
+      yCoordinate: 93.7
       image-key: ""
       model-key: ""
       video-key: ""
       audioText: ""
     - id: 2
-      name: "方形古井"
+      name: "岸堤白道"
       number: "02"
-      description: "古代饮水文化遗迹，见证侨乡村落的生活印记"
+      description: "岸旁河道流水经久不衰"
       history: ""
-      xCoordinate: 38.0
-      yCoordinate: 48.0
-      image-key: "images/e68ee5dac230abde3213b39c1f13ad2a.jpg"
+      xCoordinate: 47.0
+      yCoordinate: 73.4
+      image-key: ""
       model-key: ""
       video-key: ""
       audioText: ""
     - id: 3
-      name: "青石板街"
+      name: "青石板路"
       number: "03"
-      description: "古镇传统街道，踏石而行感受百年岁月"
+      description: "古镇传统青砖，踏石而行感受百年岁月"
       history: ""
-      xCoordinate: 52.0
-      yCoordinate: 28.0
+      xCoordinate: 63.2
+      yCoordinate: 40.3
       image-key: ""
       model-key: ""
       video-key: ""
       audioText: ""
     - id: 4
-      name: "古榕树广场"
+      name: "古榕树"
       number: "04"
-      description: "村民聚会场所，百年古榕见证侨乡变迁"
+      description: "村民聚会祈福之地，百年古榕见证侨乡变迁"
       history: ""
-      xCoordinate: 68.0
-      yCoordinate: 55.0
+      xCoordinate: 95.2
+      yCoordinate: 26.0
       image-key: ""
       model-key: ""
       video-key: ""
       audioText: ""
     - id: 5
-      name: "陈氏宗祠"
+      name: "宝源坊现有碉楼"
       number: "05"
-      description: "家族文化传承地，宗族制度与华侨精神的载体"
+      description: "高耸碉楼伫立，见证百年历史"
       history: ""
-      xCoordinate: 78.0
-      yCoordinate: 35.0
+      xCoordinate: 40.8
+      yCoordinate: 26.0
       image-key: ""
       model-key: ""
       video-key: ""
       audioText: ""
     - id: 6
-      name: "侨批展览馆"
+      name: "古屋纪实"
       number: "06"
       description: "华侨书信文化展，银信封藏家国情怀"
       history: ""
-      xCoordinate: 82.0
-      yCoordinate: 70.0
+      xCoordinate: 80.0
+      yCoordinate: 29.2
       image-key: ""
       model-key: ""
       video-key: ""
       audioText: ""
 
-  stories:
-    - id: 1
-      title: "南楼的故事"
-      category: "建筑故事"
-      summary: "赤坎南楼，七户人家合建的保护楼"
-      content: ""
-      author: "开平文化馆"
-      date: ""
-      coverImage: "cover-nanlou.jpg"
-      audioKey: ""
-      views: 0
+  stories: []
 
   timeline:
     - id: 1
@@ -251,31 +244,7 @@ app:
       description: "侨乡建筑数字化云游平台上线"
       type: "实践"
 
-  archives:
-    - id: 1
-      title: "侨乡契约文书"
-      category: "文献档案"
-      description: "清代至民国时期的土地契约、卖身契等文书"
-      icon: "📜"
-      count: 0
-      unit: "份"
-      detailUrl: "/archives/contracts"
-    - id: 2
-      title: "老照片集"
-      category: "影像档案"
-      description: "清末民初开平地区的珍贵老照片"
-      icon: "📷"
-      count: 0
-      unit: "张"
-      detailUrl: "/archives/photos"
-    - id: 3
-      title: "族谱资料"
-      category: "家族档案"
-      description: "开平各主要姓氏的族谱资料"
-      icon: "📚"
-      count: 0
-      unit: "部"
-      detailUrl: "/archives/genealogy"
+  archives: []
 
   knowledge:
     - id: 1
@@ -327,15 +296,45 @@ app:
 
   videos:
     - id: 1
-      title: "航拍开平碉楼"
-      description: "无人机视角下的开平碉楼群"
-      duration: "05:30"
-      views: 0
+      title: "宝源坊宣传视频"
+      description: "宝源坊村落整体宣传视频，介绍侨乡文化与建筑特色"
+      coverImage: ""
+      videoKey: ""
     - id: 2
-      title: "碉楼建造技艺"
-      description: "传统建造工艺纪录片"
-      duration: "12:00"
-      views: 0
+      title: "侨韵薪火三下乡总结视频"
+      description: "广东工业大学三下乡社会实践总结，记录调研与成果"
+      coverImage: ""
+      videoKey: ""
+    - id: 3
+      title: "宝源坊航拍1"
+      description: "无人机航拍宝源坊村落全景1"
+      coverImage: ""
+      videoKey: ""
+    - id: 4
+      title: "宝源坊航拍2"
+      description: "无人机航拍宝源坊村落全景2"
+      coverImage: ""
+      videoKey: ""
+    - id: 5
+      title: "宝源坊航拍3"
+      description: "无人机航拍宝源坊村落全景3"
+      coverImage: ""
+      videoKey: ""
+    - id: 6
+      title: "开平碉楼航拍1"
+      description: "无人机航拍开平碉楼群1"
+      coverImage: ""
+      videoKey: ""
+    - id: 7
+      title: "开平碉楼航拍2"
+      description: "无人机航拍开平碉楼群2"
+      coverImage: ""
+      videoKey: ""
+    - id: 8
+      title: "开平碉楼航拍3"
+      description: "无人机航拍开平碉楼群3"
+      coverImage: ""
+      videoKey: ""
 
   team:
     - id: 1
@@ -371,49 +370,8 @@ app:
       description: "百年间赤坎古镇的变迁对比"
       story: ""
 
-  qiaopi:
-    - id: 1
-      title: "一封来自纽约的侨批"
-      sender: "陈阿公"
-      recipient: "陈阿婆"
-      sendFrom: "纽约"
-      year: ""
-      amount: "50美元"
-      content: ""
-      translation: ""
-      category: "亲情类"
-    - id: 2
-      title: "生意家书"
-      sender: "梁老板"
-      recipient: "梁掌柜"
-      sendFrom: "旧金山"
-      year: ""
-      amount: "200美元"
-      content: ""
-      translation: ""
-      category: "商务类"
-
-    - id: 3
-      title: "侨乡人民的故事"
-      sender: "村民甲"
-      recipient: "党委书记"
-      year: "2020-04-03"
-      content: "侨乡人们跟随党"
-  dialects:
-    - id: 1
-      chinese: "你好"
-      dialect: "nei5 hou2"
-      pinyin: "nei hou"
-      meaning: "hello"
-      example: "nei5 hou2，食咗饭未啊？"
-      category: "日常用语"
-    - id: 2
-      chinese: "谢谢"
-      dialect: "do1 ze6"
-      pinyin: "do ze"
-      meaning: "thank you"
-      example: "do1 ze6 nei2，真系唔该晒！"
-      category: "礼貌用语"
+  qiaopi: []
+  dialects: []
 
   quizzes:
     - id: 1
@@ -447,3 +405,140 @@ app:
       icon: "📜"
       title: "国家重点文物保护单位"
       description: "2001年6月25日公布为第五批全国重点文物保护单位"
+    - id: 3
+      icon: "🚁"
+      title: "航拍数据采集"
+      description: "无人机4K航拍，多角度记录古村风貌，生成高质量影像资料"
+    - id: 4
+      icon: "🧊"
+      title: "3D数字建模"
+      description: "采用3D高斯泼溅技术，毫米级精度重建碉楼建筑三维模型"
+
+  # Module 16: 采访专栏（图文单元）
+  interviews:
+    - id: 1
+      title: "碉楼守护者访谈（8+1老板）"
+      subtitle: "对话开平碉楼修缮匠人"
+      summary: "走进开平碉楼修缮现场，聆听老一辈匠人的故事与坚守"
+      content: "在开平碉楼修缮现场，我们采访了从事修缮工作四十余年的老匠人。他讲述了传统修缮技艺的传承与创新，以及对碉楼文化的深厚情感。"
+      category: "人物访谈"
+      date: "2026-08"
+      coverImage: ""
+    - id: 2
+      title: "侨乡文化传承者（居委会采访）"
+      subtitle: "青年一代的文化守护"
+      summary: "采访致力于侨乡文化数字化保护的青年工作者"
+      content: "新一代文化保护者如何利用数字化技术传承侨乡文化？他们面临的挑战与机遇是什么？本期专访带你了解。"
+      category: "文化传承"
+      date: "2026-08"
+      coverImage: ""
+    
+
+  # Module 17: 趣味收集（图片单元）
+  collections:
+    - id: 1
+      title: "碉楼四季"
+      description: "记录宝源坊碉楼的四季变幻之美"
+      category: "自然"
+      imageKey: ""
+    - id: 2
+      title: "工匠精神"
+      description: "传统技艺传承人的工作剪影"
+      category: "人物纪实"
+      imageKey: ""
+    - id: 3
+      title: "团队风采"
+      description: "实践队工作与生活点滴"
+      category: "团队纪实"
+      imageKey: ""
+
+  # Module 18: 建筑故事摄影集（图片单元）
+  # 分类key: diaolou-坊内现存碉楼, village-强亚村-老宅村碉楼群, courtyard-碉楼院特写, interior-古屋内部
+  architecturePhotos:
+    # 分类1：坊内现存碉楼
+    - id: 1
+      title: "宝源坊碉楼全景"
+      description: "宝源坊村内碉楼全景视角"
+      category: "diaolou"
+      imageKey: ""
+    - id: 2
+      title: "碉楼雄姿"
+      description: "展现碉楼雄伟姿态"
+      category: "diaolou"
+      imageKey: ""
+    - id: 3
+      title: "碉楼与村落"
+      description: "碉楼与周围村落的和谐共存"
+      category: "diaolou"
+      imageKey: ""
+    - id: 4
+      title: "碉楼侧影"
+      description: "碉楼侧面视角拍摄"
+      category: "diaolou"
+      imageKey: ""
+
+    # 分类2：强亚村-老宅村碉楼群
+    - id: 5
+      title: "强亚村碉楼群"
+      description: "强亚村碉楼群整体风貌"
+      category: "village"
+      imageKey: ""
+    - id: 6
+      title: "老宅村碉楼"
+      description: "老宅村碉楼建筑实拍"
+      category: "village"
+      imageKey: ""
+    - id: 7
+      title: "村落碉楼远景"
+      description: "远观村落碉楼群"
+      category: "village"
+      imageKey: ""
+    - id: 8
+      title: "乡村碉楼风光"
+      description: "乡村与碉楼的自然风光"
+      category: "village"
+      imageKey: ""
+
+    # 分类3：碉楼院特写
+    - id: 9
+      title: "碉楼院门"
+      description: "碉楼院门建筑细节"
+      category: "courtyard"
+      imageKey: ""
+    - id: 10
+      title: "碉楼院墙"
+      description: "碉楼院墙结构特写"
+      category: "courtyard"
+      imageKey: ""
+    - id: 11
+      title: "院落天井"
+      description: "碉楼院落天井实拍"
+      category: "courtyard"
+      imageKey: ""
+    - id: 12
+      title: "建筑装饰"
+      description: "碉楼建筑装饰细节"
+      category: "courtyard"
+      imageKey: ""
+
+    # 分类4：古屋内部
+    - id: 13
+      title: "古屋大厅"
+      description: "古屋主大厅陈设"
+      category: "interior"
+      imageKey: ""
+    - id: 14
+      title: "古屋厢房"
+      description: "古屋厢房内部结构"
+      category: "interior"
+      imageKey: ""
+    - id: 15
+      title: "古屋主梁"
+      description: "古屋建筑主梁结构"
+      category: "interior"
+      imageKey: ""
+    - id: 16
+      title: "古屋陈设"
+      description: "古屋内部传统陈设"
+      category: "interior"
+      imageKey: ""

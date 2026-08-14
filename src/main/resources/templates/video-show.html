@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>视频展播 - 薪火侨乡</title>
+    <link rel="stylesheet" href="/css/qiaoyun.css">
+    <style>
+        .video-show-section {
+            padding: 2rem;
+        }
+
+        .video-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .video-card {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .video-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--warm-gold);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .video-thumbnail {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 16/9;
+            background: linear-gradient(135deg, rgba(212, 175, 55, 0.1), rgba(74, 158, 255, 0.1));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .video-thumbnail img,
+        .video-thumbnail video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .video-play-btn {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 60px;
+            height: 60px;
+            background: rgba(212, 175, 55, 0.9);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #1a1a2e;
+            font-size: 1.5rem;
+            opacity: 0;
+            transition: all 0.3s;
+            z-index: 2;
+        }
+
+        .video-card:hover .video-play-btn {
+            opacity: 1;
+        }
+
+        .slot-placeholder {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+            color: var(--text-muted);
+        }
+
+        .slot-placeholder .slot-type-icon {
+            font-size: 3rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .slot-placeholder .slot-badge {
+            font-size: 0.85rem;
+            color: var(--warm-gold);
+            background: rgba(212, 175, 55, 0.1);
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            margin-bottom: 0.25rem;
+        }
+
+        .video-info {
+            padding: 1.25rem;
+        }
+
+        .video-title {
+            color: var(--text-primary);
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+        }
+
+        .video-meta {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .video-badge {
+            padding: 0.3rem 0.7rem;
+            background: rgba(212, 175, 55, 0.1);
+            color: var(--warm-gold);
+            border-radius: 10px;
+            font-size: 0.78rem;
+        }
+
+        .video-badge.video {
+            background: rgba(255, 107, 107, 0.15);
+            color: #ff6b6b;
+        }
+
+        .video-count {
+            text-align: center;
+            color: var(--text-muted);
+            margin-bottom: 2rem;
+        }
+
+        /* 视频播放弹窗 */
+        .video-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .video-modal.active {
+            display: flex;
+        }
+
+        .video-modal-content {
+            width: 90%;
+            max-width: 1000px;
+            background: #1a1a2e;
+            border-radius: 16px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .video-modal-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            width: 36px;
+            height: 36px;
+            background: rgba(0, 0, 0, 0.5);
+            border: none;
+            color: white;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+        }
+
+        .video-modal-close:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .video-modal video {
+            width: 100%;
+            max-height: 600px;
+            background: #000;
+        }
+
+        .video-modal-info {
+            padding: 1.5rem;
+        }
+
+        .video-modal-title {
+            color: var(--warm-gold);
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .video-modal-desc {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        .video-modal .slot-placeholder {
+            padding: 3rem;
+        }
+
+        @media (max-width: 768px) {
+            .video-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 顶部导航 -->
+    <header class="header">
+        <div class="header-content">
+            <div class="header-left">
+                <a href="/" class="header-logo">薪火侨乡</a>
+            </div>
+            <nav class="header-nav">
+                <a href="/#hero">首页</a>
+                <a href="/sitemap">网站导览</a>
+                <a href="/#tour">云游侨乡</a>
+                <a href="/#life">我的侨乡人生</a>
+                <a href="/architecture-photo">建筑故事</a>
+                <a href="/#achievement">项目成果</a>
+                <a href="/video-show" class="active">视频展播</a>
+                <a href="/about">关于我们</a>
+                <a href="/admin">后台登录</a>
+            </nav>
+            <div class="header-right">
+                <button class="header-icon-btn theme-toggle-btn" id="theme-toggle" title="切换主题" onclick="toggleTheme()">🌙</button>
+                <button class="header-btn" onclick="window.location.href='/map'">开始云游</button>
+            </div>
+        </div>
+    </header>
+
+    <main class="main">
+        <!-- 页面 Hero -->
+        <section class="page-hero">
+            <div class="page-hero-content">
+                <span class="page-hero-label">Video Gallery</span>
+                <h1 class="page-hero-title">视频展播</h1>
+                <p class="page-hero-subtitle">记录侨乡的每一个瞬间</p>
+            </div>
+        </section>
+
+        <div class="page-content">
+            <section class="video-show-section">
+                <div class="video-count">
+                    <span style="color: var(--text-muted);">共 <span th:text="${videos.size()}" style="color: var(--warm-gold); font-weight: 600;"></span> 个视频</span>
+                </div>
+
+                <div class="video-grid" id="video-grid">
+                    <!-- 视频卡片：使用 Thymeleaf 动态渲染 -->
+                    <div th:each="video, iter : ${videos}" 
+                         class="video-card" 
+                         th:attr="data-id=${video.id}, data-title=${video.title}, data-desc=${video.description}"
+                         onclick="openVideoModal(this)">
+                        <div class="video-thumbnail">
+                            <!-- 有封面图时显示 -->
+                            <img th:if="${videoCoverUrls[video.id] != null}" 
+                                 th:src="${videoCoverUrls[video.id]}" 
+                                 th:alt="${video.title}"
+                                 loading="lazy">
+                            <!-- 无封面图时显示占位符 -->
+                            <div th:unless="${videoCoverUrls[video.id] != null}" 
+                                 class="slot-placeholder">
+                                <div class="slot-type-icon">🎬</div>
+                                <div class="slot-badge" th:text="'IMG-09-' + ${video.id}">IMG-09-xx</div>
+                                <div style="font-size: 0.78rem;">封面图待上传</div>
+                            </div>
+                            <div class="video-play-btn">▶</div>
+                        </div>
+                        <div class="video-info">
+                            <div class="video-title" th:text="${video.title}">视频标题</div>
+                            <div class="video-meta">
+                                <span class="video-badge video">视频</span>
+                                <span class="video-badge" th:text="'VID-09-' + ${video.id}">VID-09-xx</span>
+                                <span class="video-badge" th:text="'封面:IMG-09-' + ${video.id}">IMG-09-xx</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- 视频播放弹窗 -->
+    <div class="video-modal" id="video-modal" onclick="if(event.target === this) closeVideoModal()">
+        <div class="video-modal-content">
+            <button class="video-modal-close" onclick="closeVideoModal()">✕</button>
+            <!-- 有视频URL时显示播放器 -->
+            <div id="video-player-wrapper">
+                <video id="video-player" controls style="display: none;"></video>
+            </div>
+            <!-- 无视频时显示占位符 -->
+            <div id="video-placeholder" class="slot-placeholder" style="padding: 3rem; display: none;">
+                <div class="slot-type-icon" style="font-size: 4rem; margin-bottom: 1rem;">🎬</div>
+                <div class="slot-badge" id="video-slot-badge">VID-09-xx</div>
+                <div style="color: var(--text-muted); margin-bottom: 0.5rem;" id="video-placeholder-title">视频标题</div>
+                <div style="font-size: 0.85rem; color: var(--text-secondary); text-align: center; max-width: 400px;" id="video-placeholder-desc">请联系管理员上传视频素材</div>
+            </div>
+            <div class="video-modal-info">
+                <div class="video-modal-title" id="video-modal-title">视频标题</div>
+                <div class="video-modal-desc" id="video-modal-desc">视频描述</div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/theme-switch.js?v=20260808"></script>
+    <script>
+        // 视频播放功能
+        const videoFileUrls = /*[[${videoFileUrls}]]*/ {};
+
+        function openVideoModal(card) {
+            const id = card.dataset.id;
+            const title = card.dataset.title;
+            const desc = card.dataset.desc;
+            const videoUrl = videoFileUrls[id];
+
+            document.getElementById('video-modal-title').textContent = title;
+            document.getElementById('video-modal-desc').textContent = desc || '';
+            document.getElementById('video-slot-badge').textContent = 'VID-09-' + id;
+            document.getElementById('video-placeholder-title').textContent = title;
+            document.getElementById('video-placeholder-desc').textContent = '素材编号: VID-09-' + id + '，请联系管理员上传视频';
+
+            const player = document.getElementById('video-player');
+            const placeholder = document.getElementById('video-placeholder');
+
+            if (videoUrl && videoUrl.length > 0) {
+                // 有视频，显示播放器
+                player.src = videoUrl;
+                player.style.display = 'block';
+                placeholder.style.display = 'none';
+            } else {
+                // 无视频，显示占位符
+                player.style.display = 'none';
+                player.src = '';
+                placeholder.style.display = 'flex';
+            }
+
+            document.getElementById('video-modal').classList.add('active');
+        }
+
+        function closeVideoModal() {
+            const modal = document.getElementById('video-modal');
+            const player = document.getElementById('video-player');
+            modal.classList.remove('active');
+            if (player) {
+                player.pause();
+                player.src = '';
+            }
+        }
+
+        // ESC 键关闭弹窗
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') closeVideoModal();
+        });
+
+        // 主题切换
+        function toggleTheme() {
+            const html = document.documentElement;
+            const currentTheme = html.getAttribute('data-theme') || 'dark';
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+        }
+
+        // 初始化主题
+        document.addEventListener('DOMContentLoaded', function() {
+            const savedTheme = localStorage.getItem('theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+        });
+    </script>
+</body>
+</html>

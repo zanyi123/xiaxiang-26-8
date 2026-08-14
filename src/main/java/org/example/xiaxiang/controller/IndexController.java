@@ -48,6 +48,9 @@ public class IndexController {
         model.addAttribute("team", appProperties.getTeam());
         model.addAttribute("achievements", appProperties.getAchievements());
 
+        // 地图底图（IMG-02-01），首页云游区块使用
+        model.addAttribute("mapBgImageUrl", cosService.getUrlSafely(appProperties.getMapBackgroundImage()));
+
         // 素材 URL Map：key=对象 id, value=COS URL（mock 模式下为 /mock/xxx，真实模式为完整 COS URL）
         // 模板中可通过 ${coverUrls[id]} 访问，为 null 时回退到 AI 生成图
         model.addAttribute("buildingCoverUrls", buildUrlMap(appProperties.getBuildings(), AppProperties.Building::getId, AppProperties.Building::getCoverImage));
@@ -89,14 +92,16 @@ public class IndexController {
         log.info("[IndexController] 访问景区导航页");
         List<AppProperties.Location> locations = appProperties.getLocations();
         model.addAttribute("locations", locations);
-        // 地点图片URL Map（IMG-02-01~06）
+        // 地点图片URL Map（IMG-02-02~07，01为地图底图）
         model.addAttribute("locationImageUrls", cosService.buildUrlMap(locations,
                 AppProperties.Location::getId, AppProperties.Location::getImageKey));
         // 地点视频URL Map（VID-02-01~06）
         model.addAttribute("locationVideoUrls", cosService.buildUrlMap(locations,
                 AppProperties.Location::getId, AppProperties.Location::getVideoKey));
-        // 地图底图（IMG-02-00）
+        // 地图底图（IMG-02-01）
         model.addAttribute("mapBgImageUrl", cosService.getUrlSafely(appProperties.getMapBackgroundImage()));
+        // 时间线数据
+        model.addAttribute("timeline", appProperties.getTimeline());
         return "map";
     }
 
@@ -161,5 +166,75 @@ public class IndexController {
 
         log.info("[IndexController] 地点详情页数据已准备，ID={}, modelUrl={}", id, modelUrl);
         return "location";
+    }
+
+    /**
+     * 视频展播页：展示所有视频素材
+     */
+    @GetMapping("/video-show")
+    public String videoShow(Model model) {
+        log.info("[IndexController] 访问视频展播页");
+        model.addAttribute("videos", appProperties.getVideos());
+        model.addAttribute("videoCoverUrls", buildUrlMap(appProperties.getVideos(), AppProperties.VideoItem::getId, AppProperties.VideoItem::getCoverImage));
+        model.addAttribute("videoFileUrls", buildUrlMap(appProperties.getVideos(), AppProperties.VideoItem::getId, AppProperties.VideoItem::getVideoKey));
+        return "video-show";
+    }
+
+    /**
+     * 采访专栏页：展示所有采访内容
+     */
+    @GetMapping("/interview")
+    public String interview(Model model) {
+        log.info("[IndexController] 访问采访专栏页");
+        model.addAttribute("interviews", appProperties.getInterviews());
+        model.addAttribute("interviewImageUrls", buildUrlMap(appProperties.getInterviews(), AppProperties.InterviewItem::getId, AppProperties.InterviewItem::getCoverImage));
+        return "interview";
+    }
+
+    /**
+     * 趣味收集页：展示所有图片收藏
+     */
+    @GetMapping("/collection")
+    public String collection(Model model) {
+        log.info("[IndexController] 访问趣味收集页");
+        model.addAttribute("collections", appProperties.getCollections());
+        model.addAttribute("collectionImageUrls", buildUrlMap(appProperties.getCollections(), AppProperties.CollectionItem::getId, AppProperties.CollectionItem::getImageKey));
+        return "collection";
+    }
+
+    /**
+     * 建筑故事摄影集页：展示建筑摄影作品
+     */
+    @GetMapping("/architecture-photo")
+    public String architecturePhoto(Model model) {
+        log.info("[IndexController] 访问建筑故事摄影集页");
+        model.addAttribute("architecturePhotos", appProperties.getArchitecturePhotos());
+
+        Map<Integer, String> photoImageUrls = buildUrlMap(
+            appProperties.getArchitecturePhotos(),
+            AppProperties.ArchitecturePhotoItem::getId,
+            AppProperties.ArchitecturePhotoItem::getImageKey
+        );
+
+        // 古屋内部分类共享古屋纪实(location ID=6)的素材
+        AppProperties.Location wuju = null;
+        for (AppProperties.Location loc : appProperties.getLocations()) {
+            if (loc.getId() != null && loc.getId() == 6) {
+                wuju = loc;
+                break;
+            }
+        }
+        if (wuju != null && wuju.getImageKey() != null && !wuju.getImageKey().isEmpty()) {
+            String interiorUrl = cosService.getUrlSafely(wuju.getImageKey());
+            for (AppProperties.ArchitecturePhotoItem ap : appProperties.getArchitecturePhotos()) {
+                if ("interior".equals(ap.getCategory()) && ap.getId() != null
+                        && !photoImageUrls.containsKey(ap.getId())) {
+                    photoImageUrls.put(ap.getId(), interiorUrl);
+                }
+            }
+        }
+
+        model.addAttribute("photoImageUrls", photoImageUrls);
+        return "architecture-photo";
     }
 }

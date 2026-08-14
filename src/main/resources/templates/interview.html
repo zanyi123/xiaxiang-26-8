@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>采访专栏 - 薪火侨乡</title>
+    <link rel="stylesheet" href="/css/qiaoyun.css?v=20260814">
+    <style>
+        body {
+            background: linear-gradient(135deg, rgba(26, 42, 74, 0.3), rgba(10, 10, 10, 0.5));
+        }
+        .interview-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 6rem 1.5rem 3rem;
+        }
+        .page-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+        .page-header h1 {
+            color: var(--warm-gold);
+            font-size: 2.2rem;
+            letter-spacing: 4px;
+            margin-bottom: 0.5rem;
+        }
+        .page-header p {
+            color: var(--text-secondary);
+            font-size: 1rem;
+        }
+        .interview-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 1.5rem;
+        }
+        .interview-card {
+            background: var(--glass-bg, rgba(20, 30, 50, 0.6));
+            border: 1px solid var(--glass-border, rgba(255,255,255,0.1));
+            border-radius: 16px;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+            cursor: pointer;
+            backdrop-filter: blur(12px);
+        }
+        .interview-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5), 0 0 30px rgba(212, 175, 55, 0.2);
+            border-color: rgba(212, 175, 55, 0.4);
+        }
+        .interview-cover {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 16/10;
+            overflow: hidden;
+            background: linear-gradient(135deg, rgba(26, 42, 74, 0.5), rgba(10, 10, 10, 0.8));
+        }
+        .interview-cover img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.6s ease;
+        }
+        .interview-card:hover .interview-cover img {
+            transform: scale(1.05);
+        }
+        .interview-cover .slot-placeholder {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, rgba(26, 42, 74, 0.5), rgba(10, 10, 10, 0.8));
+        }
+        .cover-badge {
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+            padding: 0.3rem 0.8rem;
+            background: linear-gradient(135deg, rgba(212, 175, 55, 0.95), rgba(196, 98, 16, 0.9));
+            color: #1a2a4a;
+            font-size: 0.72rem;
+            font-weight: 700;
+            border-radius: 6px;
+            letter-spacing: 0.5px;
+            z-index: 2;
+        }
+        .interview-body {
+            padding: 1.5rem;
+        }
+        .interview-title {
+            color: var(--warm-gold);
+            font-size: 1.15rem;
+            font-weight: 700;
+            margin-bottom: 0.3rem;
+            letter-spacing: 0.5px;
+        }
+        .interview-subtitle {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            margin-bottom: 0.8rem;
+            font-style: italic;
+        }
+        .interview-summary {
+            color: var(--text-muted);
+            font-size: 0.88rem;
+            line-height: 1.6;
+            margin-bottom: 1rem;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .interview-meta {
+            display: flex;
+            gap: 1rem;
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            padding-top: 0.8rem;
+            border-top: 1px solid var(--glass-border, rgba(255,255,255,0.1));
+        }
+        .interview-meta span {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+        /* 详情弹窗 */
+        .interview-detail-modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+        .interview-detail-modal.active {
+            display: flex;
+        }
+        .modal-content {
+            background: var(--glass-bg, rgba(20, 30, 50, 0.95));
+            border: 1px solid var(--glass-border, rgba(255,255,255,0.15));
+            border-radius: 20px;
+            max-width: 800px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            backdrop-filter: blur(12px);
+        }
+        .modal-cover {
+            width: 100%;
+            aspect-ratio: 21/9;
+            overflow: hidden;
+            border-radius: 20px 20px 0 0;
+            background: linear-gradient(135deg, rgba(26, 42, 74, 0.5), rgba(10, 10, 10, 0.8));
+        }
+        .modal-cover img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .modal-body {
+            padding: 2rem;
+        }
+        .modal-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: rgba(0, 0, 0, 0.6);
+            color: white;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-close:hover {
+            background: rgba(212, 175, 55, 0.8);
+        }
+        .modal-body h2 {
+            color: var(--warm-gold);
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+        .modal-body h3 {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            margin-bottom: 1rem;
+            font-style: italic;
+        }
+        .modal-body .content-text {
+            color: var(--text-primary);
+            font-size: 1rem;
+            line-height: 1.8;
+            white-space: pre-wrap;
+        }
+        @media (max-width: 768px) {
+            .interview-container { padding: 5rem 1rem 2rem; }
+            .page-header h1 { font-size: 1.6rem; }
+            .interview-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <div class="header-left">
+                <a href="/" class="header-logo">薪火侨乡</a>
+            </div>
+            <nav class="header-nav">
+                <a href="/">首页</a>
+                <a href="/sitemap">网站导览</a>
+                <a href="/map">云游侨乡</a>
+                <a href="/architecture-photo">建筑故事</a>
+                <a href="/video-show">视频展播</a>
+                <a href="/about">关于我们</a>
+            </nav>
+            <div class="header-right">
+                <button class="header-icon-btn theme-toggle-btn" onclick="toggleTheme()">🌙</button>
+            </div>
+        </div>
+    </header>
+
+    <div class="interview-container">
+        <div class="page-header">
+            <h1>📝 采访专栏</h1>
+            <p>走进侨乡人物，聆听真实故事</p>
+        </div>
+
+        <div class="interview-grid" id="interview-grid">
+            <!-- 采访卡片由 JS 动态渲染 -->
+        </div>
+    </div>
+
+    <!-- 详情弹窗 -->
+    <div class="interview-detail-modal" id="detail-modal" onclick="if(event.target===this)closeDetail()">
+        <div class="modal-content" style="position: relative;">
+            <button class="modal-close" onclick="closeDetail()">×</button>
+            <div class="modal-cover" id="modal-cover">
+                <!-- 封面图 -->
+            </div>
+            <div class="modal-body">
+                <h2 id="modal-title">标题</h2>
+                <h3 id="modal-subtitle">副标题</h3>
+                <div class="interview-meta" style="margin-bottom: 1rem; padding-top: 0; border-top: none;">
+                    <span id="modal-category">📂 分类</span>
+                    <span id="modal-date">📅 日期</span>
+                </div>
+                <div class="content-text" id="modal-content">
+                    内容
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer" style="text-align: center; padding: 1.5rem; border-top: 1px solid var(--border-color, #3a3a3a); margin-top: 3rem;">
+        <p style="margin-top: 0.5rem;">© 2026 侨韵薪火实践团 版权所有</p>
+    </footer>
+
+    <script src="/js/slot-placeholder.js"></script>
+    <script th:inline="javascript">
+        const interviews = /*[[${interviews}]]*/ [];
+        const interviewImageUrls = /*[[${interviewImageUrls}]]*/ {};
+
+        function renderInterviews() {
+            const grid = document.getElementById('interview-grid');
+            if (!interviews || interviews.length === 0) {
+                grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 3rem; color: var(--text-muted);">暂无采访内容</div>';
+                return;
+            }
+
+            grid.innerHTML = interviews.map(item => {
+                const imgUrl = interviewImageUrls[String(item.id)] || interviewImageUrls[item.id];
+                const slotId = 'IMG-16-' + String(item.id).padStart(2, '0');
+                const imgHtml = imgUrl ? 
+                    `<img src="${imgUrl}" alt="${item.title}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">` :
+                    '';
+                const placeholderHtml = !imgUrl ? 
+                    `<div class="slot-placeholder" style="position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;" data-slot-id="${slotId}">
+                        <div class="slot-type-icon">📷</div>
+                        <div class="slot-badge">${slotId}</div>
+                        <div class="slot-desc">封面图待填充</div>
+                    </div>` : '';
+
+                return `
+                    <div class="interview-card" onclick="openDetail(${item.id})">
+                        <div class="interview-cover">
+                            <span class="cover-badge">${item.category || '采访'}</span>
+                            ${imgHtml}
+                            ${placeholderHtml}
+                        </div>
+                        <div class="interview-body">
+                            <h3 class="interview-title">${item.title}</h3>
+                            <p class="interview-subtitle">${item.subtitle || ''}</p>
+                            <p class="interview-summary">${item.summary || item.content || ''}</p>
+                            <div class="interview-meta">
+                                <span>📅 ${item.date || '2026'}</span>
+                                <span>📂 ${item.category || '专访'}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function openDetail(id) {
+            const item = interviews.find(i => i.id === id);
+            if (!item) return;
+
+            const imgUrl = interviewImageUrls[String(id)] || interviewImageUrls[id];
+            document.getElementById('modal-cover').innerHTML = imgUrl ? 
+                `<img src="${imgUrl}" alt="${item.title}">` :
+                `<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;background:linear-gradient(135deg,rgba(26,42,74,0.5),rgba(10,10,10,0.8));color:var(--text-muted);"><div style="font-size:3rem;margin-bottom:0.5rem;">📷</div><div>封面图待填充</div></div>`;
+            
+            document.getElementById('modal-title').textContent = item.title;
+            document.getElementById('modal-subtitle').textContent = item.subtitle || '';
+            document.getElementById('modal-category').textContent = '📂 ' + (item.category || '专访');
+            document.getElementById('modal-date').textContent = '📅 ' + (item.date || '2026');
+            document.getElementById('modal-content').textContent = item.content || item.summary || '暂无详细内容';
+            
+            document.getElementById('detail-modal').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeDetail() {
+            document.getElementById('detail-modal').classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeDetail();
+        });
+
+        renderInterviews();
+    </script>
+    <script src="/js/theme-switch.js?v=20260814"></script>
+</body>
+</html>

@@ -1,136 +1,363 @@
-# 薪火侨乡 - 侨乡建筑数字化云游平台 开发日志
+# 薪火侨乡项目开发日志
 
-> 记录时间：2026-08-08
-> 项目路径：`d:/JAVA/xiaxiang`
-> 技术栈：Java 17 + Spring Boot 2.7 + Thymeleaf + MySQL + 腾讯云 COS
-> 服务器：Ubuntu / Nginx / Java 17
-> 部署端口：8080
+> 记录时间：2026-08-10（初版）→ 2026-08-14（更新）
+> 项目路径：d:\JAVA\xiaxiang
+> 技术栈：Java 21 + Spring Boot 2.7.18 + Thymeleaf + COS对象存储
 
 ---
 
-## 一、本次会话核心任务
+## 一、功能开发
 
-### 首页导览模式功能实现
+### 1. MBTI测试交互优化
+**问题**：MBTI测试所有步骤同时显示，未按选择顺序跳转
 
-为首页添加"导览模式"切换功能：
-- 首页默认为**内容展示模式**（显示实际建筑图片、故事详情、互动选项等）
-- 点击"🗂️ 导览"按钮切换为**导览模式**（纯入口卡片导航，不展示实际内容）
-- 导览卡片正确跳转到对应二级页面（`/map`、`/quiz`、`/location/{id}`）
-- 切换状态通过 `localStorage` 持久化
-- 浅色/深色主题切换时导览卡片样式自动适配
+**解决方案**：
+- 添加CSS样式控制`.life-panel`的显示/隐藏
+- 通过`.active`类切换当前步骤的可见性
+- 用户选择后延迟400ms自动跳转下一步
 
----
+**修改文件**：
+- `src/main/resources/templates/index.html`
 
-## 二、Bug 修复与优化
-
-### Bug 1：主题切换功能失效
-
-| 项目 | 说明 |
-|------|------|
-| **问题描述** | 点击主题切换按钮（🌙/☀️）无反应，页面不切换深浅色主题 |
-| **根因分析** | `index.html` 内联脚本和外部 `theme-switch.js` 都定义了 `toggleTheme()` 函数，造成**函数覆盖冲突**。内联脚本先加载，外部脚本后加载覆盖了内联版本，但两个版本实现不同导致逻辑混乱 |
-| **修复方案** | 删除 `index.html` 中重复的 `toggleTheme()` 定义，统一使用外部 `theme-switch.js` 中的版本。拆分初始化函数为 `initPortalMode()`，避免与 `theme-switch.js` 中的 `initTheme()` 冲突 |
-| **涉及文件** | [index.html](file:///d:/JAVA/xiaxiang/src/main/resources/templates/index.html#L668-L717) |
-
-### Bug 2：导览卡片样式丢失
-
-| 项目 | 说明 |
-|------|------|
-| **问题描述** | 导览卡片变成丑陋的文字链接列表（蓝色文字+下划线），完全丢失卡片样式 |
-| **根因分析** | 将卡片容器从 `<div>` 改为 `<a>` 标签实现直接跳转后，浏览器默认链接样式（`color: blue; text-decoration: underline`）覆盖了 CSS 中定义的卡片样式。CSS 特异性不足，无法覆盖浏览器 UA 样式 |
-| **修复方案** | 在 `.portal-entry-card` 及其子元素的所有样式属性添加 `!important` 声明，强制覆盖 `<a>` 标签默认样式。添加 `:link`、`:visited` 伪类选择器确保链接状态一致性 |
-| **涉及文件** | [qiaoyun.css](file:///d:/JAVA/xiaxiang/src/main/resources/static/css/qiaoyun.css#L4736-L4865) |
-
-### Bug 3：服务器部署后静态资源缓存问题
-
-| 项目 | 说明 |
-|------|------|
-| **问题描述** | 本地开发环境样式正常，但部署到服务器后导览卡片样式丢失，浏览器缓存旧版 CSS |
-| **根因分析** | Spring Boot 默认启用静态资源缓存，且 HTML 中引用的 CSS/JS 文件没有版本号参数，浏览器使用本地缓存的旧版文件 |
-| **修复方案** | 1. 在 HTML 中为所有 CSS/JS 引用添加版本号参数 `?v=20260808`，强制浏览器重新下载<br>2. 在 `application.yml` 中配置 `spring.web.resources.cache.period: 0` 禁用服务器端缓存 |
-| **涉及文件** | [index.html](file:///d:/JAVA/xiaxiang/src/main/resources/templates/index.html#L7)、[application.yml](file:///d:/JAVA/xiaxiang/src/main/resources/application.yml#L23-L27) |
-
----
-
-## 三、功能实现详情
-
-### 首页导览模式
-
-**切换机制**：
-- 通过 `body[data-portal-mode="true"]` 属性控制内容/导览模式显示
-- 实际内容模式：三大区块（云游宝源坊、互动体验、建筑故事）显示实际内容
-- 导览模式：三大区块显示纯入口卡片（图标+标题+简述）
-
-**导览卡片结构**：
-```html
-<a class="portal-entry-card primary" href="/map">
-    <div class="portal-card-icon">🏛️</div>
-    <h3 class="portal-card-title">宝源坊3D全景</h3>
-    <p class="portal-card-desc">沉浸式3D云游 · 古村空间布局</p>
-</a>
-```
-
-**CSS 控制**：
+**关键代码**：
 ```css
-.portal-container { display: none; }  /* 默认隐藏导览卡片 */
-body[data-portal-mode="true"] .portal-container { display: block; }
-body[data-portal-mode="true"] .content-container { display: none; }
+.life-panel { display: none; }
+.life-panel.active { display: block; }
 ```
 
-**入口卡片跳转映射**：
+---
 
-| 区块 | 卡片 | 跳转路径 |
-|------|------|----------|
-| 云游宝源坊 | 宝源坊3D全景（主） | `/map` |
-| | 6栋特色建筑 | `/map` |
-| | 建筑故事集 | `/stories` |
-| 互动体验 | 商贸之家（主） | `/quiz` |
-| | 书香之家 | `/quiz` |
-| | 普通人家 | `/quiz` |
-| 建筑故事 | 宝源坊碉楼（主） | `/location/1` |
-| | 方形古井 | `/location/2` |
-| | 青石板街 | `/location/3` |
+### 2. 历史时间线迁移
+**问题**：首页时间线占用大块空间，影响首页布局
+
+**解决方案**：
+- 将历史时间线从首页移除
+- 迁移至景区地图页面 `/map`，采用蜿蜒曲线形式
+- 使用SVG `getPointAtLength()` 方法动态计算节点位置，自动对齐曲线
+- 6个可点击节点：1644、1649、1840、1920s、2007、2026
+- 节点按类型区分颜色：历史（蓝）、建筑（金）、荣誉（红）、实践（绿）
+
+**修改文件**：
+- [index.html](file:///d:/JAVA/xiaxiang/src/main/resources/templates/index.html)（移除时间线）
+- [map.html](file:///d:/JAVA/xiaxiang/src/main/resources/templates/map.html)（添加蜿蜒时间线）
+- [IndexController.java](file:///d:/JAVA/xiaxiang/src/main/java/org/example/xiaxiang/controller/IndexController.java)（添加时间线数据传递）
 
 ---
 
-## 四、涉及文件清单
+### 3. 网站导览卡片优化（3个新入口）
+**功能**：为网站导览的12个卡片优化内容，替换/新增3个入口
 
-| 文件路径 | 修改内容 |
-|----------|----------|
-| `src/main/resources/templates/index.html` | 删除重复的 `toggleTheme()`，添加 `initPortalMode()`，CSS/JS 添加版本号参数，导览卡片改为 `<a>` 标签 |
-| `src/main/resources/static/css/qiaoyun.css` | 新增导览卡片样式（`.portal-entry-card` 等），添加 `!important` 覆盖浏览器默认样式，支持浅色主题适配 |
-| `src/main/resources/application.yml` | 添加 `spring.web.resources.cache.period: 0` 禁用静态资源缓存 |
+**变更**：
+- `虚拟盖章` → `采访专栏`（图文单元，IMG-16-xx）
+- `老照片对比` → `视频展播`（独立内容，VID-09-xx / IMG-09-xx）
+- `趣味收集`（图片单元，IMG-17-xx，仅保留3分类：自然、人物纪实、团队纪实）
+
+**新增页面**：
+- [interview.html](file:///d:/JAVA/xiaxiang/src/main/resources/templates/interview.html)（采访专栏页 `/interview`）
+- [collection.html](file:///d:/JAVA/xiaxiang/src/main/resources/templates/collection.html)（趣味收集页 `/collection`）
+- [video-show.html](file:///d:/JAVA/xiaxiang/src/main/resources/templates/video-show.html)（视频展播页 `/video-show`）
+
+**修改文件**：
+- [application.yml](file:///d:/JAVA/xiaxiang/src/main/resources/application.yml)
+- [AppProperties.java](file:///d:/JAVA/xiaxiang/src/main/java/org/example/xiaxiang/properties/AppProperties.java)
+- [SlotService.java](file:///d:/JAVA/xiaxiang/src/main/java/org/example/xiaxiang/service/SlotService.java)
+- [IndexController.java](file:///d:/JAVA/xiaxiang/src/main/java/org/example/xiaxiang/controller/IndexController.java)
+- [sitemap.html](file:///d:/JAVA/xiaxiang/src/main/resources/templates/sitemap.html)
+
+**编号规则**：
+- 视频展播：VID-09-xx（视频）、IMG-09-xx（封面）
+- 采访专栏：IMG-16-xx（图文单元）
+- 趣味收集：IMG-17-xx（图片单元）
+- 建筑故事摄影集：IMG-18-xx（图片单元）
 
 ---
 
-## 五、部署注意事项
+### 4. 建筑故事独立化
+**问题**：建筑故事内容与景区导览图、时间线混合在同一页面
 
-1. **打包命令**：`mvn clean package -DskipTests`（必须 `clean`，避免旧文件残留）
-2. **上传路径**：`/opt/xiaxiang/`
-3. **重启命令**：
+**解决方案**：
+- 建筑故事改为独立页面 `/architecture-photo`
+- 采用摄影集形式，4个分类：坊内现存碉楼、强亚村-老宅村碉楼群、碉楼院特写、古屋内部
+- 古屋内部分类与景区地图"古屋纪实"（location ID=6）共享素材
+- 从 map.html 中彻底移除建筑卡片CSS、JS变量和HTML
+
+**新增文件**：
+- [architecture-photo.html](file:///d:/JAVA/xiaxiang/src/main/resources/templates/architecture-photo.html)（建筑故事摄影集页）
+
+**修改文件**：
+- [IndexController.java](file:///d:/JAVA/xiaxiang/src/main/java/org/example/xiaxiang/controller/IndexController.java)（新增 `/architecture-photo` 路由及素材共享逻辑）
+- [map.html](file:///d:/JAVA/xiaxiang/src/main/resources/templates/map.html)（移除建筑卡片CSS/JS/HTML，清理 `buildings` 相关数据传递）
+
+---
+
+### 5. 视频展播独立页面
+**功能**：将视频展播从首页移至独立页面
+
+**实现**：
+- 导航栏新增「视频展播」入口（位于「项目成果」和「关于我们」之间）
+- 独立页面 `/video-show` 包含11个视频素材卡片
+- 点击卡片弹出视频播放窗口，支持ESC键关闭
+
+**修改文件**：
+- [video-show.html](file:///d:/JAVA/xiaxiang/src/main/resources/templates/video-show.html)
+- [index.html](file:///d:/JAVA/xiaxiang/src/main/resources/templates/index.html)（导航栏更新）
+
+---
+
+### 6. MBTI测试优化
+**问题**：MBTI测试问题与建筑关联度低，结局建筑名称与地图节点不匹配
+
+**解决方案**：
+- 重新设计9个结局的建筑名称和跳转locationId，与景区地图6个节点对齐
+- 优化测试问题，使选项与宝源坊建筑紧密关联（碉楼世家、青石板路等）
+- 修复 `startTour` 函数名冲突导致的白屏问题（重命名为 `goToLocation`）
+
+**修改文件**：
+- [index.html](file:///d:/JAVA/xiaxiang/src/main/resources/templates/index.html)
+
+---
+
+### 7. 地图调试模式优化
+**问题**：Ctrl+Shift+D快捷键与Chrome书签冲突
+
+**解决方案**：
+- 快捷键改为 `` ` ``（反引号）
+- 新增右下角📍圆形按钮切换调试模式
+- 调试模式开启时按钮有脉冲动画
+
+**修改文件**：
+- [map.html](file:///d:/JAVA/xiaxiang/src/main/resources/templates/map.html)
+
+---
+
+### 8. 后端内容管理优化
+**功能**：后端模块列表与前端功能对齐
+
+**模块调整**：
+- 保留：知识库、民俗文化、实践日志、视频展播、建筑解剖、团队成员
+- 重命名：`建筑故事` → `景区建筑`
+- 新增：采访专栏、趣味收集、建筑故事摄影集
+- 移除：老照片对比
+
+**分类匹配修复**：
+- FieldDef 增加 `optionLabels` 字段，实现 select 选项的「值-显示名」分离
+- 建筑故事摄影集分类使用英文key（diaolou/village/courtyard/interior）存储，中文显示
+- FieldAccessor 支持简单字段路径（如 `mapBackgroundImage`）
+
+**修改文件**：
+- [ContentManageService.java](file:///d:/JAVA/xiaxiang/src/main/java/org/example/xiaxiang/service/ContentManageService.java)
+- [FieldAccessor.java](file:///d:/JAVA/xiaxiang/src/main/java/org/example/xiaxiang/service/FieldAccessor.java)
+- [content.html](file:///d:/JAVA/xiaxiang/src/main/resources/templates/admin/content.html)
+- [SlotService.java](file:///d:/JAVA/xiaxiang/src/main/java/org/example/xiaxiang/service/SlotService.java)
+
+---
+
+### 9. 导航链接统一与旧名称清理
+**问题**：全站导航链接使用 `#building-story` 锚点跳转，部分页面仍有旧名称残留
+
+**解决方案**：
+- 将所有页面的「建筑故事」导航链接从 `/#building-story` 统一改为 `/architecture-photo`
+- 22个页面共39处链接更新
+- 修复 interview.html 错误链接 `/stories` → `/architecture-photo`
+- 清理 index.html、sitemap.html、qiaoyun.css 中「6栋特色建筑」等旧名称
+- 清理 map.html 中不再使用的 buildings CSS、JS变量、viewBuilding函数
+- 清理 IndexController.map() 中不再传递的 buildings 数据
+
+**修改文件**（23个HTML模板 + 1个Java + 1个CSS）：
+- [index.html](file:///d:/JAVA/xiaxiang/src/main/resources/templates/index.html)
+- [map.html](file:///d:/JAVA/xiaxiang/src/main/resources/templates/map.html)
+- [sitemap.html](file:///d:/JAVA/xiaxiang/src/main/resources/templates/sitemap.html)
+- [about.html](file:///d:/JAVA/xiaxiang/src/main/resources/templates/about.html)
+- [anatomy.html](file:///d:/JAVA/xiaxiang/src/main/resources/templates/anatomy.html)
+- [archive.html](file:///d:/JAVA/xiaxiang/src/main/resources/templates/archive.html)
+- [archive-detail.html](file:///d:/JAVA/xiaxiang/src/main/resources/templates/archive-detail.html)
+- [blog-detail.html](file:///d:/JAVA/xiaxiang/src/main/resources/templates/blog-detail.html)
+- [dialect.html](file:///d:/JAVA/xiaxiang/src/main/resources/templates/dialect.html)
+- [error.html](file:///d:/JAVA/xiaxiang/src/main/resources/templates/error.html)
+- [knowledge.html](file:///d:/JAVA/xiaxiang/src/main/resources/templates/knowledge.html)
+- [knowledge-detail.html](file:///d:/JAVA/xiaxiang/src/main/resources/templates/knowledge-detail.html)
+- [location.html](file:///d:/JAVA/xiaxiang/src/main/resources/templates/location.html)
+- [photo-compare.html](file:///d:/JAVA/xiaxiang/src/main/resources/templates/photo-compare.html)
+- [qiaopi.html](file:///d:/JAVA/xiaxiang/src/main/resources/templates/qiaopi.html)
+- [qiaopi-detail.html](file:///d:/JAVA/xiaxiang/src/main/resources/templates/qiaopi-detail.html)
+- [quiz.html](file:///d:/JAVA/xiaxiang/src/main/resources/templates/quiz.html)
+- [search-result.html](file:///d:/JAVA/xiaxiang/src/main/resources/templates/search-result.html)
+- [stamps.html](file:///d:/JAVA/xiaxiang/src/main/resources/templates/stamps.html)
+- [stories.html](file:///d:/JAVA/xiaxiang/src/main/resources/templates/stories.html)
+- [story-detail.html](file:///d:/JAVA/xiaxiang/src/main/resources/templates/story-detail.html)
+- [video-detail.html](file:///d:/JAVA/xiaxiang/src/main/resources/templates/video-detail.html)
+- [video-show.html](file:///d:/JAVA/xiaxiang/src/main/resources/templates/video-show.html)
+- [interview.html](file:///d:/JAVA/xiaxiang/src/main/resources/templates/interview.html)
+- [upload.html](file:///d:/JAVA/xiaxiang/src/main/resources/templates/admin/upload.html)
+- [IndexController.java](file:///d:/JAVA/xiaxiang/src/main/java/org/example/xiaxiang/controller/IndexController.java)
+- [qiaoyun.css](file:///d:/JAVA/xiaxiang/src/main/resources/static/css/qiaoyun.css)
+
+---
+
+## 二、Bug修复
+
+### 问题1：MBTI测试入口跳转错误
+**表现**：点击「商贸之家」卡片跳转到答题页面
+
+**修复**：
+- 修改卡片href为`javascript:void(0)`
+- 绑定`selectOriginFromPortal()`函数
+- 切换导览模式为内容模式，触发出身选择逻辑
+
+**修改文件**：
+- [index.html](file:///d:/JAVA/xiaxiang/src/main/resources/templates/index.html)
+
+---
+
+### 问题2：云游宝源坊白屏/系统繁忙
+**表现**：首页云游宝源坊区块点击后白屏
+
+**根因**：前端存在两个 `startTour` 函数定义，参数传递冲突导致后端抛出 `NumberFormatException: For input string: "undefined"`
+
+**修复**：
+- 将MBTI测试结果中的 `startTour(locationId)` 重命名为 `goToLocation(locationId)`
+- 更新所有调用处
+
+**修改文件**：
+- [index.html](file:///d:/JAVA/xiaxiang/src/main/resources/templates/index.html)
+
+---
+
+### 问题3：IMG-02-01 地图底图素材无法在后台显示
+**表现**：素材匹配中心找不到地图底图编号
+
+**根因**：FieldAccessor.java 仅支持数组索引路径（如 `foo[123].bar`），不支持简单字段路径（如 `mapBackgroundImage`）
+
+**修复**：
+- FieldAccessor 增加简单字段路径支持
+- SlotService 调整 Module 02 顺序，IMG-02-01 排在地点图片之前
+
+**修改文件**：
+- [FieldAccessor.java](file:///d:/JAVA/xiaxiang/src/main/java/org/example/xiaxiang/service/FieldAccessor.java)
+- [SlotService.java](file:///d:/JAVA/xiaxiang/src/main/java/org/example/xiaxiang/service/SlotService.java)
+
+---
+
+### 问题4：首页Thymeleaf模板语法错误
+**表现**：首页内容缺失
+
+**根因**：`th:style` 和 `th:classappend` 表达式中使用了字符串拼接
+
+**修复**：
+- 替换为Thymeleaf字面量替换语法 `|...|` 和 `${...}`
+
+**修改文件**：
+- [index.html](file:///d:/JAVA/xiaxiang/src/main/resources/templates/index.html)
+
+---
+
+## 三、编译与兼容性问题
+
+### Maven打包错误
+**错误信息**：
+```
+[ERROR] Error reading archive file: error in opening zip file
+```
+
+**原因**：旧的jar文件被本地Java进程占用
+
+**解决方案**：
+1. 停掉本地运行的Spring Boot程序：`taskkill /F /PID <pid>`
+2. 清理target目录：`rmdir /s /q target`
+3. 重新打包：`mvn clean package -DskipTests`
+
+---
+
+## 四、项目约束与规范
+
+### 硬约束
+- 后端管理部分不得修改
+- 素材填充状态必须真实反映COS存储桶内容
+- Java应用必须使用8080端口，冲突时先清理
+- Nginx必须转发xinhuoqiaoyun.online到8080端口
+- 历史线节点位置使用SVG getPointAtLength() 动态计算
+- 视频展播入口必须在导航栏（「项目成果」和「关于我们」之间）
+- 地图底图专用编号IMG-02-01，地点图片从IMG-02-02开始
+- 地图调试模式：点击📍按钮或按反引号键
+
+### 编号规则（2026-08-14更新）
+| 模块 | 编号前缀 | 说明 |
+|------|----------|------|
+| 景区地点 | IMG-02-02~ | 01为地图底图 |
+| 视频展播 | VID-09-xx / IMG-09-xx | 视频+封面 |
+| 采访专栏 | IMG-16-xx | 图文单元 |
+| 趣味收集 | IMG-17-xx | 图片单元 |
+| 建筑故事摄影集 | IMG-18-xx | 图片单元 |
+
+### 工程规范
+- 3D模型加载三级降级：3D模型 → 部分图片 → DOM占位符
+- SlotService 验证 YAML字段 + COS文件存在性
+- CosService 实现文件存在性检查缓存
+- 静态资源URL添加版本号（如 `?v=20260814`）
+- Spring Boot 模板缓存禁用（Thymeleaf cache: false）
+- Session 管理：单账号单会话，新登录踢掉旧会话
+- 导览卡片采用图片全背景模式（背景图层+渐变遮罩+文字层+金色徽章）
+
+---
+
+## 五、部署与运维
+
+### 本地一键启动脚本
+**新增脚本**（项目根目录）：
+- `启动.bat`：清理端口占用 → 清理target → Maven编译 → 启动服务
+- `重启.bat`：停止 → 清理 → 编译 → 启动
+- `停止.bat`：停止Java进程
+
+### 服务器部署流程
+1. `mvn clean package -DskipTests` 打包
+2. WinSCP上传 `target/xiaxiang-building-tour-1.0-SNAPSHOT.jar` 到 `/opt/xiaxiang/`
+3. OrcaTerm执行：
    ```bash
-   kill $(cat /opt/xiaxiang/app.pid) 2>/dev/null || fuser -k 8080/tcp
-   cd /opt/xiaxiang
-   nohup java -jar xiaxiang-building-tour-1.0-SNAPSHOT.jar > app.log 2>&1 &
+   pkill -f xiaxiang-building-tour
+   cd /opt/xiaxiang && nohup java -jar xiaxiang-building-tour-1.0-SNAPSHOT.jar --spring.profiles.active=prod > app.log 2>&1 &
    echo $! > app.pid
    ```
-4. **浏览器缓存**：部署后使用 `Ctrl+Shift+R` 强制刷新
-5. **Nginx 缓存**：如仍有样式问题，检查 Nginx 配置中是否有缓存规则
 
 ---
 
-## 六、项目约束与规范
+## 六、文件变更清单（2026-08-14）
 
-- **后端管理**：后台管理部分不得修改
-- **3D 模型加载**：三级回退策略（.splat 文件 → 图片 → DOM 占位符）
-- **COS 存储**：material filling 状态必须严格反映 COS bucket 实际内容
-- **端口规范**：应用必须使用 8080 端口
-- **部署流程**：Maven package → 上传服务器 → 杀掉旧进程 → 启动新进程
+### 修改文件（32个）
+| # | 文件路径 | 变更类型 |
+|---|---------|---------|
+| 1 | `src/main/java/.../controller/IndexController.java` | 重写（+79行） |
+| 2 | `src/main/java/.../properties/AppProperties.java` | 修改（+50行） |
+| 3 | `src/main/java/.../service/ContentManageService.java` | 重构（+166行） |
+| 4 | `src/main/java/.../service/FieldAccessor.java` | 新增功能（+11行） |
+| 5 | `src/main/java/.../service/SlotService.java` | 重构（+147行） |
+| 6 | `src/main/resources/application.yml` | 大量修改（+331行） |
+| 7 | `src/main/resources/static/css/qiaoyun.css` | 样式调整（+36行） |
+| 8 | `src/main/resources/templates/index.html` | 大幅更新（+945行） |
+| 9 | `src/main/resources/templates/map.html` | 清理+优化（+595行） |
+| 10 | `src/main/resources/templates/sitemap.html` | 卡片优化（+126行） |
+| 11-32 | 其余22个HTML模板 | 导航链接统一更新 |
+
+### 新增文件
+| 文件 | 说明 |
+|------|------|
+| `architecture-photo.html` | 建筑故事摄影集页 |
+| `interview.html` | 采访专栏页 |
+| `collection.html` | 趣味收集页 |
+| `video-show.html` | 视频展播页 |
+| `sitemap-interview.jpg` | 采访专栏卡片底图 |
+| `sitemap-video-show.jpg` | 视频展播卡片底图 |
+| `sitemap-collection.jpg` | 趣味收集卡片底图 |
+| `启动.bat` / `重启.bat` / `停止.bat` | 一键启动脚本 |
 
 ---
 
 ## 七、待办事项
 
-- [ ] 验证导览卡片在移动端的响应式布局（<900px 单列显示）
-- [ ] 确认所有二级页面跳转功能正常（`/stories`、`/location/{id}` 等）
-- [ ] 考虑在 Nginx 层也禁用静态资源缓存（如需）
+1. ✅ 建筑故事独立化完成
+2. ✅ 网站导览3个新入口完成
+3. ✅ 导航链接统一完成
+4. ✅ 旧名称清理完成
+5. 🔲 服务器部署与线上验证
+6. 🔲 收集素材并上传COS存储桶
+7. 🔲 地图节点坐标最终调整
+8. 🔲 MBTI测试结果最终验证

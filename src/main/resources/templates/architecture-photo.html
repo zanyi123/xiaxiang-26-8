@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>建筑故事摄影集 - 薪火侨乡</title>
+    <link rel="stylesheet" href="/css/qiaoyun.css?v=20260814">
+    <style>
+        body {
+            background: linear-gradient(135deg, rgba(26, 42, 74, 0.3), rgba(10, 10, 10, 0.5));
+        }
+        .photo-container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 6rem 1.5rem 3rem;
+        }
+        .page-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+        .page-header h1 {
+            color: var(--warm-gold);
+            font-size: 2.2rem;
+            letter-spacing: 4px;
+            margin-bottom: 0.5rem;
+        }
+        .page-header p {
+            color: var(--text-secondary);
+            font-size: 1rem;
+        }
+        .category-tabs {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 2.5rem;
+            flex-wrap: wrap;
+            padding: 1rem;
+            background: rgba(20, 30, 50, 0.4);
+            border-radius: 16px;
+            border: 1px solid var(--glass-border, rgba(255,255,255,0.1));
+        }
+        .tab-btn {
+            padding: 0.6rem 1.4rem;
+            background: transparent;
+            border: 1px solid var(--glass-border, rgba(255,255,255,0.15));
+            border-radius: 12px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.88rem;
+            font-weight: 500;
+        }
+        .tab-btn:hover {
+            border-color: var(--warm-gold);
+            color: var(--warm-gold);
+        }
+        .tab-btn.active {
+            background: linear-gradient(135deg, rgba(212, 175, 55, 0.9), rgba(196, 98, 16, 0.85));
+            color: #1a2a4a;
+            border-color: rgba(212, 175, 55, 0.6);
+            box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
+        }
+        .category-section {
+            margin-bottom: 3.5rem;
+        }
+        .category-section-title {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--glass-border, rgba(255,255,255,0.1));
+        }
+        .category-section-title .icon {
+            font-size: 1.8rem;
+        }
+        .category-section-title h2 {
+            color: var(--warm-gold);
+            font-size: 1.4rem;
+            letter-spacing: 2px;
+        }
+        .category-section-title p {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            margin-left: auto;
+        }
+        .photo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+        .photo-card {
+            position: relative;
+            aspect-ratio: 4/3;
+            border-radius: 16px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+            background: linear-gradient(135deg, rgba(26, 42, 74, 0.5), rgba(10, 10, 10, 0.8));
+            border: 1px solid var(--glass-border, rgba(255,255,255,0.1));
+        }
+        .photo-card:hover {
+            transform: translateY(-6px) scale(1.02);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5), 0 0 30px rgba(212, 175, 55, 0.25);
+            border-color: rgba(212, 175, 55, 0.5);
+        }
+        .photo-img {
+            position: absolute;
+            inset: 0;
+            background-size: cover;
+            background-position: center;
+            transition: transform 0.6s ease;
+        }
+        .photo-card:hover .photo-img {
+            transform: scale(1.08);
+        }
+        .photo-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg,
+                rgba(0, 0, 0, 0.05) 0%,
+                rgba(0, 0, 0, 0.15) 40%,
+                rgba(0, 0, 0, 0.6) 75%,
+                rgba(0, 0, 0, 0.9) 100%);
+            z-index: 1;
+            transition: background 0.4s ease;
+        }
+        .photo-card:hover .photo-overlay {
+            background: linear-gradient(180deg,
+                rgba(0, 0, 0, 0.1) 0%,
+                rgba(0, 0, 0, 0.25) 40%,
+                rgba(0, 0, 0, 0.7) 75%,
+                rgba(0, 0, 0, 0.95) 100%);
+        }
+        .photo-badge {
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+            padding: 0.3rem 0.7rem;
+            background: linear-gradient(135deg, rgba(212, 175, 55, 0.95), rgba(196, 98, 16, 0.9));
+            color: #1a2a4a;
+            font-size: 0.72rem;
+            font-weight: 700;
+            border-radius: 6px;
+            z-index: 3;
+        }
+        .photo-info {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 1.25rem 1.1rem;
+            z-index: 2;
+            color: white;
+        }
+        .photo-title {
+            font-size: 1.05rem;
+            font-weight: 700;
+            margin-bottom: 0.3rem;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
+        }
+        .photo-desc {
+            font-size: 0.82rem;
+            color: rgba(255, 255, 255, 0.9);
+            line-height: 1.4;
+            text-shadow: 0 1px 6px rgba(0, 0, 0, 0.8);
+        }
+        /* Lightbox */
+        .lightbox {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.92);
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+        .lightbox.active {
+            display: flex;
+        }
+        .lightbox-content {
+            max-width: 90%;
+            max-height: 90vh;
+            position: relative;
+        }
+        .lightbox img {
+            max-width: 100%;
+            max-height: 85vh;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+        }
+        .lightbox-info {
+            position: absolute;
+            bottom: -3rem;
+            left: 0;
+            right: 0;
+            text-align: center;
+            color: white;
+        }
+        .lightbox-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .lightbox-close:hover {
+            background: rgba(212, 175, 55, 0.8);
+            transform: rotate(90deg);
+        }
+        .slot-placeholder {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, rgba(26, 42, 74, 0.6), rgba(10, 10, 10, 0.8));
+            color: var(--text-muted);
+            text-align: center;
+            padding: 1rem;
+        }
+        .slot-type-icon {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            opacity: 0.6;
+        }
+        .slot-badge {
+            padding: 0.25rem 0.6rem;
+            background: rgba(212, 175, 55, 0.15);
+            color: var(--warm-gold);
+            border-radius: 6px;
+            font-size: 0.72rem;
+            font-family: monospace;
+            margin-bottom: 0.4rem;
+        }
+        .slot-desc {
+            font-size: 0.78rem;
+            line-height: 1.4;
+        }
+        .back-btn {
+            position: fixed;
+            top: 1.5rem;
+            left: 1.5rem;
+            padding: 0.6rem 1.2rem;
+            background: var(--glass-bg, rgba(20, 30, 50, 0.6));
+            border: 1px solid var(--glass-border, rgba(255,255,255,0.15));
+            border-radius: 24px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.88rem;
+            text-decoration: none;
+            z-index: 50;
+        }
+        .back-btn:hover {
+            border-color: var(--warm-gold);
+            color: var(--warm-gold);
+        }
+        @media (max-width: 768px) {
+            .photo-grid {
+                grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            }
+            .category-section-title h2 {
+                font-size: 1.1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <a href="/" class="back-btn">← 返回首页</a>
+    
+    <div class="photo-container">
+        <div class="page-header">
+            <h1>建筑故事摄影集</h1>
+            <p>用镜头记录碉楼之美 · 建筑摄影专题</p>
+        </div>
+
+        <!-- 分类标签 -->
+        <div class="category-tabs">
+            <button class="tab-btn active" data-category="all">全部</button>
+            <button class="tab-btn" data-category="diaolou">坊内现存碉楼</button>
+            <button class="tab-btn" data-category="village">强亚村-老宅村碉楼群</button>
+            <button class="tab-btn" data-category="courtyard">碉楼院特写</button>
+            <button class="tab-btn" data-category="interior">古屋内部</button>
+        </div>
+
+        <!-- 4个主题分类的摄影集 -->
+        <div id="photo-content">
+            <!-- 内容由JS动态渲染 -->
+        </div>
+    </div>
+
+    <!-- Lightbox -->
+    <div class="lightbox" id="lightbox">
+        <button class="lightbox-close" onclick="closeLightbox()">✕</button>
+        <div class="lightbox-content">
+            <img id="lightbox-img" src="" alt="">
+            <div class="lightbox-info" id="lightbox-info"></div>
+        </div>
+    </div>
+
+    <script src="/js/theme-switch.js?v=20260808"></script>
+    <script th:inline="javascript">
+        // 从后端获取数据
+        const architecturePhotos = /*[[${architecturePhotos}]]*/ [];
+        const photoImageUrls = /*[[${photoImageUrls}]]*/ {};
+
+        // 分类配置
+        const categories = {
+            diaolou: { name: '坊内现存碉楼', icon: '🏯', desc: '宝源坊村内碉楼实拍', color: '#8b5a2b' },
+            village: { name: '强亚村-老宅村碉楼群', icon: '🏘️', desc: '周边村落碉楼群采风', color: '#64785a' },
+            courtyard: { name: '碉楼院特写', icon: '🏛️', desc: '碉楼建筑细节特写', color: '#b49664' },
+            interior: { name: '古屋内部', icon: '🏚️', desc: '古屋内部结构与陈设', color: '#8c826e' }
+        };
+
+        let currentCategory = 'all';
+
+        function init() {
+            renderPhotos();
+            initTabs();
+        }
+
+        function renderPhotos() {
+            const container = document.getElementById('photo-content');
+            container.innerHTML = '';
+
+            // 按分类分组
+            const groupedPhotos = {};
+            architecturePhotos.forEach(photo => {
+                if (!groupedPhotos[photo.category]) {
+                    groupedPhotos[photo.category] = [];
+                }
+                groupedPhotos[photo.category].push(photo);
+            });
+
+            // 渲染每个分类
+            Object.keys(categories).forEach(catKey => {
+                const cat = categories[catKey];
+                const photos = groupedPhotos[catKey] || [];
+                
+                if (currentCategory !== 'all' && currentCategory !== catKey) return;
+
+                const section = document.createElement('div');
+                section.className = 'category-section';
+                section.setAttribute('data-category', catKey);
+
+                section.innerHTML = `
+                    <div class="category-section-title">
+                        <span class="icon">${cat.icon}</span>
+                        <h2>${cat.name}</h2>
+                        <p>${cat.desc} · ${photos.length}张</p>
+                    </div>
+                    <div class="photo-grid" id="grid-${catKey}">
+                        ${photos.length > 0 ? photos.map((photo, idx) => renderPhotoCard(photo, catKey, idx)).join('') : renderEmpty(catKey)}
+                    </div>
+                `;
+                container.appendChild(section);
+            });
+        }
+
+        function renderPhotoCard(photo, category, idx) {
+            const imageUrl = photoImageUrls[photo.id];
+            const slotId = `IMG-18-${String(photo.id).padStart(2, '0')}`;
+            
+            if (imageUrl) {
+                return `
+                    <div class="photo-card" onclick="openLightbox('${imageUrl}', '${photo.title}', '${photo.description}')">
+                        <div class="photo-img" style="background-image: url('${imageUrl}')"></div>
+                        <div class="photo-overlay"></div>
+                        <div class="photo-badge">${slotId}</div>
+                        <div class="photo-info">
+                            <div class="photo-title">${photo.title}</div>
+                            <div class="photo-desc">${photo.description || ''}</div>
+                        </div>
+                    </div>
+                `;
+            } else {
+                return `
+                    <div class="photo-card" data-slot-id="${slotId}">
+                        <div class="slot-placeholder">
+                            <div class="slot-type-icon">📷</div>
+                            <div class="slot-badge">${slotId}</div>
+                            <div class="slot-desc">${photo.title}</div>
+                        </div>
+                        <div class="photo-overlay"></div>
+                        <div class="photo-info">
+                            <div class="photo-title">${photo.title}</div>
+                            <div class="photo-desc">点击上传图片</div>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        function renderEmpty(category) {
+            return `
+                <div style="grid-column: 1 / -1; text-align: center; padding: 3rem; color: var(--text-muted);">
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">📷</div>
+                    <div>该分类暂无摄影作品</div>
+                </div>
+            `;
+        }
+
+        function initTabs() {
+            const tabs = document.querySelectorAll('.tab-btn');
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    currentCategory = tab.dataset.category;
+                    renderPhotos();
+                });
+            });
+        }
+
+        function openLightbox(src, title, desc) {
+            document.getElementById('lightbox-img').src = src;
+            document.getElementById('lightbox-info').innerHTML = `
+                <div style="font-weight: bold; font-size: 1.1rem; margin-bottom: 0.3rem;">${title}</div>
+                <div style="opacity: 0.8; font-size: 0.9rem;">${desc || ''}</div>
+            `;
+            document.getElementById('lightbox').classList.add('active');
+        }
+
+        function closeLightbox() {
+            document.getElementById('lightbox').classList.remove('active');
+        }
+
+        // 点击背景关闭
+        document.getElementById('lightbox').addEventListener('click', (e) => {
+            if (e.target.id === 'lightbox') closeLightbox();
+        });
+
+        // ESC关闭
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeLightbox();
+        });
+
+        // 初始化
+        if (architecturePhotos.length === 0) {
+            // 如果没有数据，显示默认内容
+            const container = document.getElementById('photo-content');
+            container.innerHTML = `
+                <div style="text-align: center; padding: 4rem; color: var(--text-muted);">
+                    <div style="font-size: 4rem; margin-bottom: 1rem;">🏯</div>
+                    <h3 style="color: var(--warm-gold); margin-bottom: 1rem;">建筑故事摄影集</h3>
+                    <p>暂无摄影作品，待后台上传素材后展示</p>
+                </div>
+            `;
+        } else {
+            init();
+        }
+    </script>
+</body>
+</html>

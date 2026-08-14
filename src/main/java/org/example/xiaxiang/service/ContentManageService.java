@@ -55,7 +55,8 @@ public class ContentManageService {
         private String label;       // 显示标签（如 标题）
         private String type;        // text / textarea / number / select
         private boolean required;   // 是否必填
-        private List<String> options; // select 类型的选项
+        private List<String> options;      // select 类型的选项值
+        private List<String> optionLabels; // select 类型的显示标签（可选，与options一一对应）
     }
 
     /**
@@ -63,52 +64,20 @@ public class ContentManageService {
      */
     public List<ModuleDef> getModuleDefs() {
         List<ModuleDef> list = new ArrayList<>();
-        list.add(buildQiaopiDef());
-        list.add(buildStoryDef());
         list.add(buildKnowledgeDef());
-        list.add(buildDialectDef());
         list.add(buildCultureDef());
         list.add(buildBlogDef());
         list.add(buildVideoDef());
         list.add(buildAnatomyDef());
-        list.add(buildPhotoCompareDef());
         list.add(buildTeamDef());
-        list.add(buildArchiveDef());
         list.add(buildLocationDef());
+        list.add(buildInterviewDef());
+        list.add(buildCollectionDef());
+        list.add(buildArchitecturePhotoDef());
         return list;
     }
 
     // ================ 各模块字段定义 ================
-
-    private ModuleDef buildQiaopiDef() {
-        ModuleDef m = new ModuleDef();
-        m.setKey("qiaopi"); m.setName("侨批文化"); m.setModuleIndex(12); m.setSlotPrefix("IMG");
-        m.setFields(Arrays.asList(
-            field("title", "标题", "text", true, null),
-            field("sender", "寄信人", "text", false, null),
-            field("recipient", "收信人", "text", false, null),
-            field("sendFrom", "寄出地", "text", false, null),
-            field("year", "年份", "text", false, null),
-            field("amount", "金额", "text", false, null),
-            field("content", "书信内容", "textarea", false, null),
-            field("translation", "英文翻译", "textarea", false, null),
-            field("category", "分类", "select", false, Arrays.asList("亲情类", "商务类", "其他"))
-        ));
-        return m;
-    }
-
-    private ModuleDef buildStoryDef() {
-        ModuleDef m = new ModuleDef();
-        m.setKey("stories"); m.setName("侨乡故事"); m.setModuleIndex(4); m.setSlotPrefix("IMG");
-        m.setFields(Arrays.asList(
-            field("title", "标题", "text", true, null),
-            field("category", "分类", "select", false, Arrays.asList("建筑故事", "口述历史", "侨批文化", "教育故事", "民间传说")),
-            field("summary", "摘要", "textarea", false, null),
-            field("content", "正文", "textarea", false, null),
-            field("author", "作者", "text", false, null)
-        ));
-        return m;
-    }
 
     private ModuleDef buildKnowledgeDef() {
         ModuleDef m = new ModuleDef();
@@ -119,20 +88,6 @@ public class ContentManageService {
             field("summary", "摘要", "textarea", false, null),
             field("content", "正文", "textarea", false, null),
             field("difficulty", "难度", "select", false, Arrays.asList("入门", "进阶", "高级"))
-        ));
-        return m;
-    }
-
-    private ModuleDef buildDialectDef() {
-        ModuleDef m = new ModuleDef();
-        m.setKey("dialects"); m.setName("方言学习"); m.setModuleIndex(13); m.setSlotPrefix("AUD");
-        m.setFields(Arrays.asList(
-            field("chinese", "中文字", "text", true, null),
-            field("dialect", "方言发音", "text", false, null),
-            field("pinyin", "拼音", "text", false, null),
-            field("meaning", "释义", "text", false, null),
-            field("example", "例句", "textarea", false, null),
-            field("category", "分类", "select", false, Arrays.asList("日常用语", "礼貌用语", "建筑相关", "其他"))
         ));
         return m;
     }
@@ -186,20 +141,6 @@ public class ContentManageService {
         return m;
     }
 
-    private ModuleDef buildPhotoCompareDef() {
-        ModuleDef m = new ModuleDef();
-        m.setKey("photoCompares"); m.setName("老照片对比"); m.setModuleIndex(11); m.setSlotPrefix("IMG");
-        m.setFields(Arrays.asList(
-            field("title", "标题", "text", true, null),
-            field("location", "地点", "text", false, null),
-            field("yearOld", "旧照年份", "text", false, null),
-            field("yearNew", "新照年份", "text", false, null),
-            field("description", "描述", "textarea", false, null),
-            field("story", "故事", "textarea", false, null)
-        ));
-        return m;
-    }
-
     private ModuleDef buildTeamDef() {
         ModuleDef m = new ModuleDef();
         m.setKey("team"); m.setName("团队成员"); m.setModuleIndex(10); m.setSlotPrefix("IMG");
@@ -212,9 +153,47 @@ public class ContentManageService {
         return m;
     }
 
+    private ModuleDef buildInterviewDef() {
+        ModuleDef m = new ModuleDef();
+        m.setKey("interviews"); m.setName("采访专栏"); m.setModuleIndex(16); m.setSlotPrefix("IMG");
+        m.setFields(Arrays.asList(
+            field("title", "标题", "text", true, null),
+            field("subtitle", "副标题", "text", false, null),
+            field("summary", "摘要", "textarea", false, null),
+            field("content", "正文内容", "textarea", false, null),
+            field("category", "分类", "select", false, Arrays.asList("人物访谈", "文化传承", "建筑故事", "其他")),
+            field("date", "日期", "text", false, null)
+        ));
+        return m;
+    }
+
+    private ModuleDef buildCollectionDef() {
+        ModuleDef m = new ModuleDef();
+        m.setKey("collections"); m.setName("趣味收集"); m.setModuleIndex(17); m.setSlotPrefix("IMG");
+        m.setFields(Arrays.asList(
+            field("title", "标题", "text", true, null),
+            field("description", "描述", "textarea", false, null),
+            field("category", "分类", "select", false, Arrays.asList("自然", "人物纪实", "团队纪实"))
+        ));
+        return m;
+    }
+
+    private ModuleDef buildArchitecturePhotoDef() {
+        ModuleDef m = new ModuleDef();
+        m.setKey("architecturePhotos"); m.setName("建筑故事摄影集"); m.setModuleIndex(18); m.setSlotPrefix("IMG");
+        m.setFields(Arrays.asList(
+            field("title", "标题", "text", true, null),
+            field("description", "描述", "textarea", false, null),
+            fieldWithLabels("category", "分类", "select", false,
+                Arrays.asList("diaolou", "village", "courtyard", "interior"),
+                Arrays.asList("坊内现存碉楼", "强亚村-老宅村碉楼群", "碉楼院特写", "古屋内部"))
+        ));
+        return m;
+    }
+
     private ModuleDef buildLocationDef() {
         ModuleDef m = new ModuleDef();
-        m.setKey("locations"); m.setName("建筑故事"); m.setModuleIndex(2); m.setSlotPrefix("IMG");
+        m.setKey("locations"); m.setName("景区建筑"); m.setModuleIndex(2); m.setSlotPrefix("IMG");
         m.setFields(Arrays.asList(
             field("name", "建筑名称", "text", true, null),
             field("number", "编号", "text", false, null),
@@ -227,23 +206,16 @@ public class ContentManageService {
         return m;
     }
 
-    private ModuleDef buildArchiveDef() {
-        ModuleDef m = new ModuleDef();
-        m.setKey("archives"); m.setName("田野档案"); m.setModuleIndex(0); m.setSlotPrefix("IMG");
-        m.setFields(Arrays.asList(
-            field("title", "标题", "text", true, null),
-            field("category", "分类", "select", false, Arrays.asList("文献档案", "影像档案", "家族档案", "其他")),
-            field("description", "描述", "textarea", false, null),
-            field("icon", "图标", "text", false, null),
-            field("unit", "计量单位", "text", false, null),
-            field("detailUrl", "详情URL", "text", false, null)
-        ));
-        return m;
-    }
-
     private FieldDef field(String name, String label, String type, boolean required, List<String> options) {
         FieldDef f = new FieldDef();
         f.setName(name); f.setLabel(label); f.setType(type); f.setRequired(required); f.setOptions(options);
+        return f;
+    }
+
+    private FieldDef fieldWithLabels(String name, String label, String type, boolean required, List<String> options, List<String> optionLabels) {
+        FieldDef f = new FieldDef();
+        f.setName(name); f.setLabel(label); f.setType(type); f.setRequired(required);
+        f.setOptions(options); f.setOptionLabels(optionLabels);
         return f;
     }
 
@@ -555,18 +527,16 @@ public class ContentManageService {
     @SuppressWarnings("unchecked")
     private List<Object> getList(String moduleKey) {
         switch (moduleKey) {
-            case "qiaopi": return (List<Object>) (List<?>) appProperties.getQiaopi();
-            case "stories": return (List<Object>) (List<?>) appProperties.getStories();
             case "knowledge": return (List<Object>) (List<?>) appProperties.getKnowledge();
-            case "dialects": return (List<Object>) (List<?>) appProperties.getDialects();
             case "cultures": return (List<Object>) (List<?>) appProperties.getCultures();
             case "blogPosts": return (List<Object>) (List<?>) appProperties.getBlogPosts();
             case "videos": return (List<Object>) (List<?>) appProperties.getVideos();
             case "anatomies": return (List<Object>) (List<?>) appProperties.getAnatomies();
-            case "photoCompares": return (List<Object>) (List<?>) appProperties.getPhotoCompares();
             case "team": return (List<Object>) (List<?>) appProperties.getTeam();
-            case "archives": return (List<Object>) (List<?>) appProperties.getArchives();
             case "locations": return (List<Object>) (List<?>) appProperties.getLocations();
+            case "interviews": return (List<Object>) (List<?>) appProperties.getInterviews();
+            case "collections": return (List<Object>) (List<?>) appProperties.getCollections();
+            case "architecturePhotos": return (List<Object>) (List<?>) appProperties.getArchitecturePhotos();
             default: throw new IllegalArgumentException("未知模块: " + moduleKey);
         }
     }
@@ -575,17 +545,8 @@ public class ContentManageService {
         Object item;
         try {
             switch (moduleKey) {
-                case "qiaopi":
-                    item = AppProperties.QiaopiItem.class.getDeclaredConstructor().newInstance();
-                    break;
-                case "stories":
-                    item = AppProperties.Story.class.getDeclaredConstructor().newInstance();
-                    break;
                 case "knowledge":
                     item = AppProperties.KnowledgeItem.class.getDeclaredConstructor().newInstance();
-                    break;
-                case "dialects":
-                    item = AppProperties.DialectItem.class.getDeclaredConstructor().newInstance();
                     break;
                 case "cultures":
                     item = AppProperties.CultureItem.class.getDeclaredConstructor().newInstance();
@@ -599,17 +560,20 @@ public class ContentManageService {
                 case "anatomies":
                     item = AppProperties.BuildingAnatomy.class.getDeclaredConstructor().newInstance();
                     break;
-                case "photoCompares":
-                    item = AppProperties.PhotoCompare.class.getDeclaredConstructor().newInstance();
-                    break;
                 case "team":
                     item = AppProperties.TeamMember.class.getDeclaredConstructor().newInstance();
                     break;
-                case "archives":
-                    item = AppProperties.ArchiveItem.class.getDeclaredConstructor().newInstance();
-                    break;
                 case "locations":
                     item = AppProperties.Location.class.getDeclaredConstructor().newInstance();
+                    break;
+                case "interviews":
+                    item = AppProperties.InterviewItem.class.getDeclaredConstructor().newInstance();
+                    break;
+                case "collections":
+                    item = AppProperties.CollectionItem.class.getDeclaredConstructor().newInstance();
+                    break;
+                case "architecturePhotos":
+                    item = AppProperties.ArchitecturePhotoItem.class.getDeclaredConstructor().newInstance();
                     break;
                 default:
                     throw new IllegalArgumentException("未知模块: " + moduleKey);
@@ -718,10 +682,6 @@ public class ContentManageService {
 
         // 根据模块类型生成不同数量的 Slot
         switch (def.getKey()) {
-            case "stories":
-                slots.add(String.format("%s-%02d-%02d", prefix, module, posIndex));  // 封面图
-                slots.add(String.format("AUD-%02d-%02d", module, posIndex));          // 朗读音频
-                break;
             case "videos":
                 slots.add(String.format("%s-%02d-%02d", prefix, module, posIndex));  // 封面图
                 slots.add(String.format("VID-%02d-%02d", module, posIndex));          // 视频文件
@@ -729,10 +689,6 @@ public class ContentManageService {
             case "anatomies":
                 slots.add(String.format("%s-%02d-%02d", prefix, module, posIndex));  // 图片
                 slots.add(String.format("MDL-%02d-%02d", module, posIndex));          // 分体模型
-                break;
-            case "photoCompares":
-                slots.add(String.format("%s-%02d-%02d", prefix, module, posIndex * 2 - 1));  // 老照片
-                slots.add(String.format("%s-%02d-%02d", prefix, module, posIndex * 2));       // 新照片
                 break;
             case "locations":
                 slots.add(String.format("%s-%02d-%02d", prefix, module, posIndex));   // 封面图 IMG-02-xx

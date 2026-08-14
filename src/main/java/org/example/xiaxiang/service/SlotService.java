@@ -186,129 +186,206 @@ public class SlotService {
         List<SlotInfo> list = new ArrayList<>();
         int n;
 
-        // --- Module 03: buildings (建筑总览) ---
+        // --- Module 01: buildings (建筑总览) ---
+        // 使用 building.id 计算编号，确保与前端一致
         n = safeSize(appProperties.getBuildings());
         for (int i = 0; i < n; i++) {
             final int idx = i;
             if (!hasMaterials(appProperties.getBuildings().get(idx))) continue;
-            String bname = nameOf(() -> appProperties.getBuildings().get(idx).getName(), "建筑" + (idx+1));
-            list.add(slot(T_IMG, 1, i+1, "buildings[" + i + "].coverImage", "项目成果/云游侨乡", bname + " · 封面图"));
-            list.add(slot(T_MDL, 1, i+1, "buildings[" + i + "].modelKey", "项目成果/云游侨乡", bname + " · 3D模型"));
-            list.add(slot(T_VID, 1, i+1, "buildings[" + i + "].videoKey", "项目成果/云游侨乡", bname + " · 4K视频"));
+            AppProperties.Building b = appProperties.getBuildings().get(idx);
+            final int posIndex = b.getId() != null ? b.getId() : (idx + 1);
+            String bname = nameOf(() -> b.getName(), "建筑" + (idx+1));
+            list.add(slot(T_IMG, 1, posIndex, "buildings[" + i + "].coverImage", "项目成果/云游侨乡", bname + " · 封面图"));
+            list.add(slot(T_MDL, 1, posIndex, "buildings[" + i + "].modelKey", "项目成果/云游侨乡", bname + " · 3D模型"));
+            list.add(slot(T_VID, 1, posIndex, "buildings[" + i + "].videoKey", "项目成果/云游侨乡", bname + " · 4K视频"));
         }
 
         // --- Module 02: locations (云游侨乡-6个地点) ---
+        // 注意：地图底图占用 IMG-02-01，locations 从 IMG-02-02 开始
+        // 地图底图先添加，确保 IMG-02-01 排在最前
+        list.add(slot(T_IMG, 2, 1, "mapBackgroundImage", P_CLOUD, "景区导航 · 地图底图"));
+        // 使用 location.id 计算编号，确保与前端（location.id+1）一致
         n = safeSize(appProperties.getLocations());
         for (int i = 0; i < n; i++) {
             final int idx = i;
             if (!hasMaterials(appProperties.getLocations().get(idx))) continue;
-            String lname = nameOf(() -> appProperties.getLocations().get(idx).getName(), "地点" + (idx+1));
-            list.add(slot(T_IMG, 2, i+1, "locations[" + i + "].imageKey", P_CLOUD, lname + " · 封面图"));
-            list.add(slot(T_MDL, 2, i+1, "locations[" + i + "].modelKey", P_CLOUD, lname + " · 3D模型"));
-            list.add(slot(T_VID, 2, i+1, "locations[" + i + "].videoKey", P_CLOUD, lname + " · 全景视频"));
+            AppProperties.Location loc = appProperties.getLocations().get(idx);
+            final int posIndex = (loc.getId() != null ? loc.getId() : (idx + 1)) + 1; // id+1, 跳过地图底图01
+            String lname = nameOf(() -> loc.getName(), "地点" + (idx+1));
+            list.add(slot(T_IMG, 2, posIndex, "locations[" + i + "].imageKey", P_CLOUD, lname + " · 封面图"));
+            list.add(slot(T_MDL, 2, posIndex, "locations[" + i + "].modelKey", P_CLOUD, lname + " · 3D模型"));
+            list.add(slot(T_VID, 2, posIndex, "locations[" + i + "].videoKey", P_CLOUD, lname + " · 全景视频"));
         }
-        // 地图底图：云游侨乡主页面地图背景
-        list.add(slot(T_IMG, 2, 0, "mapBackgroundImage", P_CLOUD, "景区导航 · 地图底图"));
 
         // --- Module 04: stories (侨乡故事) ---
+        // 使用 story.id 计算编号
         n = safeSize(appProperties.getStories());
         for (int i = 0; i < n; i++) {
             final int idx = i;
             if (!hasMaterials(appProperties.getStories().get(idx))) continue;
-            String t = nameOf(() -> appProperties.getStories().get(idx).getTitle(), "故事" + (idx+1));
-            list.add(slot(T_IMG, 4, i+1, "stories[" + i + "].coverImage", P_STORY, t + " · 封面图"));
-            list.add(slot(T_AUD, 4, i+1, "stories[" + i + "].audioKey", P_STORY, t + " · 朗读音频"));
+            AppProperties.Story s = appProperties.getStories().get(idx);
+            final int posIndex = s.getId() != null ? s.getId() : (idx + 1);
+            String t = nameOf(() -> s.getTitle(), "故事" + (idx+1));
+            list.add(slot(T_IMG, 4, posIndex, "stories[" + i + "].coverImage", P_STORY, t + " · 封面图"));
+            list.add(slot(T_AUD, 4, posIndex, "stories[" + i + "].audioKey", P_STORY, t + " · 朗读音频"));
         }
 
         // --- Module 06: knowledge (知识库) ---
+        // 使用 knowledge.id 计算编号
         n = safeSize(appProperties.getKnowledge());
         for (int i = 0; i < n; i++) {
             final int idx = i;
             if (!hasMaterials(appProperties.getKnowledge().get(idx))) continue;
-            String t = nameOf(() -> appProperties.getKnowledge().get(idx).getTitle(), "知识" + (idx+1));
-            list.add(slot(T_IMG, 6, i+1, "knowledge[" + i + "].coverImage", P_KNOWLEDGE, t + " · 封面图"));
+            AppProperties.KnowledgeItem k = appProperties.getKnowledge().get(idx);
+            final int posIndex = k.getId() != null ? k.getId() : (idx + 1);
+            String t = nameOf(() -> k.getTitle(), "知识" + (idx+1));
+            list.add(slot(T_IMG, 6, posIndex, "knowledge[" + i + "].coverImage", P_KNOWLEDGE, t + " · 封面图"));
         }
 
         // --- Module 07: cultures (民俗文化) ---
+        // 使用 culture.id 计算编号
         n = safeSize(appProperties.getCultures());
         for (int i = 0; i < n; i++) {
             final int idx = i;
             if (!hasMaterials(appProperties.getCultures().get(idx))) continue;
-            String t = nameOf(() -> appProperties.getCultures().get(idx).getName(), "民俗" + (idx+1));
-            list.add(slot(T_IMG, 7, i+1, "cultures[" + i + "].coverImage", P_CULTURE, t + " · 封面图"));
+            AppProperties.CultureItem c = appProperties.getCultures().get(idx);
+            final int posIndex = c.getId() != null ? c.getId() : (idx + 1);
+            String t = nameOf(() -> c.getName(), "民俗" + (idx+1));
+            list.add(slot(T_IMG, 7, posIndex, "cultures[" + i + "].coverImage", P_CULTURE, t + " · 封面图"));
         }
 
         // --- Module 08: blogPosts (实践日志) ---
+        // 使用 post.id 计算编号
         n = safeSize(appProperties.getBlogPosts());
         for (int i = 0; i < n; i++) {
             final int idx = i;
             if (!hasMaterials(appProperties.getBlogPosts().get(idx))) continue;
-            String t = nameOf(() -> appProperties.getBlogPosts().get(idx).getTitle(), "日志" + (idx+1));
-            list.add(slot(T_IMG, 8, i+1, "blogPosts[" + i + "].coverImage", P_BLOG, t + " · 封面图"));
+            AppProperties.BlogPost p = appProperties.getBlogPosts().get(idx);
+            final int posIndex = p.getId() != null ? p.getId() : (idx + 1);
+            String t = nameOf(() -> p.getTitle(), "日志" + (idx+1));
+            list.add(slot(T_IMG, 8, posIndex, "blogPosts[" + i + "].coverImage", P_BLOG, t + " · 封面图"));
         }
 
         // --- Module 09: videos (视频展播) ---
+        // 使用 video.id 计算编号
         n = safeSize(appProperties.getVideos());
         for (int i = 0; i < n; i++) {
             final int idx = i;
             if (!hasMaterials(appProperties.getVideos().get(idx))) continue;
-            String t = nameOf(() -> appProperties.getVideos().get(idx).getTitle(), "视频" + (idx+1));
-            list.add(slot(T_IMG, 9, i+1, "videos[" + i + "].coverImage", P_VIDEO, t + " · 封面图"));
-            list.add(slot(T_VID, 9, i+1, "videos[" + i + "].videoKey", P_VIDEO, t + " · 视频文件"));
+            AppProperties.VideoItem v = appProperties.getVideos().get(idx);
+            final int posIndex = v.getId() != null ? v.getId() : (idx + 1);
+            String t = nameOf(() -> v.getTitle(), "视频" + (idx+1));
+            list.add(slot(T_IMG, 9, posIndex, "videos[" + i + "].coverImage", P_VIDEO, t + " · 封面图"));
+            list.add(slot(T_VID, 9, posIndex, "videos[" + i + "].videoKey", P_VIDEO, t + " · 视频文件"));
         }
 
         // --- Module 10: team (团队成员) ---
+        // 使用 member.id 计算编号
         n = safeSize(appProperties.getTeam());
         for (int i = 0; i < n; i++) {
             final int idx = i;
             if (!hasMaterials(appProperties.getTeam().get(idx))) continue;
-            String t = nameOf(() -> appProperties.getTeam().get(idx).getName(), "成员" + (idx+1));
-            list.add(slot(T_IMG, 10, i+1, "team[" + i + "].avatar", P_TEAM, t + " · 头像"));
+            AppProperties.TeamMember m = appProperties.getTeam().get(idx);
+            final int posIndex = m.getId() != null ? m.getId() : (idx + 1);
+            String t = nameOf(() -> m.getName(), "成员" + (idx+1));
+            list.add(slot(T_IMG, 10, posIndex, "team[" + i + "].avatar", P_TEAM, t + " · 头像"));
         }
 
         // --- Module 05: anatomies (建筑解剖) ---
+        // 使用 anatomy.id 计算编号
         n = safeSize(appProperties.getAnatomies());
         for (int i = 0; i < n; i++) {
             final int idx = i;
             if (!hasMaterials(appProperties.getAnatomies().get(idx))) continue;
-            String t = nameOf(() -> appProperties.getAnatomies().get(idx).getPartName(), "部位" + (idx+1));
-            list.add(slot(T_IMG, 5, i+1, "anatomies[" + i + "].imageKey", P_ANATOMY, t + " · 图片"));
-            list.add(slot(T_MDL, 5, i+1, "anatomies[" + i + "].modelKey", P_ANATOMY, t + " · 分体模型"));
+            AppProperties.BuildingAnatomy a = appProperties.getAnatomies().get(idx);
+            final int posIndex = a.getId() != null ? a.getId() : (idx + 1);
+            String t = nameOf(() -> a.getPartName(), "部位" + (idx+1));
+            list.add(slot(T_IMG, 5, posIndex, "anatomies[" + i + "].imageKey", P_ANATOMY, t + " · 图片"));
+            list.add(slot(T_MDL, 5, posIndex, "anatomies[" + i + "].modelKey", P_ANATOMY, t + " · 分体模型"));
         }
 
         // --- Module 11: photoCompares (老照片对比) ---
+        // 使用 photo.id 计算编号：老照片 = id*2-1, 新照片 = id*2
         n = safeSize(appProperties.getPhotoCompares());
         for (int i = 0; i < n; i++) {
             final int idx = i;
             if (!hasMaterials(appProperties.getPhotoCompares().get(idx))) continue;
-            list.add(slot(T_IMG, 11, (i*2+1), "photoCompares[" + i + "].oldImageKey", P_PHOTO, "对比组" + (idx+1) + " · 老照片"));
-            list.add(slot(T_IMG, 11, (i*2+2), "photoCompares[" + i + "].newImageKey", P_PHOTO, "对比组" + (idx+1) + " · 新照片"));
+            AppProperties.PhotoCompare p = appProperties.getPhotoCompares().get(idx);
+            final int posIndexOld = (p.getId() != null ? p.getId() : (idx + 1)) * 2 - 1;
+            final int posIndexNew = (p.getId() != null ? p.getId() : (idx + 1)) * 2;
+            list.add(slot(T_IMG, 11, posIndexOld, "photoCompares[" + i + "].oldImageKey", P_PHOTO, "对比组" + (idx+1) + " · 老照片"));
+            list.add(slot(T_IMG, 11, posIndexNew, "photoCompares[" + i + "].newImageKey", P_PHOTO, "对比组" + (idx+1) + " · 新照片"));
         }
 
         // --- Module 12: qiaopi (侨批文化) ---
+        // 使用 item.id 计算编号
         n = safeSize(appProperties.getQiaopi());
         for (int i = 0; i < n; i++) {
             final int idx = i;
             if (!hasMaterials(appProperties.getQiaopi().get(idx))) continue;
-            list.add(slot(T_IMG, 12, i+1, "qiaopi[" + i + "].imageKey", P_QIAOPI, "侨批" + (idx+1) + " · 扫描件"));
+            AppProperties.QiaopiItem q = appProperties.getQiaopi().get(idx);
+            final int posIndex = q.getId() != null ? q.getId() : (idx + 1);
+            list.add(slot(T_IMG, 12, posIndex, "qiaopi[" + i + "].imageKey", P_QIAOPI, "侨批" + (idx+1) + " · 扫描件"));
         }
 
         // --- Module 13: dialects (方言学习) ---
+        // 使用 dialect.id 计算编号
         n = safeSize(appProperties.getDialects());
         for (int i = 0; i < n; i++) {
             final int idx = i;
             if (!hasMaterials(appProperties.getDialects().get(idx))) continue;
-            String t = nameOf(() -> appProperties.getDialects().get(idx).getChinese(), "方言" + (idx+1));
-            list.add(slot(T_AUD, 13, i+1, "dialects[" + i + "].audioKey", P_DIALECT, t + " · 录音"));
+            AppProperties.DialectItem d = appProperties.getDialects().get(idx);
+            final int posIndex = d.getId() != null ? d.getId() : (idx + 1);
+            String t = nameOf(() -> d.getChinese(), "方言" + (idx+1));
+            list.add(slot(T_AUD, 13, posIndex, "dialects[" + i + "].audioKey", P_DIALECT, t + " · 录音"));
         }
 
         // --- Module 15: stamps (虚拟盖章) ---
+        // 使用 stamp.id 计算编号
         n = safeSize(appProperties.getStamps());
         for (int i = 0; i < n; i++) {
             final int idx = i;
             if (!hasMaterials(appProperties.getStamps().get(idx))) continue;
-            String t = nameOf(() -> appProperties.getStamps().get(idx).getName(), "印章" + (idx+1));
-            list.add(slot(T_IMG, 15, i+1, "stamps[" + i + "].imageKey", P_STAMP, t + " · 图标"));
+            AppProperties.StampItem st = appProperties.getStamps().get(idx);
+            final int posIndex = st.getId() != null ? st.getId() : (idx + 1);
+            String t = nameOf(() -> st.getName(), "印章" + (idx+1));
+            list.add(slot(T_IMG, 15, posIndex, "stamps[" + i + "].imageKey", P_STAMP, t + " · 图标"));
+        }
+
+        // --- Module 16: interviews (采访专栏) ---
+        // 使用 interview.id 计算编号
+        n = safeSize(appProperties.getInterviews());
+        for (int i = 0; i < n; i++) {
+            final int idx = i;
+            if (!hasMaterials(appProperties.getInterviews().get(idx))) continue;
+            AppProperties.InterviewItem iv = appProperties.getInterviews().get(idx);
+            final int posIndex = iv.getId() != null ? iv.getId() : (idx + 1);
+            String t = nameOf(() -> iv.getTitle(), "采访" + (idx+1));
+            list.add(slot(T_IMG, 16, posIndex, "interviews[" + i + "].coverImage", "采访专栏", t + " · 封面图"));
+        }
+
+        // --- Module 17: collections (趣味收集) ---
+        // 使用 collection.id 计算编号
+        n = safeSize(appProperties.getCollections());
+        for (int i = 0; i < n; i++) {
+            final int idx = i;
+            if (!hasMaterials(appProperties.getCollections().get(idx))) continue;
+            AppProperties.CollectionItem c = appProperties.getCollections().get(idx);
+            final int posIndex = c.getId() != null ? c.getId() : (idx + 1);
+            String t = nameOf(() -> c.getTitle(), "收藏" + (idx+1));
+            list.add(slot(T_IMG, 17, posIndex, "collections[" + i + "].imageKey", "趣味收集", t + " · 图片"));
+        }
+
+        // --- Module 18: architecturePhotos (建筑故事摄影集) ---
+        // 使用 architecturePhoto.id 计算编号
+        n = safeSize(appProperties.getArchitecturePhotos());
+        for (int i = 0; i < n; i++) {
+            final int idx = i;
+            if (!hasMaterials(appProperties.getArchitecturePhotos().get(idx))) continue;
+            AppProperties.ArchitecturePhotoItem ap = appProperties.getArchitecturePhotos().get(idx);
+            final int posIndex = ap.getId() != null ? ap.getId() : (idx + 1);
+            String t = nameOf(() -> ap.getTitle(), "摄影" + (idx+1));
+            list.add(slot(T_IMG, 18, posIndex, "architecturePhotos[" + i + "].imageKey", "建筑故事", t + " · 图片"));
         }
 
         return list;

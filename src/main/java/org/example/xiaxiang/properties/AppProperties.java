@@ -82,7 +82,16 @@ public class AppProperties {
     /** 项目成果数据 */
     private List<AchievementItem> achievements;
 
-    /** 景区导航地图底图（IMG-02-00） */
+    /** 采访专栏数据（Module 16） */
+    private List<InterviewItem> interviews;
+
+    /** 趣味收集数据（Module 17） */
+    private List<CollectionItem> collections;
+
+    /** 建筑故事摄影集数据（Module 18） */
+    private List<ArchitecturePhotoItem> architecturePhotos;
+
+    /** 景区导航地图底图（IMG-02-01） */
     private String mapBackgroundImage;
 
     /**
@@ -331,5 +340,44 @@ public class AppProperties {
         private String icon;
         private String title;
         private String description;
+    }
+
+    /**
+     * 采访专栏（Module 16）
+     */
+    @Data
+    public static class InterviewItem {
+        private Integer id;
+        private String title;
+        private String subtitle;
+        private String summary;
+        private String content;
+        private String category;
+        private String date;
+        private String coverImage;
+    }
+
+    /**
+     * 趣味收集（Module 17）
+     */
+    @Data
+    public static class CollectionItem {
+        private Integer id;
+        private String title;
+        private String description;
+        private String category;
+        private String imageKey;
+    }
+
+    /**
+     * 建筑故事摄影集（Module 18）
+     */
+    @Data
+    public static class ArchitecturePhotoItem {
+        private Integer id;
+        private String title;
+        private String description;
+        private String category;
+        private String imageKey;
     }
 }

@@ -4230,7 +4230,7 @@ body[data-theme="light"] .hero-btn-primary::before {
 }
 
 body[data-theme="light"] .hero-btn-primary::after {
-    content: '进入3D全景与特色建筑展示 →';
+    content: '进入宝源坊景区 →';
     display: block;
     font-size: 0.85rem;
     font-weight: 400;
@@ -4666,40 +4666,6 @@ body[data-theme="light"] #achievement .achievement-grid > div {
     padding: 1.5rem 1rem !important;
     border-radius: 14px !important;
 }
-
-/* --- CTA区 --- */
-body[data-theme="light"] .main > section:last-child {
-    padding: 4rem 2rem;
-}
-
-body[data-theme="light"] .main > section:last-child > div {
-    background: linear-gradient(135deg, var(--warm-gold) 0%, var(--warm-gold-light) 100%) !important;
-    color: white !important;
-    border-radius: 24px !important;
-    border: none !important;
-    max-width: 900px !important;
-}
-
-body[data-theme="light"] .main > section:last-child h2 {
-    color: white !important;
-}
-
-body[data-theme="light"] .main > section:last-child p {
-    color: rgba(255, 255, 255, 0.9) !important;
-}
-
-body[data-theme="light"] .main > section:last-child .hero-btn-primary {
-    background: white !important;
-    color: var(--warm-gold) !important;
-}
-
-body[data-theme="light"] .main > section:last-child .hero-btn-secondary {
-    background: rgba(255, 255, 255, 0.2) !important;
-    color: white !important;
-    border: 2px solid rgba(255, 255, 255, 0.4) !important;
-}
-
-/* --- 深色主题保持原样，只有浅色主题应用新布局 --- */
 
 /* 响应式：小屏幕改回单列 */
 @media (max-width: 900px) {

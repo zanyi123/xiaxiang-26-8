@@ -59,9 +59,493 @@
             .qiaoxiang-cards { grid-template-columns: 1fr !important; }
             .achievement-grid { grid-template-columns: repeat(2, 1fr) !important; }
             .achievement-team { grid-template-columns: 1fr !important; }
+            .media-grid { grid-template-columns: 1fr !important; }
             .life-choices { grid-template-columns: 1fr !important; }
             .life-steps { gap: 0.75rem !important; }
             .life-step-line { width: 1rem !important; }
+        }
+
+        /* ============ 素材展示区块样式 ============ */
+        .media-section {
+            margin-top: 3rem;
+            padding: 2rem;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            backdrop-filter: blur(15px);
+        }
+
+        .media-tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid var(--glass-border);
+            padding-bottom: 0.75rem;
+        }
+
+        .media-tab {
+            padding: 0.5rem 1.2rem;
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 0.95rem;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .media-tab:hover {
+            color: var(--warm-gold);
+        }
+
+        .media-tab.active {
+            color: var(--warm-gold);
+            font-weight: 600;
+        }
+
+        .media-tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -0.75rem;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--warm-gold);
+        }
+
+        .media-content {
+            display: none;
+        }
+
+        .media-content.active {
+            display: block;
+        }
+
+        .media-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .media-card {
+            background: rgba(26, 42, 74, 0.5);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .media-card:hover {
+            border-color: var(--warm-gold);
+            transform: translateY(-4px);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .media-thumbnail {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 16/9;
+            background: linear-gradient(135deg, rgba(212, 175, 55, 0.1), rgba(74, 158, 255, 0.1));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .media-thumbnail video,
+        .media-thumbnail img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .media-placeholder {
+            text-align: center;
+            color: var(--text-muted);
+        }
+
+        .media-placeholder-icon {
+            font-size: 3rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .media-placeholder-text {
+            font-size: 0.85rem;
+        }
+
+        .media-play-btn {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 50px;
+            height: 50px;
+            background: rgba(212, 175, 55, 0.9);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #1a1a2e;
+            font-size: 1.5rem;
+            opacity: 0;
+            transition: all 0.3s;
+        }
+
+        .media-card:hover .media-play-btn {
+            opacity: 1;
+        }
+
+        .media-info {
+            padding: 1rem;
+        }
+
+        .media-title {
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .media-meta {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .media-badge {
+            padding: 0.2rem 0.6rem;
+            background: rgba(212, 175, 55, 0.1);
+            color: var(--warm-gold);
+            border-radius: 10px;
+            font-size: 0.72rem;
+        }
+
+        .media-type-badge {
+            padding: 0.2rem 0.6rem;
+            background: rgba(74, 158, 255, 0.15);
+            color: #4a9eff;
+            border-radius: 10px;
+            font-size: 0.72rem;
+        }
+
+        .media-type-badge.video {
+            background: rgba(255, 107, 107, 0.15);
+            color: #ff6b6b;
+        }
+
+        /* 视频展播弹窗 */
+        .video-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .video-modal.active {
+            display: flex;
+        }
+
+        .video-modal-content {
+            width: 90%;
+            max-width: 900px;
+            background: #1a1a2e;
+            border-radius: 16px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .video-modal-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            width: 36px;
+            height: 36px;
+            background: rgba(0, 0, 0, 0.5);
+            border: none;
+            color: white;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .video-modal-close:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .video-modal video {
+            width: 100%;
+            max-height: 500px;
+        }
+
+        .video-modal-info {
+            padding: 1.5rem;
+        }
+
+        .video-modal-title {
+            color: var(--warm-gold);
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .video-modal-desc {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        /* 蜿蜒曲线时间线样式 */
+        .winding-timeline-container {
+            margin-top: 3rem;
+            padding: 1.5rem;
+            background: rgba(26, 42, 74, 0.5);
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            border-radius: 16px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+            min-height: 300px;
+            display: block;
+            overflow: visible;
+        }
+
+        .timeline-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+        }
+
+        .timeline-icon {
+            font-size: 1.5rem;
+        }
+
+        .timeline-title {
+            color: var(--warm-gold);
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin: 0;
+            letter-spacing: 1px;
+            text-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
+        }
+
+        .timeline-subtitle {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            margin-left: auto;
+        }
+
+        .winding-timeline {
+            position: relative;
+            padding: 4rem 0 3rem 0;
+            overflow: visible;
+            min-height: 140px;
+            width: 100%;
+        }
+
+        .timeline-svg {
+            width: 100%;
+            height: 100px;
+            display: block;
+        }
+
+        .timeline-path {
+            filter: drop-shadow(0 0 8px rgba(212, 175, 55, 0.5));
+        }
+
+        .timeline-nodes {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 100px;
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        .timeline-node {
+            position: absolute;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: auto;
+            cursor: pointer;
+            z-index: 3;
+        }
+
+        .node-dot {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: var(--warm-gold);
+            border: 3px solid var(--bg-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+            box-shadow: 0 0 15px rgba(212, 175, 55, 0.6);
+            position: relative;
+        }
+
+        .node-dot:hover {
+            transform: scale(1.3);
+            box-shadow: 0 0 25px rgba(212, 175, 55, 0.9);
+        }
+
+        .timeline-node.active .node-dot {
+            transform: scale(1.4);
+            box-shadow: 0 0 30px rgba(212, 175, 55, 1);
+        }
+
+        .node-year {
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            margin-top: 8px;
+            font-size: 0.7rem;
+            color: var(--warm-gold);
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .node-type-历史 {
+            background: #4a9eff;
+            box-shadow: 0 0 15px rgba(74, 158, 255, 0.6);
+        }
+        .node-type-建筑 {
+            background: #d4af37;
+            box-shadow: 0 0 15px rgba(212, 175, 55, 0.6);
+        }
+        .node-type-荣誉 {
+            background: #ff6b6b;
+            box-shadow: 0 0 15px rgba(255, 107, 107, 0.6);
+        }
+        .node-type-实践 {
+            background: #6bcb77;
+            box-shadow: 0 0 15px rgba(107, 203, 119, 0.6);
+        }
+
+        .node-tooltip {
+            position: absolute;
+            bottom: calc(100% + 25px);
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--glass-bg);
+            border: 1px solid var(--warm-gold);
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            min-width: 180px;
+            max-width: 220px;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s;
+            z-index: 10;
+            pointer-events: none;
+        }
+
+        .timeline-node:hover .node-tooltip {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(-50%) translateY(-5px);
+        }
+
+        .tooltip-title {
+            color: var(--warm-gold);
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 0.3rem;
+        }
+
+        .tooltip-desc {
+            color: var(--text-secondary);
+            font-size: 0.78rem;
+            line-height: 1.4;
+        }
+
+        .timeline-detail-panel {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: rgba(212, 175, 55, 0.08);
+            border: 1px solid var(--glass-border-light);
+            border-radius: 12px;
+            min-height: 80px;
+            transition: all 0.3s;
+        }
+
+        .detail-empty {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .detail-content {
+            animation: fadeIn 0.3s ease;
+        }
+
+        .detail-year {
+            color: var(--warm-gold);
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            font-family: serif;
+        }
+
+        .detail-title {
+            color: var(--text-primary);
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+        }
+
+        .detail-desc {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            line-height: 1.7;
+            margin-bottom: 0.75rem;
+        }
+
+        .detail-type {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            background: rgba(212, 175, 55, 0.15);
+            color: var(--warm-gold);
+            border-radius: 12px;
+            font-size: 0.8rem;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 900px) {
+            .winding-timeline-container {
+                padding: 1rem;
+            }
+            .timeline-svg {
+                height: 60px;
+            }
+            .node-dot {
+                width: 20px;
+                height: 20px;
+            }
+            .node-year {
+                font-size: 0.65rem;
+            }
+            .timeline-node {
+                left: auto !important;
+            }
         }
     </style>
 </head>
@@ -76,8 +560,9 @@
                 <a href="/sitemap">网站导览</a>
                 <a href="#tour">云游侨乡</a>
                 <a href="#life">我的侨乡人生</a>
-                <a href="#building-story">建筑故事</a>
+                <a href="/architecture-photo">建筑故事</a>
                 <a href="#achievement">项目成果</a>
+                <a href="/video-show">视频展播</a>
                 <a href="/about">关于我们</a>
                 <a href="/admin">后台登录</a>
             </nav>
@@ -119,8 +604,8 @@
             
             <div class="hero-content">
                 <span class="hero-chapter">序章 · 数字记忆</span>
-                <h1 class="hero-title">遇见薪火侨乡</h1>
-                <p class="hero-subtitle">一片连接山海的土地，记录几代华侨远行与归来的故事</p>
+                <h1 class="hero-title">遇见 · 侨乡</h1>
+                <p class="hero-subtitle">一片连接山海的土地，念念不忘几代华侨远行与归来的故事</p>
                 <p class="hero-tagline">长沙街道"百千万工程"结对合作项目 · 让世界看见侨乡之美</p>
                 
                 <div class="hero-buttons">
@@ -157,18 +642,18 @@
             <!-- 实际内容（默认显示） -->
             <div class="content-container">
                 <div style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 2rem; align-items: stretch;" class="tour-layout">
-                    <!-- 左侧：宝源坊3D全景入口 -->
-                    <div style="position: relative; border-radius: 16px; overflow: hidden; border: 1px solid var(--glass-border); min-height: 380px; background: linear-gradient(135deg, rgba(26, 42, 74, 0.5), rgba(10, 10, 10, 0.8));">
-                        <img th:if="${locations != null and !#lists.isEmpty(locations) and locationImageUrls != null and locationImageUrls[locations[0].id] != null}"
-                             th:src="${locationImageUrls[locations[0].id]}"
+                    <!-- 左侧：宝源坊全景入口（点击跳转地图页） -->
+                    <div style="position: relative; border-radius: 16px; overflow: hidden; border: 1px solid var(--glass-border); min-height: 380px; background: linear-gradient(135deg, rgba(26, 42, 74, 0.5), rgba(10, 10, 10, 0.8)); cursor: pointer;" onclick="startTour()">
+                        <img th:if="${mapBgImageUrl != null and #strings.length(mapBgImageUrl) > 0}"
+                             th:src="${mapBgImageUrl}"
                              style="width: 100%; height: 100%; object-fit: cover; position: absolute; inset: 0;"
-                             th:alt="${locations[0].name}">
-                        <div th:unless="${locations != null and !#lists.isEmpty(locations) and locationImageUrls != null and locationImageUrls[locations[0].id] != null}"
+                             alt="宝源坊全景图">
+                        <div th:unless="${mapBgImageUrl != null and #strings.length(mapBgImageUrl) > 0}"
                              class="slot-placeholder"
                              style="position: absolute; inset: 0; border-radius: 16px;"
-                             th:attr="data-slot-id=${locations != null and !#lists.isEmpty(locations)} ? ${'IMG-02-' + locations[0].id} : 'IMG-02-01'">
-                            <div class="slot-type-icon">🖼️</div>
-                            <div class="slot-badge" th:text="${locations != null and !#lists.isEmpty(locations)} ? ${'IMG-02-' + locations[0].id} : 'IMG-02-01'"></div>
+                             data-slot-id="IMG-02-01">
+                            <div class="slot-type-icon">🗺️</div>
+                            <div class="slot-badge">IMG-02-01</div>
                             <div class="slot-desc">宝源坊全景图 · 待填充素材</div>
                         </div>
                         <div style="position: absolute; top: 1rem; left: 1rem; display: flex; flex-direction: column; gap: 0.5rem;">
@@ -176,32 +661,48 @@
                             <span style="padding: 0.2rem 0.8rem; background: rgba(0, 0, 0, 0.6); color: var(--text-primary); border-radius: 6px; font-size: 0.75rem;">📍 宝源坊 · 广东省古村落</span>
                         </div>
                         <div style="position: absolute; bottom: 0; left: 0; right: 0; padding: 1.5rem; background: linear-gradient(transparent, rgba(0,0,0,0.85));">
-                            <h3 style="color: var(--warm-gold); font-size: 1.4rem; margin-bottom: 0.5rem; letter-spacing: 1px;">宝源坊3D全景</h3>
-                            <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1rem;">村落整体三维展示 · 古村空间布局 · 建筑群分布</p>
-                            <button class="hero-btn-primary" onclick="startTour()" style="padding: 0.5rem 1.2rem; font-size: 0.9rem;">进入宝源坊全景 →</button>
+                            <h3 style="color: var(--warm-gold); font-size: 1.4rem; margin-bottom: 0.5rem; letter-spacing: 1px;">宝源坊全景云游</h3>
+                            <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1rem;">点击进入景区导航 · 探索6个特色地点 · 查看历史时间线</p>
+                            <button class="hero-btn-primary" onclick="event.stopPropagation(); startTour()" style="padding: 0.5rem 1.2rem; font-size: 0.9rem;">🗺️ 进入宝源坊地图 →</button>
                         </div>
                     </div>
 
-                    <!-- 右侧：特色建筑展示 -->
-                    <div>
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                            <h3 style="color: var(--warm-gold); font-size: 1.15rem; letter-spacing: 1px;">📍 宝源坊 · 6栋特色建筑</h3>
-                            <a href="/map" style="color: var(--text-muted); font-size: 0.85rem; text-decoration: none;">查看地图 →</a>
-                        </div>
-                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem;" class="tour-buildings-grid">
-                            <div th:each="location, locIter : ${locations}" th:if="${locIter.index < 6}" 
-                                 th:onclick="|window.location.href='/location/' + ${location.id}|"
-                                 style="cursor: pointer; border-radius: 10px; overflow: hidden; border: 1px solid var(--glass-border-light); background: var(--glass-bg); transition: all 0.3s;"
-                                 onmouseover="this.style.borderColor='var(--warm-gold)'; this.style.transform='translateY(-3px)'"
-                                 onmouseout="this.style.borderColor='var(--glass-border-light)'; this.style.transform='translateY(0)'">
-                                <div th:if="${locationImageUrls != null and locationImageUrls[location.id] != null}" style="height: 80px; background: var(--glass-border);" th:style="'background-image: url(' + ${locationImageUrls[location.id]} + '); background-size: cover; background-position: center;'"></div>
-                                <div th:unless="${locationImageUrls != null and locationImageUrls[location.id] != null}" style="height: 80px; background: var(--glass-border); display: flex; align-items: center; justify-content: center; color: var(--text-muted); font-size: 0.75rem;" th:attr="data-slot-id=${'IMG-02-' + location.id}">
-                                    <div class="slot-placeholder" style="position: absolute; inset: 0;">
-                                        <div class="slot-type-icon">🖼️</div>
-                                    </div>
+                    <!-- 右侧：宝源坊核心数据与介绍 -->
+                    <div style="display: flex; flex-direction: column; gap: 1rem;">
+                        <div style="padding: 1.5rem; background: var(--glass-bg); border: 1px solid var(--glass-border-light); border-radius: 14px; flex: 1;">
+                            <h3 style="color: var(--warm-gold); font-size: 1.1rem; margin-bottom: 1rem; letter-spacing: 1px;">🏮 宝源坊概况</h3>
+                            <p style="color: var(--text-secondary); font-size: 0.88rem; line-height: 1.7; margin-bottom: 1rem;">
+                                宝源坊位于开平市长沙街道，是典型的侨乡古村落，保存有完整的碉楼建筑群和传统岭南建筑风貌。
+                            </p>
+                            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; margin-top: 1rem;">
+                                <div style="text-align: center; padding: 0.75rem; background: rgba(212, 175, 55, 0.1); border-radius: 10px;">
+                                    <div style="color: var(--warm-gold); font-size: 1.5rem; font-weight: bold;">6</div>
+                                    <div style="color: var(--text-muted); font-size: 0.75rem;">特色地点</div>
                                 </div>
-                                <div style="padding: 0.6rem 0.5rem; text-align: center;">
-                                    <div style="color: var(--warm-gold); font-size: 0.78rem; font-weight: 600;" th:text="${location.name}">建筑名称</div>
+                                <div style="text-align: center; padding: 0.75rem; background: rgba(212, 175, 55, 0.1); border-radius: 10px;">
+                                    <div style="color: var(--warm-gold); font-size: 1.5rem; font-weight: bold;">400+</div>
+                                    <div style="color: var(--text-muted); font-size: 0.75rem;">历史年数</div>
+                                </div>
+                                <div style="text-align: center; padding: 0.75rem; background: rgba(212, 175, 55, 0.1); border-radius: 10px;">
+                                    <div style="color: var(--warm-gold); font-size: 1.5rem; font-weight: bold;">100%</div>
+                                    <div style="color: var(--text-muted); font-size: 0.75rem;">数字建模</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div style="padding: 1.5rem; background: var(--glass-bg); border: 1px solid var(--glass-border-light); border-radius: 14px;">
+                            <h4 style="color: var(--warm-gold); font-size: 0.95rem; margin-bottom: 0.75rem;">🎯 云游体验内容</h4>
+                            <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                                <div style="display: flex; align-items: center; gap: 0.5rem; color: var(--text-secondary); font-size: 0.82rem;">
+                                    <span style="color: var(--warm-gold);">✓</span> 3D高斯泼溅模型，支持交互
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 0.5rem; color: var(--text-secondary); font-size: 0.82rem;">
+                                    <span style="color: var(--warm-gold);">✓</span> 历史时间线，了解变迁
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 0.5rem; color: var(--text-secondary); font-size: 0.82rem;">
+                                    <span style="color: var(--warm-gold);">✓</span> AI智能讲解，深度解读
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 0.5rem; color: var(--text-secondary); font-size: 0.82rem;">
+                                    <span style="color: var(--warm-gold);">✓</span> 全景视频沉浸式体验
                                 </div>
                             </div>
                         </div>
@@ -220,22 +721,6 @@
                             <p class="portal-card-desc">沉浸式3D云游 · 古村空间布局</p>
                         </div>
                     </a>
-                    <a class="portal-entry-card" style="--card-bg: url('/images/card-diaolou-buildings.jpg')" href="/map">
-                        <div class="portal-card-bg"></div>
-                        <div class="portal-card-content">
-                            <span class="portal-card-badge">6栋</span>
-                            <h3 class="portal-card-title">6栋特色建筑</h3>
-                            <p class="portal-card-desc">碉楼、古井、宗祠等精选建筑</p>
-                        </div>
-                    </a>
-                    <a class="portal-entry-card" style="--card-bg: url('/images/card-architecture-story.jpg')" href="/stories">
-                        <div class="portal-card-bg"></div>
-                        <div class="portal-card-content">
-                            <span class="portal-card-badge">故事</span>
-                            <h3 class="portal-card-title">建筑故事集</h3>
-                            <p class="portal-card-desc">聆听AI讲解 · 阅读侨乡故事</p>
-                        </div>
-                    </a>
                 </div>
             </div>
         </section>
@@ -252,77 +737,77 @@
             <div class="content-container">
                 <div style="max-width: 700px; margin: 0 auto; padding: 2rem; background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 16px; text-align: center;">
                     <div style="display: flex; gap: 0.5rem; justify-content: center; margin-bottom: 1.5rem;">
-                        <div class="life-step active" data-step="1"><div class="life-step-num">1</div><div class="life-step-label">选择出身</div></div>
+                        <div class="life-step active" data-step="1"><div class="life-step-num">1</div><div class="life-step-label">出身背景</div></div>
                         <div class="life-step-line"></div>
-                        <div class="life-step" data-step="2"><div class="life-step-num">2</div><div class="life-step-label">第一阶段</div></div>
+                        <div class="life-step" data-step="2"><div class="life-step-num">2</div><div class="life-step-label">人生选择</div></div>
                         <div class="life-step-line"></div>
-                        <div class="life-step" data-step="3"><div class="life-step-num">3</div><div class="life-step-label">第二阶段</div></div>
+                        <div class="life-step" data-step="3"><div class="life-step-num">3</div><div class="life-step-label">人生目标</div></div>
                         <div class="life-step-line"></div>
                         <div class="life-step" data-step="4"><div class="life-step-num">4</div><div class="life-step-label">人生结局</div></div>
                     </div>
 
-                    <!-- 步骤1：出生选择 -->
+                    <!-- 步骤1：出身背景 -->
                     <div id="life-step-1" class="life-panel active">
-                        <h3 style="color: var(--warm-gold); font-size: 1.3rem; margin-bottom: 1.5rem; letter-spacing: 1px;">选择你的出身</h3>
+                        <h3 style="color: var(--warm-gold); font-size: 1.3rem; margin-bottom: 1.5rem; letter-spacing: 1px;">你的出身背景是？</h3>
                         <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;" class="life-choices">
                             <div class="life-choice-card" data-origin="1" onclick="selectOrigin(1)">
-                                <div style="font-size: 2rem; margin-bottom: 0.5rem;">💰</div>
-                                <div style="color: var(--warm-gold); font-weight: 600; margin-bottom: 0.3rem;">商贸之家</div>
-                                <div style="color: var(--text-muted); font-size: 0.78rem;">远洋经商</div>
+                                <div style="font-size: 2rem; margin-bottom: 0.5rem;">🏛️</div>
+                                <div style="color: var(--warm-gold); font-weight: 600; margin-bottom: 0.3rem;">碉楼世家</div>
+                                <div style="color: var(--text-muted); font-size: 0.78rem;">祖辈参与修建宝源坊碉楼</div>
                             </div>
                             <div class="life-choice-card" data-origin="2" onclick="selectOrigin(2)">
-                                <div style="font-size: 2rem; margin-bottom: 0.5rem;">📚</div>
-                                <div style="color: var(--warm-gold); font-weight: 600; margin-bottom: 0.3rem;">书香之家</div>
-                                <div style="color: var(--text-muted); font-size: 0.78rem;">求学改变命运</div>
+                                <div style="font-size: 2rem; margin-bottom: 0.5rem;">🏪</div>
+                                <div style="color: var(--warm-gold); font-weight: 600; margin-bottom: 0.3rem;">华侨商贾之家</div>
+                                <div style="color: var(--text-muted); font-size: 0.78rem;">父辈在南洋经商贸易</div>
                             </div>
                             <div class="life-choice-card" data-origin="3" onclick="selectOrigin(3)">
-                                <div style="font-size: 2rem; margin-bottom: 0.5rem;">🏡</div>
-                                <div style="color: var(--warm-gold); font-weight: 600; margin-bottom: 0.3rem;">普通人家</div>
-                                <div style="color: var(--text-muted); font-size: 0.78rem;">守护家乡</div>
+                                <div style="font-size: 2rem; margin-bottom: 0.5rem;">🌾</div>
+                                <div style="color: var(--warm-gold); font-weight: 600; margin-bottom: 0.3rem;">乡土农家</div>
+                                <div style="color: var(--text-muted); font-size: 0.78rem;">世代安居宝源坊这片土地</div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- 步骤2：第一阶段 -->
+                    <!-- 步骤2：人生选择 -->
                     <div id="life-step-2" class="life-panel">
-                        <h3 style="color: var(--warm-gold); font-size: 1.3rem; margin-bottom: 1.5rem; letter-spacing: 1px;">人生第一阶段：你将如何起步？</h3>
+                        <h3 style="color: var(--warm-gold); font-size: 1.3rem; margin-bottom: 1.5rem; letter-spacing: 1px;">在宝源坊，你会选择哪条路？</h3>
                         <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;" class="life-choices">
                             <div class="life-choice-card" data-choice1="1" onclick="selectChoice1(1)">
-                                <div style="font-size: 2rem; margin-bottom: 0.5rem;">🚢</div>
-                                <div style="color: var(--warm-gold); font-weight: 600; margin-bottom: 0.3rem;">出洋闯荡</div>
-                                <div style="color: var(--text-muted); font-size: 0.78rem;">远赴南洋谋生</div>
+                                <div style="font-size: 2rem; margin-bottom: 0.5rem;">🔨</div>
+                                <div style="color: var(--warm-gold); font-weight: 600; margin-bottom: 0.3rem;">青石板路</div>
+                                <div style="color: var(--text-muted); font-size: 0.78rem;">学习石砌技艺，参与碉楼建造</div>
                             </div>
                             <div class="life-choice-card" data-choice1="2" onclick="selectChoice1(2)">
-                                <div style="font-size: 2rem; margin-bottom: 0.5rem;">🌾</div>
-                                <div style="color: var(--warm-gold); font-weight: 600; margin-bottom: 0.3rem;">留守家乡</div>
-                                <div style="color: var(--text-muted); font-size: 0.78rem;">耕耘这片土地</div>
+                                <div style="font-size: 2rem; margin-bottom: 0.5rem;">📖</div>
+                                <div style="color: var(--warm-gold); font-weight: 600; margin-bottom: 0.3rem;">古屋纪实</div>
+                                <div style="color: var(--text-muted); font-size: 0.78rem;">研读华侨家书与乡邦文献</div>
                             </div>
                             <div class="life-choice-card" data-choice1="3" onclick="selectChoice1(3)">
-                                <div style="font-size: 2rem; margin-bottom: 0.5rem;">📖</div>
-                                <div style="color: var(--warm-gold); font-weight: 600; margin-bottom: 0.3rem;">学习新知</div>
-                                <div style="color: var(--text-muted); font-size: 0.78rem;">读书求学进取</div>
+                                <div style="font-size: 2rem; margin-bottom: 0.5rem;">🌳</div>
+                                <div style="color: var(--warm-gold); font-weight: 600; margin-bottom: 0.3rem;">岸堤白道</div>
+                                <div style="color: var(--text-muted); font-size: 0.78rem;">守护乡土田园，与自然为伴</div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- 步骤3：第二阶段 -->
+                    <!-- 步骤3：人生目标 -->
                     <div id="life-step-3" class="life-panel">
-                        <h3 style="color: var(--warm-gold); font-size: 1.3rem; margin-bottom: 1.5rem; letter-spacing: 1px;">人生第二阶段：你将如何抉择？</h3>
+                        <h3 style="color: var(--warm-gold); font-size: 1.3rem; margin-bottom: 1.5rem; letter-spacing: 1px;">你最想成为怎样的人？</h3>
                         <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;" class="life-choices">
                             <div class="life-choice-card" data-choice2="1" onclick="selectChoice2(1)">
-                                <div style="font-size: 2rem; margin-bottom: 0.5rem;">💎</div>
-                                <div style="color: var(--warm-gold); font-weight: 600; margin-bottom: 0.3rem;">创造财富</div>
-                                <div style="color: var(--text-muted); font-size: 0.78rem;">商业帝国崛起</div>
+                                <div style="font-size: 2rem; margin-bottom: 0.5rem;">💰</div>
+                                <div style="color: var(--warm-gold); font-weight: 600; margin-bottom: 0.3rem;">家业兴旺</div>
+                                <div style="color: var(--text-muted); font-size: 0.78rem;">经商致富，光耀门楣</div>
                             </div>
                             <div class="life-choice-card" data-choice2="2" onclick="selectChoice2(2)">
                                 <div style="font-size: 2rem; margin-bottom: 0.5rem;">🏛️</div>
-                                <div style="color: var(--warm-gold); font-weight: 600; margin-bottom: 0.3rem;">建设家乡</div>
-                                <div style="color: var(--text-muted); font-size: 0.78rem;">回乡兴家立业</div>
+                                <div style="color: var(--warm-gold); font-weight: 600; margin-bottom: 0.3rem;">造福桑梓</div>
+                                <div style="color: var(--text-muted); font-size: 0.78rem;">守望相助，建设家乡</div>
                             </div>
                             <div class="life-choice-card" data-choice2="3" onclick="selectChoice2(3)">
-                                <div style="font-size: 2rem; margin-bottom: 0.5rem;">🎭</div>
+                                <div style="font-size: 2rem; margin-bottom: 0.5rem;">🔥</div>
                                 <div style="color: var(--warm-gold); font-weight: 600; margin-bottom: 0.3rem;">传承文化</div>
-                                <div style="color: var(--text-muted); font-size: 0.78rem;">守护侨乡文脉</div>
+                                <div style="color: var(--text-muted); font-size: 0.78rem;">记录历史，传递薪火</div>
                             </div>
                         </div>
                     </div>
@@ -345,25 +830,25 @@
                     <a class="portal-entry-card primary" style="--card-bg: url('/images/card-merchant-life.jpg')" href="javascript:void(0)" onclick="selectOriginFromPortal(1)">
                         <div class="portal-card-bg"></div>
                         <div class="portal-card-content">
-                            <span class="portal-card-badge">商</span>
-                            <h3 class="portal-card-title">商贸之家</h3>
-                            <p class="portal-card-desc">远洋经商 · 商业帝国崛起</p>
+                            <span class="portal-card-badge">碉</span>
+                            <h3 class="portal-card-title">碉楼世家</h3>
+                            <p class="portal-card-desc">祖辈修建碉楼 · 建筑世家</p>
                         </div>
                     </a>
                     <a class="portal-entry-card" style="--card-bg: url('/images/card-scholar-life.jpg')" href="javascript:void(0)" onclick="selectOriginFromPortal(2)">
                         <div class="portal-card-bg"></div>
                         <div class="portal-card-content">
-                            <span class="portal-card-badge">学</span>
-                            <h3 class="portal-card-title">书香之家</h3>
-                            <p class="portal-card-desc">求学改变命运 · 读书进取</p>
+                            <span class="portal-card-badge">侨</span>
+                            <h3 class="portal-card-title">华侨商贾之家</h3>
+                            <p class="portal-card-desc">南洋经商 · 家业兴旺</p>
                         </div>
                     </a>
                     <a class="portal-entry-card" style="--card-bg: url('/images/card-rural-life.jpg')" href="javascript:void(0)" onclick="selectOriginFromPortal(3)">
                         <div class="portal-card-bg"></div>
                         <div class="portal-card-content">
                             <span class="portal-card-badge">农</span>
-                            <h3 class="portal-card-title">普通人家</h3>
-                            <p class="portal-card-desc">守护家乡 · 耕耘这片土地</p>
+                            <h3 class="portal-card-title">乡土农家</h3>
+                            <p class="portal-card-desc">安居宝源坊 · 守护乡土</p>
                         </div>
                     </a>
                 </div>
@@ -375,72 +860,78 @@
             <div class="section-header">
                 <span class="section-label">建筑故事</span>
                 <h2 class="section-title">建筑故事</h2>
-                <p class="section-subtitle">走进一座建筑，读懂一段历史 · <span style="color: var(--warm-gold);">📍 宝源坊 · 精选建筑</span></p>
+                <p class="section-subtitle">走进百年碉楼，聆听华侨故事 · <span style="color: var(--warm-gold);">📍 宝源坊 · 中西合璧的侨乡建筑</span></p>
             </div>
 
-            <!-- 实际内容（默认显示） -->
+            <!-- 建筑文化价值说明 -->
+            <div style="max-width: 800px; margin: 0 auto 2rem; padding: 1.25rem 1.5rem; background: rgba(212, 175, 55, 0.08); border-left: 4px solid var(--warm-gold); border-radius: 0 12px 12px 0;">
+                <p style="color: var(--text-secondary); font-size: 0.88rem; line-height: 1.8; margin: 0;">
+                    宝源坊的每一座建筑，都是一部凝固的史书。它们见证了华侨远渡重洋的艰辛，
+                    承载着叶落归根的情怀，是中西文化交融的鲜活印记。
+                </p>
+            </div>
+
+            <!-- 摄影集入口卡片 -->
             <div class="content-container">
-                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem;" class="story-buildings-grid">
-                    <div th:each="location, locIter : ${locations}" th:if="${locIter.index < 3}"
-                         th:onclick="|window.location.href='/location/' + ${location.id}|"
-                         style="cursor: pointer; border-radius: 12px; overflow: hidden; border: 1px solid var(--glass-border-light); background: var(--glass-bg); transition: all 0.3s;"
-                         onmouseover="this.style.borderColor='var(--warm-gold)'; this.style.transform='translateY(-3px)'"
-                         onmouseout="this.style.borderColor='var(--glass-border-light)'; this.style.transform='translateY(0)'">
-                        <div th:if="${locationImageUrls != null and locationImageUrls[location.id] != null}" style="height: 180px;" th:style="'background-image: url(' + ${locationImageUrls[location.id]} + '); background-size: cover; background-position: center;'"></div>
-                        <div th:unless="${locationImageUrls != null and locationImageUrls[location.id] != null}"
-                             class="slot-placeholder"
-                             style="height: 180px; position: relative;"
-                             th:attr="data-slot-id=${'IMG-02-' + location.id}">
-                            <div class="slot-type-icon">🖼️</div>
-                            <div class="slot-badge" th:text="${'IMG-02-' + location.id}"></div>
-                            <div class="slot-desc" th:text="${location.name} + ' · 历史建筑'"></div>
+                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem;" class="story-buildings-grid">
+                    <!-- 入口1：坊内现存碉楼 -->
+                    <a href="/architecture-photo" class="story-entry-card" style="cursor: pointer; text-decoration: none; color: inherit; border-radius: 12px; overflow: hidden; border: 1px solid var(--glass-border-light); background: linear-gradient(135deg, rgba(139, 90, 43, 0.2), rgba(160, 120, 80, 0.15)); transition: all 0.3s;"
+                       onmouseover="this.style.borderColor='var(--warm-gold)'; this.style.transform='translateY(-3px)'"
+                       onmouseout="this.style.borderColor='var(--glass-border-light)'; this.style.transform='translateY(0)'">
+                        <div style="height: 160px; display: flex; align-items: center; justify-content: center; font-size: 3rem; background: rgba(139, 90, 43, 0.1);">
+                            🏯
                         </div>
-                        <div style="padding: 1rem;">
-                            <h4 style="color: var(--warm-gold); font-size: 1rem; margin-bottom: 0.4rem; letter-spacing: 1px;" th:text="${location.name}">建筑名称</h4>
-                            <p style="color: var(--text-muted); font-size: 0.82rem; margin-bottom: 0.8rem;" th:text="${location.description}">建筑描述</p>
-                            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-                                <span style="padding: 0.2rem 0.6rem; background: rgba(212, 175, 55, 0.1); color: var(--warm-gold); border-radius: 10px; font-size: 0.7rem;">3D模型</span>
-                                <span style="padding: 0.2rem 0.6rem; background: rgba(212, 175, 55, 0.1); color: var(--warm-gold); border-radius: 10px; font-size: 0.7rem;">AI讲解</span>
-                            </div>
-                            <div style="margin-top: 0.8rem; color: var(--warm-gold); font-size: 0.85rem; font-weight: 500;">进入故事 →</div>
+                        <div style="padding: 1rem; text-align: center;">
+                            <h4 style="color: var(--warm-gold); font-size: 0.95rem; margin-bottom: 0.4rem; letter-spacing: 1px;">坊内现存碉楼</h4>
+                            <p style="color: var(--text-secondary); font-size: 0.78rem; line-height: 1.5;">宝源坊村内碉楼实拍</p>
+                            <div style="margin-top: 0.8rem; color: var(--warm-gold); font-size: 0.8rem;">查看摄影集 →</div>
                         </div>
-                    </div>
-                </div>
-                <div style="text-align: center; margin-top: 2rem;">
-                    <button class="hero-btn-secondary" onclick="window.location.href='/map'">查看更多宝源坊建筑故事 →</button>
-                </div>
-            </div>
+                    </a>
 
-            <!-- 导览卡片（导览模式显示） -->
-            <div class="portal-container portal-section-story">
-                <div class="portal-cards-grid">
-                    <a class="portal-entry-card primary" style="--card-bg: url('/images/card-diaolou-tower.jpg')" href="/location/1">
-                        <div class="portal-card-bg"></div>
-                        <div class="portal-card-content">
-                            <span class="portal-card-badge">碉楼</span>
-                            <h3 class="portal-card-title">宝源坊碉楼</h3>
-                            <p class="portal-card-desc">碉楼建筑展示区 · 侨乡特色</p>
+                    <!-- 入口2：强亚村-老宅村碉楼群 -->
+                    <a href="/architecture-photo" class="story-entry-card" style="cursor: pointer; text-decoration: none; color: inherit; border-radius: 12px; overflow: hidden; border: 1px solid var(--glass-border-light); background: linear-gradient(135deg, rgba(100, 120, 90, 0.2), rgba(80, 100, 120, 0.15)); transition: all 0.3s;"
+                       onmouseover="this.style.borderColor='var(--warm-gold)'; this.style.transform='translateY(-3px)'"
+                       onmouseout="this.style.borderColor='var(--glass-border-light)'; this.style.transform='translateY(0)'">
+                        <div style="height: 160px; display: flex; align-items: center; justify-content: center; font-size: 3rem; background: rgba(100, 120, 90, 0.1);">
+                            🏘️
+                        </div>
+                        <div style="padding: 1rem; text-align: center;">
+                            <h4 style="color: var(--warm-gold); font-size: 0.95rem; margin-bottom: 0.4rem; letter-spacing: 1px;">强亚村-老宅村碉楼群</h4>
+                            <p style="color: var(--text-secondary); font-size: 0.78rem; line-height: 1.5;">周边村落碉楼群采风</p>
+                            <div style="margin-top: 0.8rem; color: var(--warm-gold); font-size: 0.8rem;">查看摄影集 →</div>
                         </div>
                     </a>
-                    <a class="portal-entry-card" style="--card-bg: url('/images/card-ancient-well.jpg')" href="/location/2">
-                        <div class="portal-card-bg"></div>
-                        <div class="portal-card-content">
-                            <span class="portal-card-badge">古井</span>
-                            <h3 class="portal-card-title">方形古井</h3>
-                            <p class="portal-card-desc">古代饮水文化遗迹</p>
+
+                    <!-- 入口3：碉楼院特写 -->
+                    <a href="/architecture-photo" class="story-entry-card" style="cursor: pointer; text-decoration: none; color: inherit; border-radius: 12px; overflow: hidden; border: 1px solid var(--glass-border-light); background: linear-gradient(135deg, rgba(180, 150, 100, 0.2), rgba(120, 90, 60, 0.15)); transition: all 0.3s;"
+                       onmouseover="this.style.borderColor='var(--warm-gold)'; this.style.transform='translateY(-3px)'"
+                       onmouseout="this.style.borderColor='var(--glass-border-light)'; this.style.transform='translateY(0)'">
+                        <div style="height: 160px; display: flex; align-items: center; justify-content: center; font-size: 3rem; background: rgba(180, 150, 100, 0.1);">
+                            🏛️
+                        </div>
+                        <div style="padding: 1rem; text-align: center;">
+                            <h4 style="color: var(--warm-gold); font-size: 0.95rem; margin-bottom: 0.4rem; letter-spacing: 1px;">碉楼院特写</h4>
+                            <p style="color: var(--text-secondary); font-size: 0.78rem; line-height: 1.5;">碉楼建筑细节特写</p>
+                            <div style="margin-top: 0.8rem; color: var(--warm-gold); font-size: 0.8rem;">查看摄影集 →</div>
                         </div>
                     </a>
-                    <a class="portal-entry-card" style="--card-bg: url('/images/card-flagstone-street.jpg')" href="/location/3">
-                        <div class="portal-card-bg"></div>
-                        <div class="portal-card-content">
-                            <span class="portal-card-badge">古街</span>
-                            <h3 class="portal-card-title">青石板街</h3>
-                            <p class="portal-card-desc">古镇传统街道 · 百年岁月</p>
+
+                    <!-- 入口4：古屋内部 -->
+                    <a href="/architecture-photo" class="story-entry-card" style="cursor: pointer; text-decoration: none; color: inherit; border-radius: 12px; overflow: hidden; border: 1px solid var(--glass-border-light); background: linear-gradient(135deg, rgba(140, 130, 110, 0.2), rgba(100, 90, 80, 0.15)); transition: all 0.3s;"
+                       onmouseover="this.style.borderColor='var(--warm-gold)'; this.style.transform='translateY(-3px)'"
+                       onmouseout="this.style.borderColor='var(--glass-border-light)'; this.style.transform='translateY(0)'">
+                        <div style="height: 160px; display: flex; align-items: center; justify-content: center; font-size: 3rem; background: rgba(140, 130, 110, 0.1);">
+                            🏚️
+                        </div>
+                        <div style="padding: 1rem; text-align: center;">
+                            <h4 style="color: var(--warm-gold); font-size: 0.95rem; margin-bottom: 0.4rem; letter-spacing: 1px;">古屋内部</h4>
+                            <p style="color: var(--text-secondary); font-size: 0.78rem; line-height: 1.5;">古屋内部结构与陈设</p>
+                            <div style="margin-top: 0.8rem; color: var(--warm-gold); font-size: 0.8rem;">查看摄影集 →</div>
                         </div>
                     </a>
                 </div>
                 <div style="text-align: center; margin-top: 2rem;">
-                    <button class="hero-btn-secondary" onclick="window.location.href='/map'">查看更多宝源坊建筑 →</button>
+                    <button class="hero-btn-secondary" onclick="window.location.href='/architecture-photo'">进入建筑故事摄影集 →</button>
                 </div>
             </div>
         </section>
@@ -523,22 +1014,6 @@
                 </div>
             </div>
 
-
-        </section>
-
-        <!-- CTA 区块 -->
-        <section class="section" style="text-align: center;">
-            <div style="max-width: 700px; margin: 0 auto; padding: 4rem 2rem; background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 16px; backdrop-filter: blur(15px);">
-                <h2 style="font-size: 2rem; color: var(--warm-gold); margin-bottom: 1rem; letter-spacing: 3px;">准备好开始云游了吗？</h2>
-                <p style="color: var(--text-secondary); margin-bottom: 2rem; font-size: 1.05rem; line-height: 1.8;">
-                    点击开启沉浸式游览，AI导游将为您讲述每一座建筑背后的故事。
-                    让我们一起穿越时空，感受百年侨乡的魅力。
-                </p>
-                <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
-                    <button class="hero-btn-primary" onclick="startTour()">▶ 立即开始云游</button>
-                    <button class="hero-btn-secondary" onclick="toggleAiGuide()">🎧 试听AI讲解</button>
-                </div>
-            </div>
         </section>
     </main>
 
@@ -553,7 +1028,7 @@
             <a href="/sitemap">网站导览</a>
             <a href="#tour">云游侨乡</a>
             <a href="#life">我的侨乡人生</a>
-            <a href="#building-story">建筑故事</a>
+            <a href="/architecture-photo">建筑故事</a>
             <a href="#achievement">项目成果</a>
             <a href="/about">关于我们</a>
         </div>
@@ -677,35 +1152,53 @@
             }
         }
 
+        let scrollTimeout;
         function updateChapterDots() {
-            const sections = ['hero', 'tour', 'life', 'building-story', 'about-qiaoxiang', 'achievement'];
-            const dots = document.querySelectorAll('.chapter-dot');
-            let current = 0;
-            sections.forEach((id, index) => {
-                const el = document.getElementById(id);
-                if (el) {
-                    const rect = el.getBoundingClientRect();
-                    if (rect.top <= window.innerHeight / 2) current = index;
-                }
-            });
-            dots.forEach((dot, index) => {
-                if (index < 6) dot.classList.toggle('active', index === current);
-            });
+            if (scrollTimeout) return;
+            scrollTimeout = setTimeout(() => {
+                scrollTimeout = null;
+                const sections = ['hero', 'tour', 'life', 'building-story', 'about-qiaoxiang', 'achievement'];
+                const dots = document.querySelectorAll('.chapter-dot');
+                if (dots.length === 0) return;
+                
+                let current = 0;
+                const scrollY = window.scrollY || window.pageYOffset;
+                const viewportCenter = scrollY + window.innerHeight / 2;
+                
+                sections.forEach((id, index) => {
+                    const el = document.getElementById(id);
+                    if (el) {
+                        const rect = el.getBoundingClientRect();
+                        const sectionCenter = rect.top + scrollY + rect.height / 2;
+                        if (sectionCenter <= viewportCenter) current = index;
+                    }
+                });
+                
+                dots.forEach((dot, index) => {
+                    if (index < 6) {
+                        if (index === current) {
+                            dot.classList.add('active');
+                        } else {
+                            dot.classList.remove('active');
+                        }
+                    }
+                });
+            }, 50);
         }
 
         // ============ 我的侨乡人生互动逻辑 ============
         let lifeState = { origin: 0, choice1: 0, choice2: 0 };
 
         const lifeEndings = [
-            { id: 1, title: '远赴南洋', icon: '🚢', desc: '你远渡重洋，在异国他乡艰苦打拼，成为一代华侨商人', building: '瑞石楼碉楼', tag: '开拓者', locationId: 1 },
-            { id: 2, title: '归乡兴家', icon: '🏠', desc: '你带着海外积蓄回乡，建起碉楼，光耀门楣', building: '宝源门楼', tag: '归乡人', locationId: 1 },
-            { id: 3, title: '重振家业', icon: '💪', desc: '你留守家乡，勤勉经营，让家族产业焕发新生', building: '宝源邓公祠', tag: '守业者', locationId: 5 },
-            { id: 4, title: '一代商人', icon: '💰', desc: '你继承商贸之家传统，将生意做到南洋各地', building: '瑞石楼碉楼', tag: '商业奇才', locationId: 6 },
-            { id: 5, title: '文化传承者', icon: '📚', desc: '你求学归来，致力于侨乡文化的记录与传承', building: '宝源邓公祠', tag: '文化使者', locationId: 5 },
-            { id: 6, title: '乡村新主人', icon: '🌾', desc: '你扎根土地，用新知识改变家乡面貌', building: '古厝', tag: '乡村建设者', locationId: 2 },
-            { id: 7, title: '侨领风范', icon: '🏛️', desc: '你成为华侨领袖，联络乡亲，造福桑梓', building: '宝源门楼', tag: '侨领', locationId: 1 },
-            { id: 8, title: '匠心营造', icon: '🔨', desc: '你钻研建筑工艺，参与设计建造精美碉楼', building: '教堂', tag: '建筑师', locationId: 3 },
-            { id: 9, title: '薪火相传', icon: '🔥', desc: '你守护侨乡记忆，让百年文化薪火相传', building: '风雨亭', tag: '薪火传承人', locationId: 4 }
+            { id: 1, title: '匠心营造', icon: '🔨', desc: '你继承碉楼建造技艺，成为宝源坊最受尊敬的建筑大师', building: '宝源坊现有碉楼', tag: '建筑大师', locationId: 5 },
+            { id: 2, title: '碉楼传人', icon: '🏛️', desc: '你守护着宝源坊的碉楼群，讲述着祖辈的建造故事', building: '宝源坊现有碉楼', tag: '碉楼守护人', locationId: 5 },
+            { id: 3, title: '乡村守望', icon: '🌾', desc: '你扎根岸堤白道旁，守护着这片土地的田园风光', building: '岸堤白道', tag: '故土守护者', locationId: 2 },
+            { id: 4, title: '一代商人', icon: '💰', desc: '你继承商业传统，将生意做到南洋各地，如古屋银信所记载', building: '古屋纪实', tag: '商海骄子', locationId: 6 },
+            { id: 5, title: '侨领风范', icon: '🏛️', desc: '你成为华侨领袖，以宝源坊牌坊为门户，联络内外乡亲', building: '宝源坊牌坊', tag: '侨乡领袖', locationId: 1 },
+            { id: 6, title: '归乡兴家', icon: '🏠', desc: '你带着海外积蓄回到宝源坊，从牌坊起步，重建家业', building: '宝源坊牌坊', tag: '归乡人', locationId: 1 },
+            { id: 7, title: '乡村新主人', icon: '🌱', desc: '你从青石板路出发，用新知识改变家乡面貌', building: '青石板路', tag: '乡土建设者', locationId: 3 },
+            { id: 8, title: '薪火相传', icon: '🔥', desc: '你守护古屋中的华侨记忆，让百年银信薪火相传', building: '古屋纪实', tag: '文化使者', locationId: 6 },
+            { id: 9, title: '薪火传承人', icon: '🌳', desc: '你在古榕树下讲述侨乡故事，让文化代代相传', building: '古榕树', tag: '文化传人', locationId: 4 }
         ];
 
         function selectOrigin(n) {
@@ -752,7 +1245,7 @@
                 </div>
                 <div style="margin-top: 1.5rem; display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap;">
                     <button class="hero-btn-primary" onclick="shareLife('${ending.title}', '${ending.tag}')" style="padding: 0.6rem 1.3rem; font-size: 0.9rem;">📤 分享我的人生</button>
-                    <button class="hero-btn-secondary" onclick="startTour(${ending.locationId})" style="padding: 0.6rem 1.3rem; font-size: 0.9rem;">🏛️ 探索对应建筑</button>
+                    <button class="hero-btn-secondary" onclick="goToLocation(${ending.locationId})" style="padding: 0.6rem 1.3rem; font-size: 0.9rem;">🏛️ 探索对应建筑</button>
                 </div>
             `;
             document.getElementById('life-restart-btn').style.display = 'inline-block';
@@ -767,7 +1260,7 @@
             }
         }
 
-        function startTour(locationId) {
+        function goToLocation(locationId) {
             window.location.href = '/location/' + locationId;
         }
 
@@ -840,7 +1333,9 @@
         document.addEventListener('DOMContentLoaded', function() {
             createParticles();
             initPortalMode();
-            window.addEventListener('scroll', updateChapterDots);
+            // initTimeline() 仅在map.html中定义，首页不需要
+            updateChapterDots(); // 立即执行一次，确保初始状态正确
+            window.addEventListener('scroll', updateChapterDots, { passive: true });
             document.addEventListener('click', function(e) {
                 const searchBox = document.querySelector('.header-search');
                 const suggestions = document.getElementById('search-suggestions');
@@ -849,7 +1344,87 @@
                 }
             });
         });
+
+        // ============ 素材展播功能 ============
+        function switchMediaTab(type) {
+            const tabs = document.querySelectorAll('.media-tab');
+            const contents = document.querySelectorAll('.media-content');
+            tabs.forEach(t => t.classList.remove('active'));
+            contents.forEach(c => c.classList.remove('active'));
+            if (type === 'video') {
+                tabs[0].classList.add('active');
+                document.getElementById('media-video').classList.add('active');
+            } else {
+                tabs[1].classList.add('active');
+                document.getElementById('media-photo').classList.add('active');
+            }
+        }
+
+        function playVideo(videoId, title, desc) {
+            const modal = document.getElementById('video-modal');
+            const videoPlayer = document.getElementById('video-player');
+            const videoTitle = document.getElementById('video-modal-title');
+            const videoDesc = document.getElementById('video-modal-desc');
+            
+            videoTitle.textContent = title;
+            videoDesc.textContent = desc;
+            
+            // 尝试加载视频，如果不存在则显示占位
+            const videoUrl = '/cos/video/' + videoId + '.mp4';
+            videoPlayer.src = videoUrl;
+            videoPlayer.onerror = function() {
+                videoPlayer.style.display = 'none';
+                document.getElementById('video-placeholder').style.display = 'flex';
+            };
+            videoPlayer.onplay = function() {
+                videoPlayer.style.display = 'block';
+                document.getElementById('video-placeholder').style.display = 'none';
+            };
+            
+            modal.classList.add('active');
+        }
+
+        function closeVideoModal() {
+            const modal = document.getElementById('video-modal');
+            const videoPlayer = document.getElementById('video-player');
+            modal.classList.remove('active');
+            if (videoPlayer) {
+                videoPlayer.pause();
+                videoPlayer.src = '';
+            }
+        }
+
+        function viewPhoto(photoId, title, desc) {
+            const modal = document.getElementById('video-modal');
+            const videoPlayer = document.getElementById('video-player');
+            const videoTitle = document.getElementById('video-modal-title');
+            const videoDesc = document.getElementById('video-modal-desc');
+            
+            videoTitle.textContent = title;
+            videoDesc.textContent = desc;
+            
+            // 显示图片
+            videoPlayer.style.display = 'none';
+            const placeholder = document.getElementById('video-placeholder');
+            placeholder.innerHTML = '<div style="text-align:center;"><div style="font-size:4rem;margin-bottom:1rem;">📷</div><div style="color:var(--warm-gold);font-size:1.2rem;margin-bottom:0.5rem;">' + title + '</div><div style="color:var(--text-muted);font-size:0.9rem;margin-bottom:1rem;">素材编号: ' + photoId + '</div><div style="color:var(--text-secondary);font-size:0.85rem;">' + desc + '</div><div style="margin-top:1.5rem;padding:0.8rem 1.5rem;background:rgba(212,175,55,0.1);border-radius:8px;color:var(--warm-gold);font-size:0.85rem;">请联系管理员上传素材</div></div>';
+            placeholder.style.display = 'flex';
+            
+            modal.classList.add('active');
+        }
     </script>
+
+    <!-- 视频播放弹窗 -->
+    <div class="video-modal" id="video-modal" onclick="if(event.target === this) closeVideoModal()">
+        <div class="video-modal-content">
+            <button class="video-modal-close" onclick="closeVideoModal()">✕</button>
+            <video id="video-player" controls style="display: none;"></video>
+            <div id="video-placeholder" class="media-placeholder" style="padding: 4rem 2rem; display: none;"></div>
+            <div class="video-modal-info">
+                <div class="video-modal-title" id="video-modal-title">视频标题</div>
+                <div class="video-modal-desc" id="video-modal-desc">视频描述</div>
+            </div>
+        </div>
+    </div>
 
     <script src="/js/slot-placeholder.js?v=20260808"></script>
     <script src="/js/theme-switch.js?v=20260808"></script>
