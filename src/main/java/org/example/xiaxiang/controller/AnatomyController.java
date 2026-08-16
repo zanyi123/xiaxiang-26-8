@@ -1,5 +1,7 @@
 package org.example.xiaxiang.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.example.xiaxiang.common.Result;
 import org.example.xiaxiang.properties.AppProperties;
@@ -9,8 +11,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -27,6 +28,8 @@ public class AnatomyController {
     @Autowired
     private CosService cosService;
 
+    private final ObjectMapper objectMapper = new ObjectMapper();
+
     @GetMapping("/anatomy")
     public String anatomyPage(@RequestParam(required = false) Integer buildingId, Model model) {
         log.info("[AnatomyController] 访问建筑解剖页，buildingId={}", buildingId);
@@ -38,12 +41,39 @@ public class AnatomyController {
         model.addAttribute("buildings", appProperties.getBuildings());
         model.addAttribute("parts", allParts);
 
-        // 构建部位 3D 模型 URL Map（id -> COS URL），供前端 3D 解剖展示使用
-        model.addAttribute("modelUrls", cosService.buildUrlMap(allParts,
-                AppProperties.BuildingAnatomy::getId, AppProperties.BuildingAnatomy::getModelKey));
-        // 构建部位图片 URL Map（id -> COS URL），作为 3D 模型未上传时的 fallback
+        // 构建部位图片 URL Map（id -> COS URL），供前端图片展示
         model.addAttribute("imageUrls", cosService.buildUrlMap(allParts,
                 AppProperties.BuildingAnatomy::getId, AppProperties.BuildingAnatomy::getImageKey));
+
+        // 构建每个部位的知识点 JSON 字符串（供前端 JS 解析渲染）
+        // knowledgePoints 在 YAML 中存储为 JSON 字符串，直接传递给前端
+        Map<Integer, String> knowledgePointsJsonMap = new HashMap<>();
+        for (AppProperties.BuildingAnatomy part : allParts) {
+            if (part.getKnowledgePoints() != null && !part.getKnowledgePoints().trim().isEmpty()) {
+                // 验证 JSON 格式是否正确
+                String kpJson = part.getKnowledgePoints().trim();
+                try {
+                    objectMapper.readTree(kpJson);
+                    // 转换知识点图片 key 为完整 COS URL
+                    List<Map<String, String>> kpList = objectMapper.readValue(kpJson,
+                            objectMapper.getTypeFactory().constructCollectionType(List.class, Map.class));
+                    for (Map<String, String> kp : kpList) {
+                        String imgKey = kp.get("imageKey");
+                        if (imgKey != null && !imgKey.trim().isEmpty()) {
+                            String imgUrl = cosService.getUrlSafely(imgKey);
+                            kp.put("imageUrl", imgUrl != null ? imgUrl : "");
+                        }
+                    }
+                    knowledgePointsJsonMap.put(part.getId(), objectMapper.writeValueAsString(kpList));
+                } catch (JsonProcessingException e) {
+                    log.warn("[AnatomyController] 知识点JSON格式错误，partId={}: {}", part.getId(), e.getMessage());
+                    // 即使格式错误也原样传递，前端会显示空列表
+                    knowledgePointsJsonMap.put(part.getId(), "[]");
+                }
+            }
+        }
+        model.addAttribute("knowledgePointsJsonMap", knowledgePointsJsonMap);
+
         return "anatomy";
     }
 

@@ -8,14 +8,45 @@
     <style>
         .anatomy-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-top: 2rem; }
         .anatomy-preview { position: sticky; top: 100px; }
-        .anatomy-preview-box { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 16px; padding: 2rem; text-align: center; backdrop-filter: blur(15px); position: relative; }
-        .anatomy-preview-img { width: 100%; max-width: 360px; border-radius: 12px; margin: 0 auto 1rem; display: block; }
-        .anatomy-canvas-wrapper { position: relative; width: 100%; height: 420px; background: rgba(0,0,0,0.5); border-radius: 12px; overflow: hidden; margin: 0 auto 1rem; }
-        .anatomy-canvas-wrapper canvas { display: block; width: 100% !important; height: 100% !important; }
-        .anatomy-loading { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; color: var(--warm-gold); }
-        .anatomy-loading .spinner { width: 36px; height: 36px; border: 3px solid rgba(212,175,55,0.2); border-top-color: var(--warm-gold); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 0.75rem; }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        .anatomy-tip { position: absolute; bottom: 1rem; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.7); color: var(--warm-gold); padding: 0.5rem 1rem; border-radius: 8px; font-size: 0.82rem; z-index: 10; pointer-events: none; max-width: 90%; text-align: center; }
+        .anatomy-preview-box { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 16px; padding: 1.5rem; text-align: center; backdrop-filter: blur(15px); }
+        .anatomy-preview-img-wrapper { width: 100%; height: 240px; border-radius: 12px; overflow: hidden; margin: 0 auto 1rem; position: relative; background: rgba(0,0,0,0.2); display: flex; align-items: center; justify-content: center; }
+        .anatomy-preview-img { width: 100%; height: 100%; object-fit: cover; display: none; }
+        .anatomy-preview-img.show { display: block; }
+        .anatomy-img-placeholder { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--warm-gold); }
+        .anatomy-img-placeholder.hide { display: none; }
+        .anatomy-preview-title { color: var(--warm-gold); font-size: 1.3rem; margin: 0.5rem 0; }
+        .anatomy-preview-meta { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; margin: 1rem 0; }
+        .anatomy-meta-item { padding: 0.6rem; background: rgba(0,0,0,0.2); border-radius: 8px; text-align: center; }
+        .anatomy-meta-label { color: var(--text-muted); display: block; font-size: 0.75rem; margin-bottom: 0.25rem; }
+        .anatomy-meta-value { color: var(--warm-gold); font-weight: 500; }
+        .anatomy-preview-desc { color: var(--text-secondary); font-size: 0.95rem; line-height: 1.7; padding: 1rem; background: rgba(212, 175, 55, 0.08); border-radius: 10px; border-left: 3px solid var(--warm-gold); text-align: left; }
+
+        /* 知识点展示区 */
+        .anatomy-knowledge-panel { margin-top: 1.5rem; background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 16px; padding: 1.5rem; backdrop-filter: blur(15px); }
+        .anatomy-knowledge-header { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem; padding-bottom: 0.75rem; border-bottom: 1px solid var(--glass-border); }
+        .anatomy-knowledge-icon { width: 36px; height: 36px; background: linear-gradient(135deg, var(--warm-gold), #b8860b); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; }
+        .anatomy-knowledge-title { font-size: 1.1rem; color: var(--warm-gold); font-weight: 600; }
+        .anatomy-knowledge-subtitle { font-size: 0.8rem; color: var(--text-muted); }
+        .anatomy-knowledge-list { display: flex; flex-direction: column; gap: 0.75rem; max-height: 500px; overflow-y: auto; padding-right: 0.5rem; }
+        .anatomy-knowledge-list::-webkit-scrollbar { width: 6px; }
+        .anatomy-knowledge-list::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); border-radius: 3px; }
+        .anatomy-knowledge-list::-webkit-scrollbar-thumb { background: var(--warm-gold); border-radius: 3px; }
+        .knowledge-item { display: flex; gap: 1rem; padding: 1rem; background: rgba(0,0,0,0.2); border-radius: 10px; border-left: 3px solid var(--warm-gold); transition: all 0.2s; cursor: pointer; }
+        .knowledge-item:hover { background: rgba(212, 175, 55, 0.1); transform: translateX(4px); }
+        .knowledge-item-thumb { flex-shrink: 0; width: 90px; height: 90px; border-radius: 8px; background: rgba(212, 175, 55, 0.15); display: flex; align-items: center; justify-content: center; font-size: 2rem; overflow: hidden; }
+        .knowledge-item-thumb img { width: 100%; height: 100%; object-fit: cover; }
+        .knowledge-item-content { flex: 1; min-width: 0; }
+        .knowledge-item-title { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; flex-wrap: wrap; }
+        .knowledge-item-title-text { font-size: 1rem; color: var(--warm-gold); font-weight: 500; }
+        .knowledge-item-tag { display: inline-block; padding: 0.15rem 0.6rem; border-radius: 10px; font-size: 0.7rem; background: rgba(212, 175, 55, 0.2); color: var(--warm-gold); }
+        .knowledge-item-text { font-size: 0.9rem; color: var(--text-secondary); line-height: 1.6; }
+
+        /* 初始引导卡片 */
+        .anatomy-intro-card { background: linear-gradient(135deg, rgba(212, 175, 55, 0.15), rgba(139, 69, 19, 0.1)); border: 1px solid rgba(212, 175, 55, 0.3); border-radius: 12px; padding: 2rem; text-align: center; }
+        .anatomy-intro-icon { font-size: 3rem; margin-bottom: 0.75rem; }
+        .anatomy-intro-text { color: var(--text-secondary); font-size: 0.95rem; line-height: 1.8; }
+
+        /* 右侧部位列表 */
         .anatomy-parts-list { display: flex; flex-direction: column; gap: 1rem; }
         .anatomy-part-card { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 12px; padding: 1.5rem; cursor: pointer; transition: all 0.3s; backdrop-filter: blur(15px); }
         .anatomy-part-card:hover { border-color: var(--warm-gold); transform: translateX(4px); }
@@ -26,10 +57,15 @@
         .anatomy-part-category { display: inline-block; padding: 0.2rem 0.75rem; background: rgba(212, 175, 55, 0.15); color: var(--warm-gold); border-radius: 20px; font-size: 0.75rem; }
         .anatomy-part-desc { color: var(--text-secondary); font-size: 0.9rem; line-height: 1.6; margin-bottom: 0.75rem; }
         .anatomy-part-meta { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; font-size: 0.8rem; }
-        .anatomy-meta-item { padding: 0.5rem; background: rgba(0,0,0,0.2); border-radius: 6px; }
-        .anatomy-meta-label { color: var(--text-muted); display: block; margin-bottom: 0.25rem; }
-        .anatomy-meta-value { color: var(--text-primary); }
-        @media (max-width: 768px) { .anatomy-layout { grid-template-columns: 1fr; } .anatomy-preview { position: static; } }
+        .anatomy-part-meta .anatomy-meta-item { padding: 0.4rem; }
+
+        @media (max-width: 768px) {
+            .anatomy-layout { grid-template-columns: 1fr; }
+            .anatomy-preview { position: static; }
+            .knowledge-item { flex-direction: column; }
+            .knowledge-item-thumb { width: 100%; height: 120px; }
+            .anatomy-preview-meta { grid-template-columns: repeat(3, 1fr); }
+        }
     </style>
 </head>
 <body>
@@ -65,7 +101,7 @@
                 <div class="section-header">
                     <span class="section-label">互动探索</span>
                     <h2 class="section-title">碉楼部位分解</h2>
-                    <p class="section-subtitle">点击右侧部位卡片，查看功能、材料与年代详情</p>
+                    <p class="section-subtitle">点击右侧部位卡片，查看宝源坊碉楼的建筑结构与历史文化知识</p>
                 </div>
 
                 <div class="filter-tabs" th:if="${buildings != null and !buildings.isEmpty()}">
@@ -77,42 +113,74 @@
                 </div>
 
                 <div class="anatomy-layout">
+                    <!-- 左侧：图片展示 + 知识点详情 -->
                     <div class="anatomy-preview">
+                        <!-- 部位图片展示区 -->
                         <div class="anatomy-preview-box">
-                            <div class="anatomy-canvas-wrapper">
-                                <div id="anatomy-loading" class="anatomy-loading">
-                                    <div class="spinner"></div>
-                                    <p style="font-size: 0.85rem; margin: 0;">3D 模型加载中...</p>
-                                </div>
-                                <canvas id="anatomy-3d-canvas"></canvas>
-                                <!-- 无素材时显示的 Slot 占位符（MDL-05 / IMG-05） -->
-                                <div id="anatomy-slot-placeholder"
-                                     class="slot-placeholder"
-                                     style="display: none; position: absolute; inset: 0; border-radius: 12px; z-index: 5;">
-                                    <div class="slot-type-icon" id="anatomy-slot-icon">🧊</div>
-                                    <div class="slot-badge" id="anatomy-slot-badge">MDL-05</div>
-                                    <div class="slot-desc" id="anatomy-slot-desc">部位素材待填充</div>
-                                    <div class="slot-status" id="anatomy-slot-status">请在后台上传对应 Slot 的素材</div>
+                            <div class="anatomy-preview-img-wrapper">
+                                <img class="anatomy-preview-img" id="anatomy-preview-img"
+                                     alt="建筑部位图片"
+                                     onerror="this.classList.remove('show'); document.getElementById('anatomy-img-placeholder').classList.remove('hide');">
+                                <div class="anatomy-img-placeholder" id="anatomy-img-placeholder">
+                                    <div style="font-size:4rem; margin-bottom:0.5rem;">🏛️</div>
+                                    <div style="font-size:0.9rem;">点击右侧部位查看图片</div>
                                 </div>
                             </div>
-                            <h3 style="color: var(--warm-gold); margin-bottom: 0.5rem;" id="anatomy-preview-title">碉楼部位3D展示</h3>
-                            <p style="color: var(--text-muted); font-size: 0.9rem;" id="anatomy-preview-hint">点击右侧部位卡片，查看该部位的3D模型</p>
-                            <div id="anatomy-detail-box" style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--glass-border); display: none;">
-                                <h4 id="detail-name" style="color: var(--warm-gold);"></h4>
-                                <p id="detail-desc" style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 0.5rem;"></p>
+                            <h3 class="anatomy-preview-title" id="anatomy-preview-title">宝源坊碉楼建筑结构</h3>
+                            <div class="anatomy-preview-meta">
+                                <div class="anatomy-meta-item">
+                                    <span class="anatomy-meta-label">分类</span>
+                                    <span class="anatomy-meta-value" id="anatomy-preview-category">-</span>
+                                </div>
+                                <div class="anatomy-meta-item">
+                                    <span class="anatomy-meta-label">年代</span>
+                                    <span class="anatomy-meta-value" id="anatomy-preview-era">-</span>
+                                </div>
+                                <div class="anatomy-meta-item">
+                                    <span class="anatomy-meta-label">材料</span>
+                                    <span class="anatomy-meta-value" id="anatomy-preview-material">-</span>
+                                </div>
                             </div>
+                            <p class="anatomy-preview-desc" id="anatomy-preview-desc">选择右侧任一部位卡片，查看该部位的详细介绍与建筑知识。</p>
+                        </div>
+
+                        <!-- 知识点展示面板 -->
+                        <div class="anatomy-knowledge-panel" id="knowledge-panel">
+                            <div class="anatomy-knowledge-header">
+                                <div class="anatomy-knowledge-icon">📚</div>
+                                <div>
+                                    <div class="anatomy-knowledge-title">建筑知识解读</div>
+                                    <div class="anatomy-knowledge-subtitle" id="knowledge-subtitle">选择一个部位查看详细知识点</div>
+                                </div>
+                            </div>
+                            <!-- 初始引导 -->
+                            <div class="anatomy-intro-card" id="knowledge-intro">
+                                <div class="anatomy-intro-icon">📖</div>
+                                <div class="anatomy-intro-text">
+                                    <strong>探索宝源坊碉楼建筑之美</strong><br>
+                                    点击右侧任意部位卡片，<br>
+                                    即可阅读相关历史文化知识。
+                                </div>
+                            </div>
+                            <!-- 知识点列表 -->
+                            <div class="anatomy-knowledge-list" id="knowledge-list" style="display: none;"></div>
                         </div>
                     </div>
 
+                    <!-- 右侧：部位卡片列表 -->
                     <div class="anatomy-parts-list" th:if="${parts != null and !parts.isEmpty()}">
                         <div th:each="part, iterStat : ${parts}"
                              class="anatomy-part-card"
                              th:data-id="${part.id}"
                              th:data-name="${part.partName}"
+                             th:data-en="${part.partNameEn}"
+                             th:data-category="${part.category}"
                              th:data-desc="${part.description}"
-                             th:data-part-index="${iterStat.count}"
-                             th:data-model-url="${modelUrls != null ? modelUrls[part.id] : null}"
+                             th:data-function="${part.function}"
+                             th:data-material="${part.material}"
+                             th:data-era="${part.era}"
                              th:data-image-url="${imageUrls != null ? imageUrls[part.id] : null}"
+                             th:data-knowledge="${knowledgePointsJsonMap != null and knowledgePointsJsonMap.containsKey(part.id) ? knowledgePointsJsonMap[part.id] : '[]'}"
                              onclick="selectPart(this)">
                             <div class="anatomy-part-header">
                                 <div>
@@ -136,6 +204,11 @@
                                     <span class="anatomy-meta-value" th:text="${part.era}">年代</span>
                                 </div>
                             </div>
+                            <!-- 知识点指示器 -->
+                            <div th:if="${part.knowledgePoints != null and !#strings.isEmpty(part.knowledgePoints) and part.knowledgePoints != '[]'}" style="margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px dashed var(--glass-border); display: flex; align-items: center; gap: 0.5rem; font-size: 0.8rem; color: var(--warm-gold);">
+                                <span>📖</span>
+                                <span>含知识点详情</span>
+                            </div>
                         </div>
                     </div>
                     <div th:if="${parts == null or parts.isEmpty()}" style="text-align: center; padding: 3rem; color: var(--text-muted);">
@@ -158,7 +231,7 @@
             <a href="/#life">我的侨乡人生</a>
             <a href="/architecture-photo">建筑故事</a>
             <a href="/#achievement">项目成果</a>
-                <a href="/video-show">视频展播</a>
+            <a href="/video-show">视频展播</a>
             <a href="/about">关于我们</a>
         </div>
         <div class="footer-bottom">
@@ -177,82 +250,156 @@
         </div>
     </div>
 
-    <!-- 引入 Three.js 和 OrbitControls（统一 r128 版本，与 building.html 保持一致） -->
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
-    <!-- 统一 TTS 语音讲解工具（智能选声线 + 分段播放） -->
+    <!-- 统一 TTS 语音讲解工具 -->
     <script src="/js/qiaoyun-tts.js"></script>
-    <script src="/js/anatomy-3d.js"></script>
     <script>
         /**
-         * 点击部位卡片：
-         * 1. 高亮卡片 + 更新详情区
-         * 2. 切换左侧 3D 模型
-         * 3. 调用后端 /api/ai/guide?type=anatomy&id={partId} 获取讲解文本
-         * 4. 用 QiaoyunTTS 播放（自动选最佳中文女声、分段播放、讲解预设语速）
+         * 解析知识点 JSON 字符串
+         */
+        function parseKnowledgePoints(raw) {
+            if (!raw || raw === '[]') return [];
+            try {
+                var points = JSON.parse(raw);
+                if (!Array.isArray(points)) return [];
+                return points;
+            } catch (e) {
+                console.warn('[Anatomy] 解析知识点 JSON 失败:', e);
+                return [];
+            }
+        }
+
+        /**
+         * 获取知识点图标（根据tag类型）
+         */
+        function getKnowledgeIcon(tag) {
+            var icons = {
+                '历史': '📜',
+                '建筑': '🏛️',
+                '文化': '🎭',
+                '工艺': '🔨',
+                '装饰': '✨',
+                '防御': '🛡️',
+                '结构': '🏗️'
+            };
+            return icons[tag] || '📖';
+        }
+
+        /**
+         * 渲染知识点列表
+         */
+        function renderKnowledgePoints(knowledgePoints, partName) {
+            var listEl = document.getElementById('knowledge-list');
+            var introEl = document.getElementById('knowledge-intro');
+            var subtitleEl = document.getElementById('knowledge-subtitle');
+
+            if (!knowledgePoints || knowledgePoints.length === 0) {
+                listEl.style.display = 'none';
+                introEl.style.display = 'block';
+                introEl.innerHTML = '<div class="anatomy-intro-icon">📝</div>' +
+                    '<div class="anatomy-intro-text"><strong>' + partName + '</strong><br>该部位的知识点正在整理中，敬请期待。</div>';
+                subtitleEl.textContent = partName + ' · 详情';
+                return;
+            }
+
+            introEl.style.display = 'none';
+            listEl.style.display = 'flex';
+            subtitleEl.textContent = partName + ' · 共 ' + knowledgePoints.length + ' 个知识点';
+
+            var html = '';
+            for (var i = 0; i < knowledgePoints.length; i++) {
+                var kp = knowledgePoints[i];
+                var icon = getKnowledgeIcon(kp.tag);
+                var thumbContent = kp.imageUrl
+                    ? '<img src="' + kp.imageUrl + '" alt="' + kp.title + '" onerror="this.parentElement.innerHTML=\'' + icon + '\'">'
+                    : icon;
+
+                html += '<div class="knowledge-item">' +
+                    '<div class="knowledge-item-thumb">' + thumbContent + '</div>' +
+                    '<div class="knowledge-item-content">' +
+                        '<div class="knowledge-item-title">' +
+                            '<span class="knowledge-item-title-text">' + (kp.title || '') + '</span>' +
+                            (kp.tag ? '<span class="knowledge-item-tag">' + kp.tag + '</span>' : '') +
+                        '</div>' +
+                        '<div class="knowledge-item-text">' + (kp.content || '') + '</div>' +
+                    '</div>' +
+                '</div>';
+            }
+            listEl.innerHTML = html;
+        }
+
+        /**
+         * 点击部位卡片
          */
         function selectPart(card) {
-            document.querySelectorAll('.anatomy-part-card').forEach(c => c.classList.remove('active'));
+            document.querySelectorAll('.anatomy-part-card').forEach(function(c) { c.classList.remove('active'); });
             card.classList.add('active');
-            const box = document.getElementById('anatomy-detail-box');
-            document.getElementById('detail-name').textContent = card.dataset.name;
-            document.getElementById('detail-desc').textContent = card.dataset.desc;
-            box.style.display = 'block';
-            // 触发 3D 模型切换
-            if (window.loadAnatomyPart) {
-                var partIndex = parseInt(card.dataset.partIndex, 10) || 1;
-                window.loadAnatomyPart(card.dataset.modelUrl, card.dataset.imageUrl, card.dataset.name, partIndex);
-            }
-            // 同步更新标题与提示
-            var titleEl = document.getElementById('anatomy-preview-title');
-            var hintEl = document.getElementById('anatomy-preview-hint');
-            if (titleEl) titleEl.textContent = card.dataset.name + ' · 3D展示';
-            if (hintEl) hintEl.textContent = '可拖拽旋转查看，滚轮缩放';
 
-            // 调用后端 AI 讲解 API 获取结构化讲解文本，再用 TTS 播放
+            // 更新左侧图片
+            var imgEl = document.getElementById('anatomy-preview-img');
+            var placeholderEl = document.getElementById('anatomy-img-placeholder');
+            var imgUrl = card.dataset.imageUrl;
+            if (imgUrl && imgUrl !== 'null' && imgUrl !== '') {
+                imgEl.src = imgUrl;
+                imgEl.classList.add('show');
+                placeholderEl.classList.add('hide');
+            } else {
+                imgEl.classList.remove('show');
+                placeholderEl.classList.remove('hide');
+            }
+
+            // 更新标题和元数据
+            document.getElementById('anatomy-preview-title').textContent = card.dataset.name + ' ' + (card.dataset.en ? '· ' + card.dataset.en : '');
+            document.getElementById('anatomy-preview-category').textContent = card.dataset.category || '-';
+            document.getElementById('anatomy-preview-era').textContent = card.dataset.era || '-';
+            document.getElementById('anatomy-preview-material').textContent = card.dataset.material || '-';
+            document.getElementById('anatomy-preview-desc').textContent = card.dataset.desc || '暂无介绍';
+
+            // 渲染知识点
+            var knowledgePoints = parseKnowledgePoints(card.dataset.knowledge);
+            renderKnowledgePoints(knowledgePoints, card.dataset.name);
+
+            // AI 讲解
             var partId = card.dataset.id;
             if (partId && window.QiaoyunTTS) {
-                // 立即停止当前讲解
                 QiaoyunTTS.stop();
                 fetch('/api/ai/guide?type=anatomy&id=' + encodeURIComponent(partId))
-                    .then(function (r) { return r.json(); })
-                    .then(function (res) {
+                    .then(function(r) { return r.json(); })
+                    .then(function(res) {
                         if (res && res.data && res.data.audioText) {
-                            console.log('[Anatomy] AI讲解文本：', res.data.audioText);
                             QiaoyunTTS.speakGuide(res.data.audioText);
                         } else {
-                            // 接口失败，回退到本地拼装
                             QiaoyunTTS.speakGuide(card.dataset.name + '。' + card.dataset.desc);
                         }
                     })
-                    .catch(function (err) {
-                        console.warn('[Anatomy] AI讲解接口异常，回退本地:', err);
+                    .catch(function(err) {
+                        console.warn('[Anatomy] AI讲解接口异常:', err);
                         if (window.QiaoyunTTS) {
                             QiaoyunTTS.speakGuide(card.dataset.name + '。' + card.dataset.desc);
                         }
                     });
             }
         }
+
         function toggleAiGuide() {
             document.getElementById('ai-guide-panel').classList.toggle('active');
-            // 打开面板时，显示当前 TTS 声线信息
             var textEl = document.querySelector('#ai-guide-panel .ai-guide-text');
             if (textEl && window.QiaoyunTTS) {
                 var info = QiaoyunTTS.getVoiceInfo();
                 textEl.textContent = '当前讲解声线：' + info + '。点击右侧建筑部位，AI 将为您详细解读其功能与历史。';
             }
         }
+
         function playPageIntro() {
             if (window.QiaoyunTTS) {
-                QiaoyunTTS.speakGuide('欢迎来到建筑解剖互动模块。在这里，我们将百年碉楼拆解为屋顶、八角窗、燕子窝、青砖墙体、灰塑装饰等部位，逐一解读其功能、材料与建造年代。点击右侧任意部位卡片，即可查看3D模型并聆听详细讲解。');
+                QiaoyunTTS.speakGuide('欢迎来到宝源坊建筑解剖互动模块。在这里，我们将宝源坊碉楼拆解为楼体结构、八角楼窗、碉眼枪孔、灰塑装饰、楼板结构等部位，逐一解读其功能、材料与建造年代。点击右侧任意部位卡片，即可阅读详细的建筑文化知识。');
             }
         }
+
         function stopGuide() {
             if (window.QiaoyunTTS) {
                 QiaoyunTTS.stop();
             }
         }
     </script>
-    <script src="/js/slot-placeholder.js"></script>
 </body>
 </html>

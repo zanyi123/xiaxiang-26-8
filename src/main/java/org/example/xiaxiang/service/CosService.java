@@ -248,6 +248,7 @@ public class CosService {
             return cached;
         }
 
+        // Mock 模式：检查本地文件
         if (appProperties.isMockMode()) {
             String localPath = "src/main/resources/static/mock/" + key;
             File f = new File(localPath);
@@ -256,6 +257,7 @@ public class CosService {
             return exists;
         }
 
+        // 真实 COS 模式：通过 HEAD 请求检查
         try {
             boolean exists = cosClient.doesObjectExist(cosProperties.getBucketName(), key);
             existenceCache.put(key, exists);

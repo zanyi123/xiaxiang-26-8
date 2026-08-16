@@ -64,13 +64,13 @@ public class ContentManageService {
      */
     public List<ModuleDef> getModuleDefs() {
         List<ModuleDef> list = new ArrayList<>();
+        list.add(buildLocationDef());
+        list.add(buildAnatomyDef());
         list.add(buildKnowledgeDef());
         list.add(buildCultureDef());
         list.add(buildBlogDef());
         list.add(buildVideoDef());
-        list.add(buildAnatomyDef());
         list.add(buildTeamDef());
-        list.add(buildLocationDef());
         list.add(buildInterviewDef());
         list.add(buildCollectionDef());
         list.add(buildArchitecturePhotoDef());
@@ -132,11 +132,13 @@ public class ContentManageService {
         m.setFields(Arrays.asList(
             field("partName", "部位名称", "text", true, null),
             field("partNameEn", "英文名称", "text", false, null),
-            field("category", "分类", "select", false, Arrays.asList("主体结构", "防御系统", "装饰元素", "其他")),
+            field("category", "分类", "select", false, Arrays.asList("主体结构", "防御系统", "装饰元素", "内部结构")),
             field("description", "描述", "textarea", false, null),
             field("function", "功能", "text", false, null),
             field("material", "材料", "text", false, null),
-            field("era", "年代", "text", false, null)
+            field("era", "年代", "text", false, null),
+            field("buildingId", "建筑ID", "text", false, null),
+            field("knowledgePoints", "知识点(JSON)", "textarea", false, null)
         ));
         return m;
     }
@@ -688,7 +690,6 @@ public class ContentManageService {
                 break;
             case "anatomies":
                 slots.add(String.format("%s-%02d-%02d", prefix, module, posIndex));  // 图片
-                slots.add(String.format("MDL-%02d-%02d", module, posIndex));          // 分体模型
                 break;
             case "locations":
                 slots.add(String.format("%s-%02d-%02d", prefix, module, posIndex));   // 封面图 IMG-02-xx

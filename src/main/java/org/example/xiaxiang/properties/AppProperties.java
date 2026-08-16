@@ -105,6 +105,8 @@ public class AppProperties {
         private String coverImage;
         private String modelKey;
         private String videoKey;
+        /** AI讲解文案 */
+        private String audioText;
     }
 
     /**
@@ -140,6 +142,8 @@ public class AppProperties {
         private String coverImage;
         private String audioKey;
         private Integer views;
+        /** AI讲解文案 */
+        private String audioText;
     }
 
     /**
@@ -181,6 +185,8 @@ public class AppProperties {
         private String content;
         private String coverImage;
         private String difficulty;
+        /** AI讲解文案 */
+        private String audioText;
     }
 
     /**
@@ -193,6 +199,8 @@ public class AppProperties {
         private String category;
         private String description;
         private String coverImage;
+        /** AI讲解文案 */
+        private String audioText;
     }
 
     /**
@@ -252,6 +260,10 @@ public class AppProperties {
         private String era;
         private String imageKey;
         private String modelKey;
+        /** 图文知识点列表（JSON字符串格式） */
+        private String knowledgePoints;
+        /** AI讲解文案 */
+        private String audioText;
     }
 
     /**
@@ -301,6 +313,8 @@ public class AppProperties {
         private String example;
         private String audioKey;
         private String category;
+        /** AI讲解文案 */
+        private String audioText;
     }
 
     /**

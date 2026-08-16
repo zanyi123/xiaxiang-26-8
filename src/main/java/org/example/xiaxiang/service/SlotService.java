@@ -301,7 +301,6 @@ public class SlotService {
             final int posIndex = a.getId() != null ? a.getId() : (idx + 1);
             String t = nameOf(() -> a.getPartName(), "部位" + (idx+1));
             list.add(slot(T_IMG, 5, posIndex, "anatomies[" + i + "].imageKey", P_ANATOMY, t + " · 图片"));
-            list.add(slot(T_MDL, 5, posIndex, "anatomies[" + i + "].modelKey", P_ANATOMY, t + " · 分体模型"));
         }
 
         // --- Module 11: photoCompares (老照片对比) ---

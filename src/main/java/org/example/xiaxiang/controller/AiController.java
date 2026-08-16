@@ -100,17 +100,25 @@ public class AiController {
                 AppProperties.Building obj = findBuildingById(id);
                 if (obj == null) return null;
                 result.put("title", obj.getName());
-                result.put("audioText", safe(obj.getDescription()));
+                // 优先 audioText，回退 description
+                String text = obj.getAudioText();
+                if (text == null || text.trim().isEmpty()) {
+                    text = obj.getDescription();
+                }
+                result.put("audioText", safe(text));
                 return result;
             }
             case "story": {
                 AppProperties.Story obj = findStoryById(id);
                 if (obj == null) return null;
                 result.put("title", obj.getTitle());
-                // 故事优先用 content（正文），回退 summary
-                String text = obj.getContent();
+                // 优先 audioText，回退 content，再回退 summary
+                String text = obj.getAudioText();
                 if (text == null || text.trim().isEmpty()) {
-                    text = obj.getSummary();
+                    text = obj.getContent();
+                    if (text == null || text.trim().isEmpty()) {
+                        text = obj.getSummary();
+                    }
                 }
                 result.put("audioText", safe(text));
                 return result;
@@ -119,42 +127,55 @@ public class AiController {
                 AppProperties.BuildingAnatomy obj = findAnatomyById(id);
                 if (obj == null) return null;
                 result.put("title", obj.getPartName());
-                // 解剖讲解：拼装 部位名 + 描述 + 功能 + 材料 + 年代
-                StringBuilder sb = new StringBuilder();
-                sb.append(safe(obj.getPartName())).append("。");
-                sb.append(safe(obj.getDescription())).append("。");
-                if (obj.getFunction() != null && !obj.getFunction().trim().isEmpty()) {
-                    sb.append("它的主要功能是").append(obj.getFunction()).append("。");
+                // 优先 audioText，回退到拼装文本
+                String text = obj.getAudioText();
+                if (text == null || text.trim().isEmpty()) {
+                    // 解剖讲解：拼装 部位名 + 描述 + 功能 + 材料 + 年代
+                    StringBuilder sb = new StringBuilder();
+                    sb.append(safe(obj.getPartName())).append("。");
+                    sb.append(safe(obj.getDescription())).append("。");
+                    if (obj.getFunction() != null && !obj.getFunction().trim().isEmpty()) {
+                        sb.append("它的主要功能是").append(obj.getFunction()).append("。");
+                    }
+                    if (obj.getMaterial() != null && !obj.getMaterial().trim().isEmpty()) {
+                        sb.append("采用").append(obj.getMaterial()).append("建造。");
+                    }
+                    if (obj.getEra() != null && !obj.getEra().trim().isEmpty()) {
+                        sb.append("建造年代约为").append(obj.getEra()).append("。");
+                    }
+                    text = sb.toString();
                 }
-                if (obj.getMaterial() != null && !obj.getMaterial().trim().isEmpty()) {
-                    sb.append("采用").append(obj.getMaterial()).append("建造。");
-                }
-                if (obj.getEra() != null && !obj.getEra().trim().isEmpty()) {
-                    sb.append("建造年代约为").append(obj.getEra()).append("。");
-                }
-                result.put("audioText", sb.toString());
+                result.put("audioText", safe(text));
                 return result;
             }
             case "dialect": {
                 AppProperties.DialectItem obj = findDialectById(id);
                 if (obj == null) return null;
                 result.put("title", obj.getDialect());
-                StringBuilder sb = new StringBuilder();
-                sb.append(safe(obj.getDialect())).append("。");
-                if (obj.getChinese() != null) sb.append(obj.getChinese()).append("。");
-                if (obj.getMeaning() != null) sb.append("意思是，").append(obj.getMeaning()).append("。");
-                if (obj.getExample() != null) sb.append("例句：").append(obj.getExample()).append("。");
-                result.put("audioText", sb.toString());
+                // 优先 audioText，回退到拼装文本
+                String text = obj.getAudioText();
+                if (text == null || text.trim().isEmpty()) {
+                    StringBuilder sb = new StringBuilder();
+                    sb.append(safe(obj.getDialect())).append("。");
+                    if (obj.getChinese() != null) sb.append(obj.getChinese()).append("。");
+                    if (obj.getMeaning() != null) sb.append("意思是，").append(obj.getMeaning()).append("。");
+                    if (obj.getExample() != null) sb.append("例句：").append(obj.getExample()).append("。");
+                    text = sb.toString();
+                }
+                result.put("audioText", safe(text));
                 return result;
             }
             case "knowledge": {
                 AppProperties.KnowledgeItem obj = findKnowledgeById(id);
                 if (obj == null) return null;
                 result.put("title", obj.getTitle());
-                // 知识库优先 content，回退 summary
-                String text = obj.getContent();
+                // 优先 audioText，回退 content，再回退 summary
+                String text = obj.getAudioText();
                 if (text == null || text.trim().isEmpty()) {
-                    text = obj.getSummary();
+                    text = obj.getContent();
+                    if (text == null || text.trim().isEmpty()) {
+                        text = obj.getSummary();
+                    }
                 }
                 result.put("audioText", safe(text));
                 return result;
@@ -163,7 +184,12 @@ public class AiController {
                 AppProperties.CultureItem obj = findCultureById(id);
                 if (obj == null) return null;
                 result.put("title", obj.getName());
-                result.put("audioText", safe(obj.getDescription()));
+                // 优先 audioText，回退 description
+                String text = obj.getAudioText();
+                if (text == null || text.trim().isEmpty()) {
+                    text = obj.getDescription();
+                }
+                result.put("audioText", safe(text));
                 return result;
             }
             default:

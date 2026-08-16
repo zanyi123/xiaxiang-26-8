@@ -1,295 +1,245 @@
 /**
- * 薪火侨乡 - 统一 TTS 语音讲解工具
- *
- * 解决浏览器原生 speechSynthesis 的痛点：
- * 1. 声线僵硬 → 智能选择最佳中文女声（优先 Google/Microsoft 高质量声线）
- * 2. 首次播放无声线 → 等待 voicesloaded 事件
- * 3. 长文本被截断 → 分段播放（按句号/问号/感叹号切分）
- * 4. 各页面重复代码 → 统一 API：speak / pause / resume / stop
- *
- * 使用方式：
- *   QiaoyunTTS.speak('你好，欢迎来到侨乡');  // 播放
- *   QiaoyunTTS.pause();                       // 暂停
- *   QiaoyunTTS.resume();                      // 继续
- *   QiaoyunTTS.stop();                        // 停止
- *   QiaoyunTTS.isPlaying();                   // 是否播放中
+ * 薪火侨乡 - 统一 TTS 语音讲解工具（v5 最终版）
+ * 
+ * 策略：先尝试最简模式（不指定 voice），与测试语音使用相同路径
+ * 这是经过验证的可靠方式
  */
 (function (window) {
     'use strict';
 
     var synth = window.speechSynthesis;
     if (!synth) {
-        console.warn('[QiaoyunTTS] 浏览器不支持 speechSynthesis，TTS 功能不可用');
+        console.warn('[QiaoyunTTS] 浏览器不支持 speechSynthesis');
+        window.QiaoyunTTS = null;
         return;
     }
 
     var state = {
         voices: [],
         bestVoice: null,
-        queue: [],              // 待播放文本分段队列
-        currentUtterance: null,  // 当前正在播放的 utterance
         isPlaying: false,
         isPaused: false,
         onEndCallback: null
     };
 
-    // ====== 声线加载与选择 ======
-
-    /**
-     * 加载所有可用声线，并选出最佳中文女声
-     */
     function loadVoices() {
         state.voices = synth.getVoices() || [];
         state.bestVoice = pickBestVoice(state.voices);
-        console.log('[QiaoyunTTS] 声线加载完成，共', state.voices.length, '个，已选：',
-            state.bestVoice ? (state.bestVoice.name + ' / ' + state.bestVoice.lang) : '默认');
+        console.log('[QiaoyunTTS] 声线加载完成，共', state.voices.length, '个');
     }
 
-    /**
-     * 智能选择最佳中文声线
-     * 优先级（从高到低）：
-     *   1. Google 普通话女声（Chrome 在线声线，最自然）
-     *   2. Microsoft 普通话女声（Edge/Win 本地声线）
-     *   3. Microsoft 粤语女声（若讲解为粤语场景）
-     *   4. 任意 zh-CN 女声
-     *   5. 任意 zh-CN 声线
-     *   6. 任意 zh* 声线
-     *   7. default
-     */
     function pickBestVoice(voices) {
         if (!voices || voices.length === 0) return null;
-
-        // 按优先级定义声线匹配规则
         var matchers = [
-            // 1. Google 普通话女声（最自然）
-            function (v) {
-                return /google/i.test(v.name) && /zh(-|_)?cn/i.test(v.lang) && /female|女|wan|xiao/i.test(v.name);
-            },
-            // 2. Google 任意普通话
-            function (v) {
-                return /google/i.test(v.name) && /zh(-|_)?cn/i.test(v.lang);
-            },
-            // 3. Microsoft 普通话女声（Huihui/Xiaoxiao/Tingting）
-            function (v) {
-                return /microsoft/i.test(v.name) && /zh(-|_)?cn/i.test(v.lang) &&
-                    /huihui|xiaoxiao|tingting|yaoyao|female|女/i.test(v.name);
-            },
-            // 4. Microsoft 任意普通话
-            function (v) {
-                return /microsoft/i.test(v.name) && /zh(-|_)?cn/i.test(v.lang);
-            },
-            // 5. 任意 zh-CN 女声
-            function (v) {
-                return /zh(-|_)?cn/i.test(v.lang) && /female|女|wan|xiao/i.test(v.name);
-            },
-            // 6. 任意 zh-CN 声线
-            function (v) {
-                return /zh(-|_)?cn/i.test(v.lang);
-            },
-            // 7. 任意 zh* 声线（含 zh-HK 粤语、zh-TW 等）
-            function (v) {
-                return /zh/i.test(v.lang);
-            }
+            function (v) { return /google/i.test(v.name) && /zh/i.test(v.lang) && /female|女|wan|xiao/i.test(v.name); },
+            function (v) { return /google/i.test(v.name) && /zh/i.test(v.lang); },
+            function (v) { return /microsoft/i.test(v.name) && /zh/i.test(v.lang) && /huihui|xiaoxiao|tingting|yaoyao/i.test(v.name); },
+            function (v) { return /microsoft/i.test(v.name) && /zh/i.test(v.lang); },
+            function (v) { return /zh/i.test(v.lang) && /female|女|wan|xiao/i.test(v.name); },
+            function (v) { return /zh/i.test(v.lang); }
         ];
-
         for (var i = 0; i < matchers.length; i++) {
             for (var j = 0; j < voices.length; j++) {
-                if (matchers[i](voices[j])) {
-                    return voices[j];
-                }
+                if (matchers[i](voices[j])) return voices[j];
             }
         }
-        return voices[0]; // 兜底：第一个
+        return null;
     }
 
-    // 声线异步加载（Chrome 需要监听 voiceschanged 事件）
     loadVoices();
-    if (typeof synth.onvoiceschanged !== 'undefined') {
+    if (synth.onvoiceschanged !== undefined) {
         synth.addEventListener('voiceschanged', loadVoices);
     } else {
-        // 部分浏览器不支持该事件，轮询兜底
         var pollCount = 0;
         var pollTimer = setInterval(function () {
             pollCount++;
-            if (state.voices.length > 0 || pollCount > 10) {
+            if (state.voices.length > 0 || pollCount > 15) {
                 clearInterval(pollTimer);
             } else {
                 loadVoices();
             }
-        }, 200);
+        }, 150);
     }
 
-    // ====== 文本分段 ======
-
-    /**
-     * 将长文本按句号/问号/感叹号/分号切分为短句
-     * 避免浏览器 TTS 对长文本截断
-     */
-    function splitText(text) {
-        if (!text) return [];
-        // 按中文标点切分，保留标点
-        var parts = text.split(/(?<=[。！？；\n])/);
-        var result = [];
-        var buffer = '';
-        for (var i = 0; i < parts.length; i++) {
-            var p = (parts[i] || '').trim();
-            if (!p) continue;
-            // 每段控制在 80 字以内（太长浏览器可能截断）
-            if ((buffer + p).length > 80) {
-                if (buffer) result.push(buffer);
-                buffer = p;
-            } else {
-                buffer += p;
-            }
-        }
-        if (buffer) result.push(buffer);
-        return result;
-    }
-
-    // ====== 核心 API ======
-
-    /**
-     * 播放文本（会自动停止当前播放）
-     * @param text      要播放的文本
-     * @param options   可选：{ rate: 0.95, pitch: 1.0, volume: 1.0, onEnd: fn, lang: 'zh-CN' }
-     */
     function speak(text, options) {
-        if (!synth) return;
-        if (!text || !text.trim()) return;
+        if (!synth) return false;
+        if (!text || !text.trim()) return false;
 
         options = options || {};
-        stopInternal(); // 先停止当前
-
-        var segments = splitText(text);
-        if (segments.length === 0) return;
-
-        state.queue = segments.slice();
         state.onEndCallback = options.onEnd || null;
         state.isPlaying = true;
         state.isPaused = false;
 
-        playNext(options);
+        // 关键：先 cancel，然后用 setTimeout 让浏览器完成清理
+        synth.cancel();
+
+        var rate = options.rate != null ? options.rate : 0.95;
+        var pitch = options.pitch != null ? options.pitch : 1.0;
+        var volume = options.volume != null ? options.volume : 1.0;
+
+        // 用 setTimeout 模拟测试语音的成功模式
+        setTimeout(function () {
+            if (!state.isPlaying) return;
+
+            var u = new SpeechSynthesisUtterance(text);
+            u.lang = 'zh-CN';
+            u.rate = rate;
+            u.pitch = pitch;
+            u.volume = volume;
+
+            // 不指定 voice，让浏览器自动选择
+            // 这是测试语音验证过的可靠模式
+
+            var started = false;
+
+            u.onstart = function () {
+                started = true;
+                console.log('[QiaoyunTTS] ✅ onstart 触发，语音开始播放');
+            };
+
+            u.onend = function () {
+                if (!state.isPlaying) return;
+
+                if (started) {
+                    console.log('[QiaoyunTTS] ✅ onend 触发，语音正常播放完成');
+                    finishOk();
+                } else {
+                    // onend 在 onstart 之前触发了
+                    console.warn('[QiaoyunTTS] ⚠️ onend 先于 onstart，无声音');
+                    // 再试一次
+                    if (state.isPlaying) {
+                        console.log('[QiaoyunTTS] 🔄 重试一次...');
+                        synth.cancel();
+                        setTimeout(function () {
+                            if (!state.isPlaying) return;
+                            var u2 = new SpeechSynthesisUtterance(text);
+                            u2.lang = 'zh-CN';
+                            u2.rate = rate;
+                            u2.pitch = pitch;
+                            u2.volume = volume;
+
+                            var started2 = false;
+                            u2.onstart = function () {
+                                started2 = true;
+                                console.log('[QiaoyunTTS] ✅ 重试 onstart 触发');
+                            };
+                            u2.onend = function () {
+                                if (started2) {
+                                    console.log('[QiaoyunTTS] ✅ 重试 onend 完成');
+                                    finishOk();
+                                } else {
+                                    console.error('[QiaoyunTTS] ❌ 重试仍然失败');
+                                    finishError('语音合成失败：浏览器无法播放语音。建议使用 Chrome 或 Edge 浏览器，并确保系统音量开启。');
+                                }
+                            };
+                            u2.onerror = function (e) {
+                                if (e.error !== 'canceled' && e.error !== 'interrupted') {
+                                    finishError('语音合成出错：' + e.error);
+                                }
+                            };
+                            synth.speak(u2);
+                        }, 200);
+                    }
+                }
+            };
+
+            u.onerror = function (e) {
+                if (e.error === 'canceled' || e.error === 'interrupted') return;
+                console.error('[QiaoyunTTS] ❌ onerror:', e.error);
+                finishError('语音合成出错：' + e.error);
+            };
+
+            console.log('[QiaoyunTTS] 🎙️ 准备 speak，文本长度:', text.length);
+            synth.speak(u);
+
+            // 3秒后检查是否真的开始播放了
+            setTimeout(function () {
+                if (state.isPlaying && !started) {
+                    console.warn('[QiaoyunTTS] ⏰ 3秒超时仍未 onstart，尝试用指定声线');
+                    synth.cancel();
+                    if (state.bestVoice && state.isPlaying) {
+                        var u3 = new SpeechSynthesisUtterance(text);
+                        u3.voice = state.bestVoice;
+                        u3.lang = state.bestVoice.lang;
+                        u3.rate = rate;
+                        u3.pitch = pitch;
+                        u3.volume = volume;
+
+                        var started3 = false;
+                        u3.onstart = function () {
+                            started3 = true;
+                            console.log('[QiaoyunTTS] ✅ 指定声线 onstart 触发');
+                        };
+                        u3.onend = function () {
+                            if (started3) {
+                                finishOk();
+                            } else {
+                                finishError('语音合成失败：所有模式均无法播放。建议使用 Chrome 或 Edge 浏览器。');
+                            }
+                        };
+                        u3.onerror = function (e) {
+                            if (e.error !== 'canceled' && e.error !== 'interrupted') {
+                                finishError('语音合成出错：' + e.error);
+                            }
+                        };
+                        synth.speak(u3);
+                    } else {
+                        finishError('语音合成超时：浏览器无法播放语音');
+                    }
+                }
+            }, 3000);
+
+        }, 150);
+
+        return true;
     }
 
-    /**
-     * 播放下一段
-     */
-    function playNext(options) {
-        if (state.queue.length === 0) {
-            // 全部播放完毕
-            state.isPlaying = false;
-            state.currentUtterance = null;
-            if (typeof state.onEndCallback === 'function') {
-                var cb = state.onEndCallback;
-                state.onEndCallback = null;
-                cb();
-            }
-            return;
-        }
-
-        // 暂停状态下不播放下一段
-        if (state.isPaused) return;
-
-        var segment = state.queue.shift();
-        var utterance = new SpeechSynthesisUtterance(segment);
-
-        // 声线与参数
-        if (state.bestVoice) {
-            utterance.voice = state.bestVoice;
-        }
-        utterance.lang = options.lang || (state.bestVoice ? state.bestVoice.lang : 'zh-CN');
-        utterance.rate = options.rate != null ? options.rate : 0.95;   // 略慢，讲解感
-        utterance.pitch = options.pitch != null ? options.pitch : 1.0; // 标准 pitch，避免过尖
-        utterance.volume = options.volume != null ? options.volume : 1.0;
-
-        utterance.onend = function () {
-            state.currentUtterance = null;
-            // 继续下一段（除非已停止/暂停）
-            if (state.isPlaying && !state.isPaused) {
-                // 小间隔，避免连读
-                setTimeout(function () {
-                    playNext(options);
-                }, 120);
-            }
-        };
-
-        utterance.onerror = function (e) {
-            console.warn('[QiaoyunTTS] 播放出错:', e.error || e);
-            state.currentUtterance = null;
-            // 出错也继续下一段
-            if (state.isPlaying && !state.isPaused) {
-                setTimeout(function () {
-                    playNext(options);
-                }, 120);
-            }
-        };
-
-        state.currentUtterance = utterance;
-        synth.speak(utterance);
+    function finishOk() {
+        state.isPlaying = false;
+        state.isPaused = false;
+        var cb = state.onEndCallback;
+        state.onEndCallback = null;
+        if (typeof cb === 'function') cb(null);
     }
 
-    /**
-     * 暂停播放
-     */
+    function finishError(msg) {
+        state.isPlaying = false;
+        state.isPaused = false;
+        var cb = state.onEndCallback;
+        state.onEndCallback = null;
+        if (typeof cb === 'function') cb(msg);
+    }
+
     function pause() {
-        if (!synth || !state.isPlaying) return;
-        if (state.isPaused) return;
+        if (!synth || !state.isPlaying || state.isPaused) return;
         state.isPaused = true;
-        if (synth.speaking) {
-            synth.pause();
-        }
-        console.log('[QiaoyunTTS] 已暂停');
+        synth.pause();
     }
 
-    /**
-     * 继续播放
-     */
     function resume() {
         if (!synth || !state.isPlaying || !state.isPaused) return;
         state.isPaused = false;
-        if (synth.paused) {
-            synth.resume();
-        }
-        console.log('[QiaoyunTTS] 已继续');
+        synth.resume();
     }
 
-    /**
-     * 停止播放（清空队列）
-     */
     function stop() {
-        stopInternal();
-        console.log('[QiaoyunTTS] 已停止');
-    }
-
-    function stopInternal() {
-        state.queue = [];
         state.isPlaying = false;
         state.isPaused = false;
-        state.currentUtterance = null;
         state.onEndCallback = null;
         if (synth.speaking || synth.paused) {
             synth.cancel();
         }
     }
 
-    /**
-     * 是否正在播放
-     */
     function isPlaying() {
         return state.isPlaying && !state.isPaused;
     }
 
-    /**
-     * 获取当前选用的声线信息（调试用）
-     */
     function getVoiceInfo() {
-        if (!state.bestVoice) return '默认声线';
+        if (!state.bestVoice) return '默认声线（浏览器自动选择）';
         return state.bestVoice.name + ' (' + state.bestVoice.lang + ')';
     }
 
-    /**
-     * 获取所有中文声线（调试用）
-     */
     function listChineseVoices() {
         return (state.voices || []).filter(function (v) {
             return /zh/i.test(v.lang);
@@ -298,7 +248,69 @@
         });
     }
 
-    // ====== 导出 API ======
+    function testConnection() {
+        return new Promise(function (resolve) {
+            if (!synth) {
+                resolve({
+                    success: false, message: '浏览器不支持 speechSynthesis',
+                    voicesCount: 0, selectedVoice: 'N/A', chineseVoices: [],
+                    hint: '请使用 Chrome 或 Edge 浏览器'
+                });
+                return;
+            }
+
+            var started = false;
+            var testUtterance = new SpeechSynthesisUtterance('测试语音');
+            var result = {
+                voicesCount: state.voices.length,
+                selectedVoice: getVoiceInfo(),
+                chineseVoices: listChineseVoices()
+            };
+
+            testUtterance.lang = 'zh-CN';
+            testUtterance.rate = 1.0;
+            testUtterance.pitch = 1.0;
+            testUtterance.volume = 1.0;
+
+            testUtterance.onstart = function () {
+                started = true;
+                synth.cancel();
+                resolve({ success: true, message: '语音合成正常工作', details: result });
+            };
+
+            testUtterance.onend = function () {
+                if (!started) {
+                    synth.cancel();
+                    resolve({
+                        success: false, message: '语音合成立即结束（无声音）',
+                        details: result,
+                        hint: '声线不兼容，建议使用 Chrome 或 Edge 浏览器'
+                    });
+                }
+            };
+
+            testUtterance.onerror = function (e) {
+                resolve({ success: false, message: '测试出错: ' + (e.error || e), details: result });
+            };
+
+            var timeout = setTimeout(function () {
+                if (!started) {
+                    synth.cancel();
+                    resolve({
+                        success: false, message: '语音合成超时（3秒未开始）',
+                        details: result,
+                        hint: '浏览器可能限制了自动播放'
+                    });
+                }
+            }, 3000);
+
+            synth.cancel();
+            setTimeout(function () {
+                synth.speak(testUtterance);
+            }, 150);
+        });
+    }
+
     window.QiaoyunTTS = {
         speak: speak,
         pause: pause,
@@ -307,12 +319,12 @@
         isPlaying: isPlaying,
         getVoiceInfo: getVoiceInfo,
         listChineseVoices: listChineseVoices,
-        // 讲解预设：略慢、温和，适合文化讲解场景
+        testConnection: testConnection,
         speakGuide: function (text, onEnd) {
-            speak(text, { rate: 0.92, pitch: 0.98, volume: 1.0, onEnd: onEnd });
+            return speak(text, { rate: 0.92, pitch: 0.98, volume: 1.0, onEnd: onEnd });
         }
     };
 
-    console.log('[QiaoyunTTS] 工具已加载，当前声线：', getVoiceInfo());
+    console.log('[QiaoyunTTS] v5 已加载，当前声线：', getVoiceInfo());
 
 })(window);

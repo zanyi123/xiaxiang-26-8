@@ -769,18 +769,28 @@
             点击左侧地图上的地点标记，我将为您讲解该地点的历史故事。
         </div>
         <div class="ai-guide-controls">
+            <button class="ai-control-btn primary" onclick="playGuide()" id="btn-play" disabled>▶ 讲解当前地点</button>
+            <button class="ai-control-btn" onclick="readPageContent()">📖 朗读页面内容</button>
+        </div>
+        <div class="ai-guide-controls" style="margin-top: 0.5rem;">
             <button class="ai-control-btn" onclick="pauseGuide()" id="btn-pause">暂停</button>
             <button class="ai-control-btn" onclick="stopGuide()">停止</button>
+            <button class="ai-control-btn" onclick="testTTS()">🔧 测试语音</button>
         </div>
+        <div class="ai-guide-hint" id="ai-guide-hint" style="font-size: 0.75rem; color: #888; margin-top: 0.5rem; display: none;">
+            💡 提示：选择地点后点击"讲解当前地点"，AI将朗读该地点的介绍内容。
+        </div>
+        <div id="ai-diagnostic" style="font-size: 0.7rem; color: #999; margin-top: 0.5rem; display: none;"></div>
     </div>
 
-    <script src="/js/qiaoyun-tts.js"></script>
+    <script src="/js/qiaoyun-tts.js?v=20260816v5"></script>
     <script src="/js/slot-placeholder.js"></script>
     <script th:inline="javascript">
         // ============ 从后端注入数据 ============
         const locations = /*[[${locations}]]*/ [];
         const locationImageUrls = /*[[${locationImageUrls}]]*/ {};
         const locationVideoUrls = /*[[${locationVideoUrls}]]*/ {};
+        const timeline = /*[[${timeline}]]*/ [];
         const PROGRESS_KEY = 'xiaxiang_visited_locations_v1';
 
         let currentLocationId = null;
@@ -791,10 +801,55 @@
             applyVisitedMarkers();
             updateProgress();
             initTimeline();
+            initTTSStatus();
         });
+
+        // ============ TTS 状态检测 ============
+        function initTTSStatus() {
+            const aiGuideText = document.getElementById('ai-guide-text');
+            if (!aiGuideText) return;
+            
+            if (!window.speechSynthesis) {
+                aiGuideText.textContent = '您的浏览器不支持语音合成。请使用 Chrome 或 Edge 浏览器体验 AI 讲解功能。';
+                console.error('[TTS] 浏览器不支持 speechSynthesis');
+                return;
+            }
+            
+            if (!window.QiaoyunTTS) {
+                aiGuideText.textContent = '语音工具加载失败，请刷新页面重试。';
+                console.error('[TTS] QiaoyunTTS 未加载');
+                return;
+            }
+            
+            // 检查语音列表
+            const voices = window.speechSynthesis.getVoices();
+            if (voices.length === 0) {
+                // 等待语音加载
+                window.speechSynthesis.onvoiceschanged = function() {
+                    const newVoices = window.speechSynthesis.getVoices();
+                    console.log('[TTS] 语音列表已加载，共', newVoices.length, '个');
+                    if (aiGuideText.textContent.includes('加载中')) {
+                        aiGuideText.textContent = '系统已就绪！点击地点标记后，点击"🎧 AI讲解"按钮即可聆听景点介绍。';
+                    }
+                };
+                aiGuideText.textContent = '正在加载语音资源...点击任意地点标记后即可使用 AI 讲解。';
+            } else {
+                const voiceInfo = QiaoyunTTS.getVoiceInfo();
+                const chineseVoices = QiaoyunTTS.listChineseVoices();
+                console.log('[TTS] 可用声线：', voices.length, '个，中文声线：', chineseVoices.length, '个');
+                console.log('[TTS] 当前选用：', voiceInfo);
+                
+                if (chineseVoices.length === 0) {
+                    aiGuideText.textContent = '⚠️ 未检测到中文语音。AI讲解可能无法正常工作。建议安装浏览器中文语言包或使用 Chrome/Edge 浏览器。';
+                } else {
+                    aiGuideText.textContent = '系统已就绪！点击地点标记后，点击"🎧 AI讲解"按钮即可聆听景点介绍。当前声线：' + voiceInfo;
+                }
+            }
+        }
 
         // ============ 核心：选择地点（右侧刷新） ============
         function selectLocation(id) {
+            if (!locations || !Array.isArray(locations)) return;
             const loc = locations.find(l => l.id === id);
             if (!loc) return;
             currentLocationId = id;
@@ -864,9 +919,22 @@
             applyVisitedMarkers();
             updateProgress();
 
-            // 8. 右侧详情AI讲解文本
+            // 8. 右侧详情AI讲解文本 - 更新AI面板
             const guideText = loc.audioText || loc.history || loc.description || '';
-            document.getElementById('ai-guide-text').textContent = guideText;
+            const aiGuideText = document.getElementById('ai-guide-text');
+            const btnPlay = document.getElementById('btn-play');
+            const aiGuideHint = document.getElementById('ai-guide-hint');
+            
+            if (aiGuideText) {
+                aiGuideText.textContent = guideText || '该地点暂无讲解内容。';
+            }
+            if (btnPlay) {
+                btnPlay.disabled = false;
+                btnPlay.textContent = '▶ 讲解：' + loc.name;
+            }
+            if (aiGuideHint) {
+                aiGuideHint.style.display = 'block';
+            }
 
             // 9. 滚动右侧到顶部（小屏体验）
             document.getElementById('detail-panel').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
@@ -898,11 +966,14 @@
             });
         }
         function updateProgress() {
+            if (!locations || !Array.isArray(locations)) return;
             const total = locations.length;
             const n = visited.filter(x => locations.some(l => l.id === x)).length;
             const pct = total > 0 ? (n / total) * 100 : 0;
-            document.getElementById('progress-fill').style.width = pct + '%';
-            document.getElementById('progress-text').textContent = `已游览 ${n}/${total} 个地点`;
+            const fill = document.getElementById('progress-fill');
+            const text = document.getElementById('progress-text');
+            if (fill) fill.style.width = pct + '%';
+            if (text) text.textContent = `已游览 ${n}/${total} 个地点`;
         }
         function resetProgress() {
             if (!confirm('确定要重置游览进度吗？')) return;
@@ -918,9 +989,30 @@
         }
         function playGuide() {
             const loc = locations.find(l => l.id === currentLocationId);
-            if (!loc) return;
+            if (!loc) { alert('请先选择一个地点'); return; }
+            
+            // 优先使用 audioText，回退到 history，再回退到 description
             const text = loc.audioText || loc.history || loc.description;
-            if (!text) { alert('该地点暂无讲解内容'); return; }
+            console.log('[AI讲解] playGuide 被调用', {
+                locationId: loc.id,
+                locationName: loc.name,
+                audioText: loc.audioText ? loc.audioText.substring(0, 50) + '...(长度:' + loc.audioText.length + ')' : null,
+                history: loc.history ? loc.history.substring(0, 50) + '...(长度:' + loc.history.length + ')' : null,
+                description: loc.description ? loc.description.substring(0, 50) + '...(长度:' + loc.description.length + ')' : null,
+                finalText: text ? text.substring(0, 50) + '...(长度:' + text.length + ')' : null
+            });
+            
+            if (!text || text.trim().length === 0) {
+                alert('该地点暂无讲解内容，请在后台管理中添加"AI讲解文案"');
+                return;
+            }
+            
+            // 显示正在加载的提示
+            const aiGuideText = document.getElementById('ai-guide-text');
+            if (aiGuideText) {
+                aiGuideText.textContent = '正在播放：' + text.substring(0, 30) + (text.length > 30 ? '...' : '');
+            }
+            
             speak(text);
         }
         function goToDetail() {
@@ -951,14 +1043,172 @@
             if (b) { b.textContent = '暂停'; b.setAttribute('onclick', 'pauseGuide()'); }
         }
         function speak(text) {
-            if (!window.QiaoyunTTS) { alert('语音功能加载失败，请刷新重试'); return; }
-            stopGuide();
-            QiaoyunTTS.speakGuide(text, () => {
+            if (!window.QiaoyunTTS) { 
+                alert('语音功能加载失败，请刷新页面重试'); 
+                return; 
+            }
+            
+            if (!window.speechSynthesis) {
+                alert('您的浏览器不支持语音合成功能，请使用 Chrome 或 Edge 浏览器');
+                return;
+            }
+            
+            console.log('[AI讲解] speak 被调用，文本长度:', text.length, '前50字:', text.substring(0, 50));
+            
+            const aiGuideText = document.getElementById('ai-guide-text');
+            const diagnostic = document.getElementById('ai-diagnostic');
+            
+            if (aiGuideText) {
+                aiGuideText.textContent = '🎧 正在初始化语音合成...';
+            }
+            
+            // 先停止之前的播放
+            if (QiaoyunTTS.isPlaying()) {
+                QiaoyunTTS.stop();
+            }
+            
+            console.log('[AI讲解] 调用 QiaoyunTTS.speakGuide...');
+            const success = QiaoyunTTS.speakGuide(text, function(error) {
+                console.log('[AI讲解] speakGuide 回调触发，error:', error);
                 document.getElementById('ai-guide-btn').classList.remove('playing');
                 const b = document.getElementById('btn-pause');
                 if (b) { b.textContent = '暂停'; b.setAttribute('onclick', 'pauseGuide()'); }
+                
+                if (error) {
+                    if (aiGuideText) {
+                        aiGuideText.textContent = '❌ ' + error;
+                    }
+                    if (diagnostic) {
+                        diagnostic.style.display = 'block';
+                        diagnostic.textContent = '错误：' + error + '。建议使用 Chrome 或 Edge 浏览器。';
+                    }
+                } else {
+                    if (aiGuideText) {
+                        aiGuideText.textContent = '✅ 讲解完毕！点击地点标记可继续聆听其他景点介绍。';
+                    }
+                }
             });
-            document.getElementById('ai-guide-btn').classList.add('playing');
+            
+            console.log('[AI讲解] speakGuide 返回:', success);
+            
+            if (success !== false) {
+                document.getElementById('ai-guide-btn').classList.add('playing');
+                const b = document.getElementById('btn-pause');
+                if (b) { b.textContent = '暂停'; b.setAttribute('onclick', 'pauseGuide()'); }
+                
+                if (aiGuideText) {
+                    aiGuideText.textContent = '🔊 正在播放...';
+                }
+                if (diagnostic) {
+                    diagnostic.style.display = 'none';
+                }
+            } else {
+                if (aiGuideText) {
+                    aiGuideText.textContent = '❌ 语音播放失败，请点击"🔧 测试语音"按钮诊断问题';
+                }
+                if (diagnostic) {
+                    diagnostic.style.display = 'block';
+                    diagnostic.textContent = '语音播放失败，可能原因：浏览器不支持、无可用声线、或需要用户手势触发。';
+                }
+            }
+        }
+        
+        // ============ 测试语音连接 ============
+        function testTTS() {
+            if (!window.QiaoyunTTS) {
+                alert('语音功能加载失败');
+                return;
+            }
+            
+            const diagnostic = document.getElementById('ai-diagnostic');
+            const aiGuideText = document.getElementById('ai-guide-text');
+            
+            if (diagnostic) {
+                diagnostic.style.display = 'block';
+                diagnostic.textContent = '🔍 正在测试语音连接...';
+            }
+            if (aiGuideText) {
+                aiGuideText.textContent = '🔍 正在测试语音连接，请稍候...';
+            }
+            
+            QiaoyunTTS.testConnection().then(function(result) {
+                if (diagnostic) {
+                    diagnostic.style.display = 'block';
+                }
+                
+                const detail = result.details || {};
+                
+                if (result.success) {
+                    if (aiGuideText) {
+                        aiGuideText.textContent = '✅ 语音合成正常！当前声线：' + (detail.selectedVoice || '默认') + '。可以开始讲解了。';
+                    }
+                    if (diagnostic) {
+                        diagnostic.innerHTML = '✅ <b>测试通过</b><br>' +
+                            '声线数量：' + (detail.voicesCount || 0) + '<br>' +
+                            '当前声线：' + (detail.selectedVoice || 'N/A') + '<br>' +
+                            '中文声线：' + (detail.chineseVoices ? detail.chineseVoices.length : 0) + ' 个';
+                    }
+                } else {
+                    if (aiGuideText) {
+                        aiGuideText.textContent = '❌ ' + result.message;
+                    }
+                    if (diagnostic) {
+                        diagnostic.innerHTML = '❌ <b>测试失败</b><br>' +
+                            result.message + '<br><br>' +
+                            '💡 <b>可能的解决方法</b>：<br>' +
+                            '1. 使用 Chrome 或 Edge 浏览器（推荐）<br>' +
+                            '2. 确保浏览器已安装中文语言包<br>' +
+                            '3. 点击页面任意位置后再试<br>' +
+                            '4. 检查系统音量是否开启';
+                    }
+                }
+            }).catch(function(err) {
+                if (diagnostic) {
+                    diagnostic.style.display = 'block';
+                    diagnostic.textContent = '测试出错：' + (err.message || err);
+                }
+                if (aiGuideText) {
+                    aiGuideText.textContent = '❌ 测试出错：' + (err.message || err);
+                }
+            });
+        }
+
+        // ============ 朗读页面内容 ============
+        function readPageContent() {
+            // 收集当前页面所有可读文本
+            const contents = [];
+            
+            // 1. 当前选中的地点信息
+            if (currentLocationId) {
+                const loc = locations.find(l => l.id === currentLocationId);
+                if (loc) {
+                    contents.push('当前选择地点：' + loc.name + '。');
+                    if (loc.description) contents.push(loc.description + '。');
+                    if (loc.audioText) {
+                        // 优先使用预定义的讲解文案
+                        contents.push(loc.audioText);
+                    } else if (loc.history) {
+                        contents.push('历史背景：' + loc.history + '。');
+                    }
+                }
+            }
+            
+            // 2. 时间线介绍
+            if (timeline && timeline.length > 0) {
+                contents.push('宝源坊历史变迁：从1644年瑞云楼建成，到2007年列入世界文化遗产，再到2026年薪火侨乡实践项目上线，承载了数百年的侨乡记忆。');
+            }
+            
+            // 3. 游览提示
+            contents.push('欢迎来到宝源坊景区导航。您可以点击地图上的金色标记点，游览各个景点。游览进度会自动保存。');
+            
+            const fullText = contents.join('');
+            
+            const aiGuideText = document.getElementById('ai-guide-text');
+            if (aiGuideText) {
+                aiGuideText.textContent = '正在朗读页面内容...';
+            }
+            
+            speak(fullText);
         }
 
         // ============ 图片放大查看 Lightbox ============

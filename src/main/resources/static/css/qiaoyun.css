@@ -1639,6 +1639,22 @@ body::after {
     border: none;
 }
 
+.ai-control-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    background: rgba(212, 175, 55, 0.1);
+}
+
+.ai-control-btn.primary:disabled {
+    background: rgba(212, 175, 55, 0.3);
+    color: var(--text-muted);
+}
+
+.ai-control-btn:not(:disabled):hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
+}
+
 .footer {
     text-align: center;
     padding: 4rem 2rem 3rem;
