@@ -135,9 +135,17 @@ public class YamlUpdater {
         int lb = yamlPath.indexOf('[');
         int rb = yamlPath.indexOf(']');
         int dot = yamlPath.indexOf('.');
+        
+        // 处理简单字段路径（如 mapBackgroundImage）
         if (lb < 0 || rb < 0 || dot < 0) {
-            return content;
+            if (yamlPath.contains(".") || yamlPath.contains("[")) {
+                return content; // 格式不对，跳过
+            }
+            // 简单字段：找 kebab-case 版本并替换
+            String kebabPath = camelToKebab(yamlPath);
+            return patchSimpleField(content, kebabPath, yamlPath, newValue);
         }
+        
         String listName = yamlPath.substring(0, lb);
         int index = Integer.parseInt(yamlPath.substring(lb + 1, rb));
         String fieldCamel = yamlPath.substring(dot + 1);
@@ -272,6 +280,81 @@ public class YamlUpdater {
         }
         lines[targetLine] = keyPart + valStr;
         return String.join("\n", lines);
+    }
+
+    /**
+     * 处理简单字段路径（如 mapBackgroundImage → map-background-image: "value"）
+     */
+    private static String patchSimpleField(String content, String kebabName, String camelName, String newValue) {
+        String[] lines = content.split("\n", -1);
+        
+        // 查找字段所在行
+        int targetLine = -1;
+        for (int i = 0; i < lines.length; i++) {
+            String trim = stripLeading(lines[i]);
+            if (trim.startsWith(kebabName + ":") || trim.startsWith(camelName + ":")) {
+                targetLine = i;
+                break;
+            }
+        }
+        
+        if (targetLine >= 0) {
+            // 替换现有行的值
+            String targetLineContent = lines[targetLine];
+            int colon = targetLineContent.indexOf(':');
+            if (colon >= 0) {
+                String keyPart = targetLineContent.substring(0, colon + 1);
+                String valStr = newValue == null ? "" : newValue;
+                if (valStr.contains("#") || valStr.contains(":") || valStr.startsWith(" ")
+                        || valStr.endsWith(" ") || valStr.isEmpty()) {
+                    valStr = " \"" + escapeYaml(valStr) + "\"";
+                } else {
+                    valStr = " " + valStr;
+                }
+                lines[targetLine] = keyPart + valStr;
+                return String.join("\n", lines);
+            }
+        }
+        
+        // 找不到字段，在 app: 块下插入新行
+        int appLine = -1;
+        for (int i = 0; i < lines.length; i++) {
+            String trim = stripLeading(lines[i]);
+            if (trim.equals("app:") || trim.startsWith("app:")) {
+                appLine = i;
+                break;
+            }
+        }
+        
+        if (appLine >= 0) {
+            // 找 app: 块的结束位置（缩进变小的行）
+            int insertPos = appLine + 1;
+            int appIndent = countLeadingSpaces(lines[appLine]);
+            while (insertPos < lines.length) {
+                if (isBlank(lines[insertPos])) {
+                    insertPos++;
+                    continue;
+                }
+                int sp = countLeadingSpaces(lines[insertPos]);
+                if (sp <= appIndent) {
+                    break;
+                }
+                insertPos++;
+            }
+            
+            String indent = "  "; // app 块下的缩进
+            String valStr = newValue == null ? "" : newValue;
+            if (valStr.contains("#") || valStr.contains(":") || valStr.startsWith(" ")
+                    || valStr.endsWith(" ") || valStr.isEmpty()) {
+                valStr = " \"" + escapeYaml(valStr) + "\"";
+            } else {
+                valStr = " " + valStr;
+            }
+            String newLine = indent + kebabName + ":" + valStr;
+            return insertLine(lines, insertPos, newLine);
+        }
+        
+        return content; // 无法处理，返回原内容
     }
 
     private static String insertLine(String[] lines, int pos, String newLine) {
