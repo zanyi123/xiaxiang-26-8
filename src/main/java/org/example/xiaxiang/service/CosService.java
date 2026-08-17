@@ -17,8 +17,8 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * COS URL 生成服务
  *
- * 核心职责：拼接 COS 文件的公开 URL，绝不通过 InputStream 读取大文件
- * 动静分离原则：前端浏览器直接通过 COS 公网 URL 拉取 .splat / .mp4
+ * 由于 COS 桶防盗链限制，所有 URL 返回后端代理路径 /cos/{key}
+ * 由 CosProxyController 代理转发文件
  *
  * Mock 模式：app.mock-mode=true 时返回本地静态资源路径，用于开发调试
  */
@@ -59,13 +59,13 @@ public class CosService {
     }
 
     /**
-     * 获取文件的公开访问 URL
+     * 获取文件的访问 URL
+     * 由于 COS 桶防盗链限制，返回后端代理 URL
      *
      * @param key COS 对象键，如 "models/kaiping.splat"
-     * @return 完整公开 URL
+     * @return 代理 URL
      */
     public String getFileUrl(String key) {
-        // 参数校验
         if (isBlank(key)) {
             throw new BusinessException("文件 key 不能为空");
         }
@@ -77,14 +77,8 @@ public class CosService {
             return mockUrl;
         }
 
-        // 真实 COS 模式：拼接公开 URL
-        if (isBlank(cosBaseUrl)) {
-            throw new BusinessException("COS 配置不完整，无法生成文件 URL");
-        }
-
-        String url = cosBaseUrl + key;
-        log.debug("[CosService] 生成 COS 公开 URL：{}", url);
-        return url;
+        // 返回后端代理 URL（绕过 COS 防盗链）
+        return "/cos/" + key;
     }
 
     /**
@@ -92,7 +86,7 @@ public class CosService {
      * 适用于素材可选场景（如封面图未上传时回退到 AI 生成图）
      *
      * @param key COS 对象键，可为 null
-     * @return 完整公开 URL，或 null
+     * @return 代理 URL，或 null
      */
     public String getUrlSafely(String key) {
         if (isBlank(key)) {
@@ -102,11 +96,8 @@ public class CosService {
         if (appProperties.isMockMode()) {
             return "/mock/" + key;
         }
-        // 真实 COS 模式：拼接公开 URL
-        if (isBlank(cosBaseUrl)) {
-            return null;
-        }
-        return cosBaseUrl + key;
+        // 返回后端代理 URL（绕过 COS 防盗链）
+        return "/cos/" + key;
     }
 
     // ==================== 建筑相关方法 ====================

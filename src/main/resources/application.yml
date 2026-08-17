@@ -135,7 +135,7 @@ app:
   env: prod
 
   # 景区导航地图底图（IMG-02-01）
-  map-background-image: "images/宝源坊航拍坐标图.png"
+  map-background-image: images/宝源坊俯拍坐标图.png
 
   buildings:
     - id: 1

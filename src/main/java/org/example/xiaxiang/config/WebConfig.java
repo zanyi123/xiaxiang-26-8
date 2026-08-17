@@ -26,6 +26,12 @@ public class WebConfig implements WebMvcConfigurer {
                 .allowedMethods("GET", "POST", "OPTIONS")
                 .allowedHeaders("*")
                 .maxAge(3600);
+        // COS 代理也需要 CORS 支持
+        registry.addMapping("/cos/**")
+                .allowedOrigins("*")
+                .allowedMethods("GET")
+                .allowedHeaders("*")
+                .maxAge(3600);
     }
 
     @Override
